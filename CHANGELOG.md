@@ -7,6 +7,26 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **A status column on every phase table in `docs/ROADMAP.md`, held to the tree by a
+  test** (issue #88). Twenty-seven rows across five tables recorded no state at all, so
+  the document read as a list of intentions while sixteen of its items were built,
+  merged and gated. That is how issues #69 to #87 came to be filed against work that
+  already existed. Each row now opens with `**Shipped.**`, `**Partly shipped.**` or
+  `**Open.**`, and the two rows that carried **Done.** inside their item cell no longer
+  do, so an item's state is in one place. Two rows say plainly that they shipped in a
+  different shape than they were written in: 0.3 is a required job rather than a step
+  inside `verify`, and 2.1 is
+  `src/wildfire_service_territory_overlap/artifact_diff.py` rather than the
+  `tools/diff_artifacts.py` the row had named since it was drafted.
+- **The status cells are refused when this repository contradicts them**
+  (`tests/test_provenance_and_standards.py`). A shipped or partly shipped row has to
+  name something that exists in the tree; every path any status cell names has to
+  resolve, so the `tools/diff_artifacts.py` claim would have failed the build rather
+  than standing for two weeks; a row marked shipped may not also say something is still
+  open; a partly shipped or open row has to say what is outstanding; and an item the
+  prose above the tables lists as still open may not have a row below saying it
+  shipped. Five fabricated rows drive the five refusals, because a gate nobody has
+  watched refuse is not a gate.
 - **`docs/adr/0018`: the search for a county inspection source finished, and the answer
   is a negative with an address** (issue #53). Roadmap 3.4 has been waiting on a county
   record set that can be pinned. The supply of published California county data was

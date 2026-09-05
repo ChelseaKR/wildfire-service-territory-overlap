@@ -21,6 +21,7 @@ from wildfire_service_territory_overlap.artifacts import (
     BY_NAME,
     ORDERINGS,
     check_document,
+    table_cells,
 )
 from wildfire_service_territory_overlap.sources import RETRIEVED, SOURCES, WIRES_TYPES
 
@@ -992,3 +993,178 @@ def test_the_readme_accessibility_row_says_the_same_thing_the_review_says() -> N
     assert "check_document" in row, (
         "the row states what became enforced, so it names the gate that enforces it"
     )
+
+
+# The roadmap's phase tables say what this project has built. They carried no status
+# column at all until 2026-09-05, so sixteen shipped items read as pending and issues
+# #69 to #87 were filed against work that already existed. The column is the repair;
+# what follows is what stops it drifting back, by holding every cell to a path in this
+# tree rather than to whoever last read the document.
+ROADMAP_STATUSES = ("**Shipped.**", "**Partly shipped.**", "**Open.**")
+
+
+def phase_table_rows(document: str) -> list[tuple[str, list[str]]]:
+    """Every row of every `## Phase` table, as its item number and its cells.
+
+    Found by heading and by the shape of the first cell rather than by line number, so
+    a table that moves stays covered, and a table that is deleted shows up as a count
+    that dropped rather than as a check quietly reading nothing.
+    """
+    rows: list[tuple[str, list[str]]] = []
+    for section in document.split("\n## ")[1:]:
+        if not section.startswith("Phase "):
+            continue
+        for line in section.splitlines():
+            if not line.lstrip().startswith("|"):
+                continue
+            cells = table_cells(line)
+            if cells and re.fullmatch(r"\d\.\d", cells[0]):
+                rows.append((cells[0], cells))
+    return rows
+
+
+def _names_something_this_repository_has(token: str) -> bool:
+    """True when a backticked token resolves to a path in this repository.
+
+    ADRs are cited by number (`docs/adr/0013`) rather than by their full filename, so a
+    token also resolves when a path that exists starts with it. `tools/diff_artifacts.py`
+    does not resolve, which is the point: roadmap 2.1 named that file, the module
+    shipped somewhere else, and nothing read either.
+    """
+    if not token or " " in token or any(char in token for char in "*?["):
+        return False
+    if (ROOT / token).exists():
+        return True
+    return any(ROOT.glob(token + "*"))
+
+
+def _refuse_a_status_the_tree_contradicts(document: str) -> None:
+    """Raise on a phase row whose status this repository does not support.
+
+    Kept out of the tests so the test that watches it refuse drives the same code the
+    test guarding the roadmap drives, rather than a re-implementation of it, the way
+    the conformance-table date check is arranged.
+    """
+    for number, cells in phase_table_rows(document):
+        status = cells[1]
+        marker = next((m for m in ROADMAP_STATUSES if status.startswith(m)), None)
+        if marker is None:
+            raise AssertionError(
+                f"roadmap row {number} states no status. Every phase row opens its "
+                f"status cell with one of {', '.join(ROADMAP_STATUSES)}"
+            )
+        cited = re.findall(r"`([^`]+)`", status)
+        for token in cited:
+            if "/" in token and not _names_something_this_repository_has(token):
+                raise AssertionError(
+                    f"roadmap row {number} is marked {marker} and cites `{token}`, "
+                    "which is not in this repository"
+                )
+        if marker == "**Shipped.**":
+            if not any(_names_something_this_repository_has(token) for token in cited):
+                raise AssertionError(
+                    f"roadmap row {number} claims {marker} and names nothing in this "
+                    "repository that holds the claim up"
+                )
+            for overstatement in ("still open", "remains open", "not yet"):
+                if overstatement in status.lower():
+                    raise AssertionError(
+                        f"roadmap row {number} claims {marker} and says "
+                        f"{overstatement!r} in the same cell"
+                    )
+        elif "Still open" not in status:
+            raise AssertionError(
+                f"roadmap row {number} is marked {marker} and does not say what is "
+                "outstanding"
+            )
+
+
+def test_every_phase_table_row_carries_a_status_the_tree_supports() -> None:
+    """The defect this column exists for, held shut."""
+    _refuse_a_status_the_tree_contradicts(ROADMAP)
+
+
+def test_the_roadmap_status_check_reads_every_phase_table() -> None:
+    """The rows are found by parsing, so an empty parse would pass every row silently."""
+    rows = phase_table_rows(ROADMAP)
+    assert len(rows) >= 25, "the phase tables collapsed to a handful of rows"
+    assert {number.split(".")[0] for number, _ in rows} == {"0", "1", "2", "3", "4"}
+    for _, cells in rows:
+        assert len(cells) >= 3, cells
+
+
+def test_no_phase_row_carries_its_status_anywhere_but_the_status_cell() -> None:
+    """Two places to read a state is one place too many.
+
+    Rows 0.3 and 0.5 said **Done.** inside their item cell while the twenty-five around
+    them said nothing, which is how the tables came to be read as a list of intentions.
+    """
+    for number, cells in phase_table_rows(ROADMAP):
+        assert "**Done.**" not in " ".join(cells[2:]), number
+        assert not any(cell.startswith(ROADMAP_STATUSES) for cell in cells[2:]), number
+
+
+def test_the_roadmap_says_how_to_read_the_status_column() -> None:
+    """A vocabulary nobody wrote down is a vocabulary the next writer invents again."""
+    preamble = ROADMAP.split("\n## Phase ")[0]
+    for marker in ROADMAP_STATUSES:
+        assert marker in preamble, marker
+    assert "tests/test_provenance_and_standards.py" in preamble, (
+        "the roadmap does not name the gate that holds its status cells"
+    )
+
+
+def test_the_roadmap_prose_and_the_status_cells_agree_about_what_is_open() -> None:
+    """The two halves of this document cannot disagree about the same item.
+
+    The prose above the tables lists what is still open. Before the status column
+    existed that list was the only place an item's state was recorded, and the tables
+    were free to imply anything. An item named there and marked shipped below fails
+    here.
+    """
+    paragraph = re.search(
+        r"^Still open: .*?(?=\n\n)", ROADMAP, re.MULTILINE | re.DOTALL
+    )
+    assert paragraph, "the roadmap's summary of what is still open has gone"
+    named = set(re.findall(r"\b\d\.\d\b", paragraph.group(0)))
+    assert named, "that summary names no item, so this check reads nothing"
+    statuses = {number: cells[1] for number, cells in phase_table_rows(ROADMAP)}
+    for number in sorted(named):
+        assert number in statuses, f"{number} is called open and has no row"
+        assert not statuses[number].startswith("**Shipped.**"), (
+            f"the prose says {number} is still open and its row says shipped"
+        )
+
+
+CONTRADICTED_STATUSES = (
+    # A shipped row citing a path that is not here. This is the roadmap 2.1 defect:
+    # the row named `tools/diff_artifacts.py` for two weeks and the module shipped as
+    # `artifact_diff.py` instead.
+    ("not in this repository", "| 9.1 | **Shipped.** `tools/diff_artifacts.py` | a |"),
+    # A row with no status at all, which is every row before this column existed.
+    ("states no status", "| 9.1 | it got done at some point | a |"),
+    # A shipped row that names nothing, so nothing can contradict it.
+    ("names nothing in this repository", "| 9.1 | **Shipped.** trust me | a |"),
+    # A shipped row that still says what is outstanding, which is a partly shipped row
+    # wearing the stronger word.
+    ("says 'still open'", "| 9.1 | **Shipped.** `README.md`. Still open: all | a |"),
+    # An open row that does not say what is outstanding.
+    ("does not say what is outstanding", "| 9.1 | **Open.** `README.md` | a |"),
+)
+
+
+@pytest.mark.parametrize(("expected", "row"), CONTRADICTED_STATUSES)
+def test_the_roadmap_status_check_can_actually_fire(expected: str, row: str) -> None:
+    """A gate nobody has watched refuse is not a gate.
+
+    Every branch is driven by a fabricated table rather than by editing the real one,
+    so the check is known to be able to fail without the document having to be wrong.
+    """
+    fabricated = (
+        "\n\n## Phase 9: a table written for this check to read\n\n"
+        "Introduced, because the document rules refuse a table that opens cold.\n\n"
+        f"| # | Status | Item |\n|---|---|---|\n{row}\n"
+    )
+    assert phase_table_rows(fabricated), "the fabricated table did not parse"
+    with pytest.raises(AssertionError, match=expected):
+        _refuse_a_status_the_tree_contradicts(fabricated)

@@ -85,6 +85,17 @@ def test_the_bypass_actors_are_stated_rather_than_omitted() -> None:
     )
 
 
+#: Workflows that may key their concurrency group on the ref alone, because the newest
+#: run really is the only one that matters and evicting a superseded run loses nothing.
+#: CI-CD-STANDARD.md 11c names this exception and gives the test for it: none of these
+#: produces a required status check, so no merge is gated on the run that was dropped.
+#: An OpenSSF score is a property of the repository rather than of a commit, so the
+#: newest run is the answer and the one it replaced was not a different answer.
+CONVERGING_WORKFLOWS = {
+    "scorecard.yml": "OpenSSF score; a repository property, not a commit's",
+}
+
+
 def push_triggered_workflows() -> dict[str, str]:
     """Every workflow that runs on a push to a branch, with its text.
 
@@ -120,6 +131,8 @@ def test_a_commit_pushed_to_main_gets_a_concurrency_slot_of_its_own() -> None:
     trigger later is caught here rather than quietly sharing a slot.
     """
     for name, text in push_triggered_workflows().items():
+        if name in CONVERGING_WORKFLOWS:
+            continue
         group = re.search(r"^  group:\s*(.+?)\s*$", text, re.MULTILINE)
         assert group is not None, (
             f"{name} runs on push and declares no concurrency group"
@@ -135,3 +148,37 @@ def test_a_commit_pushed_to_main_gets_a_concurrency_slot_of_its_own() -> None:
             "pushes to one branch would both run instead of the later superseding "
             "the earlier"
         )
+
+
+def test_every_converging_exception_still_earns_its_place() -> None:
+    """An exception list is only safe while every entry is still true.
+
+    CI-CD-STANDARD.md 11c allows a ref-only key exactly where the newest run is the
+    only one that matters, and its test is that the workflow produces no required
+    status check. An exempt workflow that becomes a merge gate would otherwise keep
+    its exemption and start dropping verdicts that block merges.
+    """
+    required = required_contexts()
+    push_workflows = push_triggered_workflows()
+    for name, reason in CONVERGING_WORKFLOWS.items():
+        assert name in push_workflows, f"{name} is exempt but no longer runs on push"
+        assert reason, f"{name} is exempt with no reason recorded"
+        jobs = workflow_job_names(push_workflows[name])
+        gating = jobs & required
+        assert not gating, (
+            f"{name} is exempt from the per-commit concurrency key, but {sorted(gating)} "
+            "is a required status check, so a dropped run blocks a merge"
+        )
+
+
+def workflow_job_names(text: str) -> set[str]:
+    """The check names one workflow's jobs report under."""
+    names: set[str] = set()
+    _, _, body = text.partition("\njobs:")
+    for block in re.finditer(
+        r"^  ([a-z0-9][a-z0-9_-]*):\n((?:(?:    .*)?\n)*)", body, re.MULTILINE
+    ):
+        job_id, job_body = block.group(1), block.group(2)
+        named = re.search(r"^    name:\s*(.+?)\s*$", job_body, re.MULTILINE)
+        names.add(named.group(1).strip("\"'") if named else job_id)
+    return names

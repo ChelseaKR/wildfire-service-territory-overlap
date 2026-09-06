@@ -82,6 +82,25 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Every commit pushed to `main` competed with every other for one CI slot, so a burst
+  of merges could drop a verdict entirely.** `ci.yml` and `scorecard.yml` both keyed
+  their concurrency group on `github.ref`, which is `refs/heads/main` for every push, so
+  all pushes to `main` shared a single group. A group holds one running run and exactly
+  one pending run; a third arrival evicts the pending one with no jobs ever dispatched.
+  The commit that was waiting then has no run at all -- not a red check somebody can
+  find, an absent one, which is the shape this repository is otherwise built to refuse.
+  `cancel-in-progress` does not decide whether that happens, only whether the loss looks
+  like a cancellation or like nothing. Both keys now carry `github.sha` on a push and
+  stay per-ref on a pull request, so branch supersession is unchanged. `codeql.yml` and
+  `osv.yml` are deliberately untouched: neither has a `push:` trigger, so neither has a
+  queue to evict from.
+- **The rule is now held by a test** (`tests/test_ruleset.py`). Any workflow with a
+  `push:` trigger must key its concurrency group per commit and keep pull requests
+  per-ref, so a workflow that gains a push trigger later cannot quietly share a slot.
+  `test_the_push_workflow_sweep_did_not_collapse` fails if the glob or the filter finds
+  nothing, because a rule that iterates an empty set passes without checking anything.
+  Both were verified by sabotage: restoring the ref-only key to `ci.yml` fails the
+  concurrency rule, and stubbing the push filter to `if False:` fails the sweep rule.
 - **`.github/workflows/ci.yml` described the branch ruleset as running `with no bypass
   actors`, and the gate that forbids exactly that claim never read the file.** On
   2026-08-28 the

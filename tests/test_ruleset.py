@@ -83,3 +83,55 @@ def test_the_bypass_actors_are_stated_rather_than_omitted() -> None:
         "bypass_actors is absent from the committed ruleset; an omitted bypass reads "
         "as no bypass, which is the claim .github/rulesets/README.md refuses to make"
     )
+
+
+def push_triggered_workflows() -> dict[str, str]:
+    """Every workflow that runs on a push to a branch, with its text.
+
+    `schedule` and `workflow_dispatch` are not push triggers: they fire at most once
+    at a time, so a shared slot never has a queue to evict from.
+    """
+    found: dict[str, str] = {}
+    for workflow in sorted(WORKFLOWS.glob("*.yml")):
+        text = workflow.read_text(encoding="utf-8")
+        header, _, _ = text.partition("\njobs:")
+        if re.search(r"^\s{2}push:", header, re.MULTILINE):
+            found[workflow.name] = text
+    return found
+
+
+def test_the_push_workflow_sweep_did_not_collapse() -> None:
+    """Both rules below pass vacuously if this glob or this filter finds nothing."""
+    names = set(push_triggered_workflows())
+    assert {"ci.yml", "scorecard.yml"} <= names, names
+
+
+def test_a_commit_pushed_to_main_gets_a_concurrency_slot_of_its_own() -> None:
+    """A ref-only key on a push trigger loses a commit's verdict silently.
+
+    A concurrency group holds one running run and exactly one pending run. A third
+    arrival evicts the pending one with no jobs ever dispatched, so in a burst of
+    merges some commit on `main` gets no run at all: not a red check a reader can
+    find, an absent one. `cancel-in-progress` does not decide whether that happens,
+    only whether the loss is visible.
+
+    The key must therefore vary per commit on a push while staying per-ref on a pull
+    request, so branch supersession still works. Any workflow that gains a `push:`
+    trigger later is caught here rather than quietly sharing a slot.
+    """
+    for name, text in push_triggered_workflows().items():
+        group = re.search(r"^  group:\s*(.+?)\s*$", text, re.MULTILINE)
+        assert group is not None, (
+            f"{name} runs on push and declares no concurrency group"
+        )
+        key = group.group(1)
+        assert "github.sha" in key, (
+            f"{name} keys its concurrency group on the ref alone ({key}), so every "
+            "commit pushed to main competes for one slot and a burst of merges drops "
+            "a verdict with no run to show for it"
+        )
+        assert "pull_request" in key, (
+            f"{name} does not keep pull requests on a per-ref group ({key}), so two "
+            "pushes to one branch would both run instead of the later superseding "
+            "the earlier"
+        )

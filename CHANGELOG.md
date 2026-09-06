@@ -82,6 +82,35 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`assert_contested_groups_are_whole` treated the absence of the number it checks
+  against as nothing to check.** The rule keeps the capped overlap table honest by
+  summing its rows to `placement_coverage.counts.contested_between_two_or_more`, and it
+  is the only rule that can: `assert_aggregate_only`'s ceiling is never below 32 and the
+  cap is 25, so the module's one length rule is numerically incapable of firing on that
+  collection. Three early `return`s meant a tree that published the table without the
+  coverage block, without the count, or with `placement_coverage` holding something that
+  is not a block, passed the check in silence. Measured against the previous code: a
+  two-row table declaring 50 records with the total removed was published without
+  complaint, while the same table against a total of 65 was correctly refused. Once a
+  `contested_groups` table is in the artifact, every way its total can be missing is now
+  a refusal naming the absent key; a tree carrying no such table still passes, because
+  there is nothing there to be short. `cli.py` writes both keys together, so this was a
+  regression gap rather than a defect in anything published; `published/measurements.json`
+  carries 12 rows against a total of 50,167 and the offline build is unchanged.
+  `_field_values` in the same module already stated the discipline this rule was
+  missing, that a missing field is a refusal rather than a traceback, and
+  `assert_collections_are_ordered_as_declared` already failed closed on arrival.
+- **A contested-groups row carrying no readable record count was refused under the wrong
+  name.** Such a row was dropped from the sum, so the artifact was refused with a message
+  saying a combination had been cut for sitting past the cap, which it had not been. The
+  row is now named with its index and the reason it is unreadable.
+- `tests/test_artifacts.py` asserted the permissive behaviour as intended
+  (`test_the_contested_check_stays_quiet_when_there_is_nothing_to_compare`, whose
+  docstring read "a tree without the coverage block is not an artifact this rule can
+  judge"). It now covers only the absence that really is quiet, the one where no table is
+  published at all, and two new tests drive every refusal. Both fail against the previous
+  code.
+
 - **Every commit pushed to `main` competed with every other for one CI slot, so a burst
   of merges could drop a verdict entirely.** `ci.yml` keyed its concurrency group on
   `github.ref`, which is `refs/heads/main` for every push, so every commit ever merged

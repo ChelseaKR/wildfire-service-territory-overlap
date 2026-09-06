@@ -214,11 +214,60 @@ def test_a_contested_groups_table_longer_than_its_total_is_also_refused() -> Non
         check_all(_coverage_tree(with_extra, 50), max_rows=32)
 
 
-def test_the_contested_check_stays_quiet_when_there_is_nothing_to_compare() -> None:
-    """A tree without the coverage block is not an artifact this rule can judge."""
-    check_all({"contested_groups": [{"records": 3}]}, max_rows=32)
+def test_the_contested_check_stays_quiet_when_no_table_is_published() -> None:
+    """No table, nothing to be short. This is the one absence that is not a refusal.
+
+    It is quiet because there is no contested-groups table in the tree, not because the
+    rule lost the key it checks against.
+    """
     check_all({"placement_coverage": {"counts": {}}}, max_rows=32)
     check_all({"placement_coverage": "not a block"}, max_rows=32)
+    check_all({}, max_rows=32)
+
+
+def test_a_contested_table_published_without_its_total_is_refused() -> None:
+    """The published table stays; the number it must sum to goes missing.
+
+    This is the shape the rule was blind to. `assert_aggregate_only` cannot see a cut
+    table (its ceiling is never below 32 and the cap is 25), so this rule is the only
+    one that can, and losing the total made it pass. Every way the total can be absent
+    refuses, and each names the key.
+    """
+    table = [{"records": 30}, {"records": 20}]
+    with pytest.raises(PublicationRefused, match=r"no .*placement_coverage block"):
+        check_all({"contested_groups": table}, max_rows=32)
+    with pytest.raises(PublicationRefused, match="carries no 'contested_between"):
+        check_all(
+            {"contested_groups": table, "placement_coverage": {"counts": {}}},
+            max_rows=32,
+        )
+    with pytest.raises(PublicationRefused, match=r"no .*placement_coverage block"):
+        check_all(
+            {"contested_groups": table, "placement_coverage": "not a block"},
+            max_rows=32,
+        )
+    with pytest.raises(PublicationRefused, match="not a record count"):
+        check_all(
+            {
+                "contested_groups": table,
+                "placement_coverage": {
+                    "counts": {"contested_between_two_or_more": "50"}
+                },
+            },
+            max_rows=32,
+        )
+
+
+def test_a_contested_row_that_carries_no_count_is_refused_by_name() -> None:
+    """And refused for the reason it is actually wrong.
+
+    Such a row used to be dropped from the sum, so the artifact was refused with a
+    message saying a combination had been cut for sitting past the cap. It had not.
+    """
+    with pytest.raises(PublicationRefused, match=r"contested_groups\[1\]"):
+        check_all(_coverage_tree([{"records": 30}, {"other": 20}], 50), max_rows=32)
+    with pytest.raises(PublicationRefused, match=r"contested_groups\[1\]"):
+        check_all(_coverage_tree([{"records": 30}, {"records": "20"}], 50), max_rows=32)
 
 
 def test_a_collection_nobody_declared_an_order_for_is_refused() -> None:

@@ -31,7 +31,10 @@ of a dated review and into the build.
 ``assert_contested_groups_are_whole``
     The overlap table is capped at the largest combinations. The rows must still sum to
     the published contested total, so a combination cut for sitting past the cap cannot
-    take its records out of the artifact without the build stopping.
+    take its records out of the artifact without the build stopping. The total is
+    required rather than used where present: an artifact that publishes the table and
+    not the number it sums to is refused, because otherwise the one rule that can catch
+    a cut table goes quiet exactly when the build has changed shape.
 
 ``assert_collections_are_ordered_as_declared``
     Every published collection appears in ``ORDERINGS`` with the order it comes out in,
@@ -194,6 +197,40 @@ def assert_no_ranking(tree: Any) -> None:
 CONTESTED_TOTAL_KEY = "contested_between_two_or_more"
 
 
+def _contested_total(tree: dict[str, Any]) -> int:
+    """The published contested total the overlap table must account for, or a refusal.
+
+    Named separately so that every way the number can be missing produces the same
+    refusal, with the key that is absent in the message. The build writes this block
+    and the table together; a tree that has one without the other is a build that has
+    changed shape, and that is exactly when a rule reading "absent" as "nothing to
+    check" would go quiet.
+    """
+    coverage = tree.get("placement_coverage")
+    if not isinstance(coverage, dict):
+        raise PublicationRefused(
+            "$.contested_groups: the artifact publishes a contested-groups table and no "
+            "$.placement_coverage block to check it against. The table is capped, so "
+            "without the published total nothing can tell a whole table from one cut "
+            "short."
+        )
+    counts = coverage.get("counts")
+    if not isinstance(counts, dict) or CONTESTED_TOTAL_KEY not in counts:
+        raise PublicationRefused(
+            f"$.placement_coverage.counts: carries no {CONTESTED_TOTAL_KEY!r}, and the "
+            "artifact publishes a contested-groups table that has to sum to it. Publish "
+            "the total, or do not publish the table."
+        )
+    total = counts[CONTESTED_TOTAL_KEY]
+    if not isinstance(total, int):
+        raise PublicationRefused(
+            f"$.placement_coverage.counts.{CONTESTED_TOTAL_KEY}: is "
+            f"{type(total).__name__}, not a record count. The contested table is "
+            "checked by summing to it."
+        )
+    return total
+
+
 def assert_contested_groups_are_whole(tree: Any) -> None:
     """Refuse a contested-groups table that leaves contested records out of itself.
 
@@ -211,22 +248,40 @@ def assert_contested_groups_are_whole(tree: Any) -> None:
     must sum to the published contested total. Where they do not, the difference is the
     number of records that would have gone missing from the table, and the artifact is
     refused rather than published short.
+
+    **The total this sums against is required, not merely used when present.** A tree
+    carrying no ``contested_groups`` publishes no such table and there is nothing here
+    to be short, so it passes. Once the table is in the artifact, the absence of
+    ``placement_coverage.counts.contested_between_two_or_more`` is a refusal. Reading
+    it any other way makes the one rule that can catch a truncated table go quiet by
+    losing the key it needs, so the very thing that goes missing when a build changes
+    shape is what would silence the check. ``_field_values`` states the same
+    discipline one rule down, that a missing field is a refusal rather than a
+    traceback, and ``assert_collections_are_ordered_as_declared`` fails closed on
+    arrival of a collection nobody declared. This rule was the one that did not.
     """
     if not isinstance(tree, dict):
         return
     rows = tree.get("contested_groups")
-    coverage = tree.get("placement_coverage")
-    if not isinstance(rows, list) or not isinstance(coverage, dict):
+    if not isinstance(rows, list):
+        # No contested-groups table in this tree, so nothing published here can be
+        # short. This is the only absence that stays quiet, and it is quiet because
+        # there is no table, not because the check lost its footing.
         return
-    counts = coverage.get("counts")
-    if not isinstance(counts, dict) or CONTESTED_TOTAL_KEY not in counts:
-        return
-    total = counts[CONTESTED_TOTAL_KEY]
-    shown = sum(
-        row["records"]
-        for row in rows
-        if isinstance(row, dict) and isinstance(row.get("records"), int)
-    )
+    total = _contested_total(tree)
+    shown = 0
+    for index, row in enumerate(rows):
+        # A row that does not carry an integer record count used to be dropped from the
+        # sum, which refused the artifact for the right reason under the wrong name: the
+        # message said a combination had been cut for sitting past the cap. Say what is
+        # actually wrong with the row instead.
+        if not isinstance(row, dict) or not isinstance(row.get("records"), int):
+            raise PublicationRefused(
+                f"$.contested_groups[{index}]: carries no integer 'records' count, so "
+                "the table cannot be shown to account for every contested record. A "
+                "row whose count cannot be read is not a row that counts zero."
+            )
+        shown += row["records"]
     if shown != total:
         raise PublicationRefused(
             f"$.contested_groups: the table accounts for {shown} of {total} contested "

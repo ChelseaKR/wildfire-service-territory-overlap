@@ -28,11 +28,7 @@ permissions:
 
 # CI-CD-STANDARD.md 11c: cancel superseded runs on the same ref.
 concurrency:
-  # Same reasoning as ci.yml: this workflow also runs on pushes to `main`, where a
-  # ref-only key gives every commit the same slot and a burst of merges drops one
-  # commit's scan with no run to show for it. Scorecard is not a required check, so the
-  # loss is quieter here than in ci.yml, and quieter is the problem.
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || github.sha }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   analysis:

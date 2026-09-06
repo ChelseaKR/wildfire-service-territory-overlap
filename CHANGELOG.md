@@ -83,24 +83,32 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - **Every commit pushed to `main` competed with every other for one CI slot, so a burst
-  of merges could drop a verdict entirely.** `ci.yml` and `scorecard.yml` both keyed
-  their concurrency group on `github.ref`, which is `refs/heads/main` for every push, so
-  all pushes to `main` shared a single group. A group holds one running run and exactly
-  one pending run; a third arrival evicts the pending one with no jobs ever dispatched.
-  The commit that was waiting then has no run at all -- not a red check somebody can
-  find, an absent one, which is the shape this repository is otherwise built to refuse.
+  of merges could drop a verdict entirely.** `ci.yml` keyed its concurrency group on
+  `github.ref`, which is `refs/heads/main` for every push, so every commit ever merged
+  shared a single group. A group holds one running run and exactly one pending run; a
+  third arrival evicts the pending one with no jobs ever dispatched. The commit that was
+  waiting then has no run at all -- not a red check somebody can find, an absent one,
+  which is the shape this repository is otherwise built to refuse.
   `cancel-in-progress` does not decide whether that happens, only whether the loss looks
-  like a cancellation or like nothing. Both keys now carry `github.sha` on a push and
-  stay per-ref on a pull request, so branch supersession is unchanged. `codeql.yml` and
-  `osv.yml` are deliberately untouched: neither has a `push:` trigger, so neither has a
-  queue to evict from.
-- **The rule is now held by a test** (`tests/test_ruleset.py`). Any workflow with a
-  `push:` trigger must key its concurrency group per commit and keep pull requests
-  per-ref, so a workflow that gains a push trigger later cannot quietly share a slot.
+  like a cancellation or like nothing. The key now carries `github.sha` on a push and
+  stays per-ref on a pull request, so branch supersession is unchanged. `codeql.yml` and
+  `osv.yml` are untouched: neither has a `push:` trigger, so neither has a queue to
+  evict from. `scorecard.yml` is untouched for a different reason, recorded below.
+- **The rule is now held by a test** (`tests/test_ruleset.py`), which already reads the
+  workflows for the required-checks invariant. Any workflow with a `push:` trigger must
+  key its concurrency group per commit and keep pull requests per-ref, so a workflow
+  that gains a push trigger later cannot quietly share a slot.
   `test_the_push_workflow_sweep_did_not_collapse` fails if the glob or the filter finds
   nothing, because a rule that iterates an empty set passes without checking anything.
-  Both were verified by sabotage: restoring the ref-only key to `ci.yml` fails the
-  concurrency rule, and stubbing the push filter to `if False:` fails the sweep rule.
+- **`scorecard.yml` keeps its ref-only key, as a recorded exception rather than an
+  oversight.** CI-CD-STANDARD.md 11c allows one exactly where the newest run is the only
+  one that matters: an OpenSSF score is a property of the repository, not of a commit,
+  so a superseded run was not a different answer. The standard's test for the exception
+  is that the workflow gates no merge, and
+  `test_every_converging_exception_still_earns_its_place` enforces that here by reading
+  the committed ruleset: if `analysis` ever becomes a required status check, the
+  exemption stops being safe and the build says so. An exception list nobody re-checks
+  is how a real offender keeps its pass.
 - **`.github/workflows/ci.yml` described the branch ruleset as running `with no bypass
   actors`, and the gate that forbids exactly that claim never read the file.** On
   2026-08-28 the

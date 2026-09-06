@@ -568,15 +568,66 @@ def test_the_readme_does_not_still_make_the_unqualified_claim() -> None:
     assert "Every collection in the output is sorted by name" not in README
 
 
+def in_its_own_voice(text: str) -> str:
+    """The file with its inline code spans removed.
+
+    A phrase inside backticks is being named, not asserted. `docs/RUNBOOK.md` quotes
+    the false claim in exactly that form, in the sentence that records the row having
+    made it and having been corrected, and a rule that cannot tell a correction from a
+    relapse would push the history out of the document to stay green.
+    """
+    return re.sub(r"`[^`]*`", " ", text)
+
+
+# Every file in the repository that says anything about the branch ruleset, found by
+# reading the tree rather than by naming three of them.
+#
+# The hand-written set was `README.md`, `CHANGELOG.md` and `docs/ROADMAP.md`, and the
+# rule below is why: on 2026-08-28 the ruleset was read back, it carried a bypass actor
+# those three documents denied, and they were corrected. `.github/workflows/ci.yml`
+# said the same false thing in its header comment, was not in the set, and went on
+# saying it for nine more days -- past a merge that widened the *document* rules from
+# three files to thirty-three, because that widening did not reach this rule. A gate
+# whose file set excludes the file carrying the violation reports success without
+# having looked, which is the same defect as a gate that reads three of thirty-three
+# documents, one rule further down.
+RULESET_FILES = tuple(
+    sorted(
+        str(path.relative_to(ROOT))
+        for path in [
+            *ROOT.glob("*.md"),
+            *(ROOT / "docs").rglob("*.md"),
+            *(ROOT / ".github").rglob("*.md"),
+            *(ROOT / ".github" / "workflows").glob("*.yml"),
+        ]
+        if "ruleset" in path.read_text(encoding="utf-8").lower()
+    )
+)
 RULESET_DOCUMENTS = {
-    "README.md": README,
-    "CHANGELOG.md": CHANGELOG,
-    "docs/ROADMAP.md": ROADMAP,
+    name: (ROOT / name).read_text(encoding="utf-8") for name in RULESET_FILES
 }
 
 
+def test_the_ruleset_file_sweep_did_not_collapse() -> None:
+    """The set is globbed and filtered, so either step going empty would pass silently.
+
+    Both named files are ones the hand-written set left out, and one of them is where
+    the defect this rule exists to catch actually sat.
+    """
+    assert len(RULESET_DOCUMENTS) >= 6, RULESET_FILES
+    for name in (
+        "README.md",
+        "CHANGELOG.md",
+        "docs/ROADMAP.md",
+        "docs/RUNBOOK.md",
+        ".github/rulesets/README.md",
+        ".github/workflows/ci.yml",
+    ):
+        assert name in RULESET_DOCUMENTS, f"{name} describes the ruleset and is unread"
+
+
 def test_no_document_claims_the_ruleset_carries_no_bypass_actor() -> None:
-    """It carries one, and three documents said it carried none.
+    """It carries one, and four files said it carried none.
 
     Read back from the API on 2026-08-28: the ruleset on `main` grants `RepositoryRole`
     5, repository admin, `bypass_mode: always`. That is the account that pushes, so
@@ -586,7 +637,7 @@ def test_no_document_claims_the_ruleset_carries_no_bypass_actor() -> None:
     about. `docs/RUNBOOK.md` now carries the command that reads it back.
     """
     for name, text in RULESET_DOCUMENTS.items():
-        assert "no bypass actors" not in text.lower(), (
+        assert "no bypass actors" not in in_its_own_voice(text).lower(), (
             f"{name} claims a protection the ruleset does not have"
         )
 
@@ -594,9 +645,7 @@ def test_no_document_claims_the_ruleset_carries_no_bypass_actor() -> None:
 def test_every_document_describing_the_ruleset_names_its_bypass_actor() -> None:
     """Silence would be the same overstatement with fewer words."""
     for name, text in RULESET_DOCUMENTS.items():
-        if "ruleset" not in text.lower():
-            continue
-        lowered = text.lower()
+        lowered = text.lower().replace("-", " ")
         assert "bypass" in lowered, name
         assert "repository admin" in lowered, name
 

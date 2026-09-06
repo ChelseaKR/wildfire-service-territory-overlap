@@ -5,8 +5,15 @@
 # These gates block now. A branch ruleset on `main` (active 2026-08-22) refuses force
 # pushes and deletions, requires every change to arrive as a merged pull request, and
 # requires this workflow's four jobs plus osv-scanner's `scan` and CodeQL green before
-# anything lands, with no bypass actors. Until then they reported and blocked nothing;
-# this paragraph said so, because a gate that cannot go red is not a gate.
+# anything lands. It carries one bypass actor: the repository admin role at
+# `bypass_mode: always`, which is the account that pushes, so those six checks are
+# required by agreement for that account rather than by configuration. The committed
+# copy is `.github/rulesets/main.json` and `.github/rulesets/README.md` says why the
+# actor stays. This paragraph claimed none for nine days after `README.md`,
+# `CHANGELOG.md`, `docs/ROADMAP.md` and `docs/RUNBOOK.md` were corrected on 2026-08-28,
+# because the gate that forbids the claim read three Markdown documents and never read
+# this file. Until the ruleset existed the gates reported and blocked nothing; this
+# paragraph said so, because a gate that cannot go red is not a gate.
 #
 # Every action is pinned to the full 40-char commit SHA of its tag, resolved 2026-08-17
 # via `gh api repos/OWNER/REPO/commits/TAG`. The pins stay `@<sha> # vX.Y.Z` so the

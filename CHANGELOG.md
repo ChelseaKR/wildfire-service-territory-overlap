@@ -82,6 +82,30 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`.github/workflows/ci.yml` described the branch ruleset as running `with no bypass
+  actors`, and the gate that forbids exactly that claim never read the file.** On
+  2026-08-28 the
+  ruleset was read back, found to carry `RepositoryRole` 5 at `bypass_mode: always`,
+  and `README.md`, `CHANGELOG.md`, `docs/ROADMAP.md` and `docs/RUNBOOK.md` were
+  corrected. `test_no_document_claims_the_ruleset_carries_no_bypass_actor` was written
+  at the same time to stop the claim coming back, over a hand-written set of three
+  Markdown documents. The workflow's header comment carried the same sentence, was in
+  none of the three, and went on asserting it for nine days -- through the merge that
+  widened the *document* rules from three files to thirty-three, which did not reach
+  this rule. The comment now states the actor, points at `.github/rulesets/main.json`,
+  and says why the gate did not catch it.
+- **The rule now reads every file in the repository that mentions the ruleset**, found
+  by globbing root Markdown, `docs/`, `.github/` Markdown and `.github/workflows/*.yml`
+  and keeping the ones that say `ruleset`, rather than by naming three. That is six
+  files today; `test_the_ruleset_file_sweep_did_not_collapse` fails if either the glob
+  or the filter goes empty and names both files the hand-written set had left out. The
+  claim is tested in each file's own voice: inline code spans come out first, because
+  `docs/RUNBOOK.md` quotes the false sentence inside backticks in the paragraph that
+  records it having been corrected, and a rule that read a correction as a relapse
+  would push the history out of the document to stay green. Both halves were verified
+  by sabotage: restoring the sentence to `ci.yml` fails the claim rule, and deleting
+  the workflow glob fails the sweep rule.
+
 - **Both unsent CEC letters quoted a retrieval date this project no longer publishes**
   (adjacent to issues #50 and #51). `docs/outreach/cec-overlap-letter.md` and
   `docs/outreach/cec-type-field-request.md` were drafted in #14 against the 2026-08-17

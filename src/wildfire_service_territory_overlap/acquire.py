@@ -269,10 +269,18 @@ def acquire_territories(source: Source, out_dir: Path) -> Acquired:
 
 
 def acquire_dins(out_dir: Path) -> Acquired:
-    """Read the damage inspections through perimeter's walk, then check it independently."""
-    before = perimeter_layer_record_count(DINS.endpoint)
-    rows = perimeter_fetch_layer(DINS.endpoint, DINS_FIELDS)
-    after = perimeter_layer_record_count(DINS.endpoint)
+    """Read the damage inspections through perimeter's walk, then check it independently.
+
+    Every request names this project. Until the pin moved to `3a6aa47`, upstream read its
+    own `USER_AGENT` from a module constant inside a private `_get` and took no other, so
+    the largest of the four layers at 132,522 records went out as
+    `perimeter-coverage/0.1` while the other three carried this project's name. An
+    operator at CAL FIRE reading their logs saw a caller that did not lead back here.
+    docs/UPSTREAM.md gap 1.
+    """
+    before = perimeter_layer_record_count(DINS.endpoint, user_agent=USER_AGENT)
+    rows = perimeter_fetch_layer(DINS.endpoint, DINS_FIELDS, user_agent=USER_AGENT)
+    after = perimeter_layer_record_count(DINS.endpoint, user_agent=USER_AGENT)
     if before != after:
         raise IncompleteAcquisition(
             f"{DINS.key}: the layer reported {before} records before the walk and "

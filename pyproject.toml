@@ -17,7 +17,15 @@ dependencies = [
   # file and already carries a paged walk that steps by rows received rather than by page
   # size. Re-implementing either would be re-implementing a bug that has already been
   # found and fixed once. Pinned to a commit, not a branch.
-  "perimeter @ git+https://github.com/ChelseaKR/perimeter@dac60195c50786f33f69a8fab70b6230894ed374",
+  #
+  # The distribution is `perimeter-wildfire` and the import name is still `perimeter`.
+  # Upstream renamed the distribution because `perimeter` on PyPI is YunoJuno's Django
+  # middleware; the package directory did not move. This line names the distribution, so
+  # it had to move with it. Measured: with the new commit under the old name, `uv lock`
+  # fails with "Package metadata name `perimeter-wildfire` does not match given name
+  # `perimeter`", which reads as a bad revision rather than as a rename. Import sites are
+  # unaffected.
+  "perimeter-wildfire @ git+https://github.com/ChelseaKR/perimeter@3a6aa47ae9e755a256614bc124a6db960d60dc7a",
   "shapely>=2.1",
   "pyproj>=3.7",
 ]
@@ -66,23 +74,19 @@ warn_return_any = true
 disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
-# Neither ships a py.typed marker, so mypy reads both as untyped. `pyproj` was listed
+# `shapely` ships no py.typed marker, so mypy reads it as untyped. `pyproj` was listed
 # here too and had stopped earning it: pyproj 3.7.2 does ship the marker, and
 # mypy --strict passes without the entry, measured 2026-09-05. An override that cannot
 # fail is a rule nobody is following, so tests/test_provenance_and_standards.py now
-# refuses an entry naming a package that carries the marker. `perimeter` is checked with
-# mypy --strict upstream and still ships none; see docs/UPSTREAM.md.
-module = ["shapely.*", "perimeter.*"]
+# refuses an entry naming a package that carries the marker.
+#
+# `perimeter` was listed here until the pin moved to 3a6aa47, and both overrides that
+# named it are gone with it. It now ships `src/perimeter/py.typed`, so that same rule
+# would refuse the entry; and its `AcquisitionFailed` resolves to a real class rather
+# than to `Any`, so `IncompleteAcquisition` subclasses it under `mypy --strict` with
+# nothing relaxed. docs/UPSTREAM.md gap 4 records the measurement.
+module = ["shapely.*"]
 ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-# `perimeter` is untyped, so its exception classes resolve to Any and mypy refuses the
-# subclass. IncompleteAcquisition is deliberately a kind of AcquisitionFailed: a caller
-# that already handles a failed acquisition should handle an incomplete one the same way.
-# Narrowed to this one module and this one rule rather than relaxed globally. Both
-# overrides go the day `perimeter` ships py.typed; docs/UPSTREAM.md records the measure.
-module = ["wildfire_service_territory_overlap.acquire"]
-disallow_subclassing_any = false
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

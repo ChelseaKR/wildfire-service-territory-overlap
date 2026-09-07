@@ -270,8 +270,12 @@ def test_dins_acquisition_checks_the_walk_it_did_not_write(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     rows = [{"OBJECTID": i, "DAMAGE": "No Damage"} for i in range(1, 5)]
-    monkeypatch.setattr(acquire, "perimeter_layer_record_count", lambda _e: 4)
-    monkeypatch.setattr(acquire, "perimeter_fetch_layer", lambda _e, _f: rows)
+    monkeypatch.setattr(
+        acquire, "perimeter_layer_record_count", lambda _e, user_agent="": 4
+    )
+    monkeypatch.setattr(
+        acquire, "perimeter_fetch_layer", lambda _e, _f, user_agent="": rows
+    )
     result = acquire.acquire_dins(tmp_path)
     assert result.feature_count == 4
 
@@ -280,8 +284,12 @@ def test_a_short_upstream_walk_is_caught_here_rather_than_trusted(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     rows = [{"OBJECTID": i} for i in range(1, 4)]
-    monkeypatch.setattr(acquire, "perimeter_layer_record_count", lambda _e: 4)
-    monkeypatch.setattr(acquire, "perimeter_fetch_layer", lambda _e, _f: rows)
+    monkeypatch.setattr(
+        acquire, "perimeter_layer_record_count", lambda _e, user_agent="": 4
+    )
+    monkeypatch.setattr(
+        acquire, "perimeter_fetch_layer", lambda _e, _f, user_agent="": rows
+    )
     with pytest.raises(IncompleteAcquisition, match="hole in it"):
         acquire.acquire_dins(tmp_path)
     assert not list(tmp_path.iterdir()), "nothing is written when the walk is short"
@@ -292,10 +300,12 @@ def test_dins_acquisition_refuses_a_layer_republished_mid_walk(
 ) -> None:
     counts = iter([4, 5])
     monkeypatch.setattr(
-        acquire, "perimeter_layer_record_count", lambda _e: next(counts)
+        acquire, "perimeter_layer_record_count", lambda _e, user_agent="": next(counts)
     )
     monkeypatch.setattr(
-        acquire, "perimeter_fetch_layer", lambda _e, _f: [{"OBJECTID": 1}]
+        acquire,
+        "perimeter_fetch_layer",
+        lambda _e, _f, user_agent="": [{"OBJECTID": 1}],
     )
     with pytest.raises(IncompleteAcquisition, match="republished mid-walk"):
         acquire.acquire_dins(tmp_path)
@@ -372,26 +382,29 @@ def test_the_walks_written_here_name_this_project_to_the_publisher(
     assert "wildfire-service-territory-overlap" in acquire.USER_AGENT
 
 
-def test_the_dins_walk_names_the_pinned_dependency_rather_than_this_project(
+def test_the_dins_walk_names_this_project_and_not_the_pinned_dependency(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """The largest of the four layers identifies as `perimeter`, and cannot be made not to.
+    """The largest of the four layers now identifies as the caller.
 
-    `perimeter.acquire` reads its User-Agent from a module constant inside a private
-    helper, and neither of the two functions this project calls accepts one. So every
-    request of the DINS walk, both counts and each page, names the dependency instead of
-    the caller. That is gap 1 in `docs/UPSTREAM.md`, and PROVENANCE.md says so rather
-    than claiming otherwise.
+    This test used to assert the opposite, and was right to. Until the pin moved to
+    `3a6aa47`, `perimeter.acquire` read its User-Agent from a module constant inside a
+    private helper and neither function this project calls accepted one, so every request
+    of the DINS walk, both counts and each page, named the dependency instead of the
+    caller: 132,522 records going out as `perimeter-coverage/0.1` while the other three
+    layers carried this project's name. That was gap 1 in `docs/UPSTREAM.md`, recorded
+    rather than claimed away.
 
-    Held here so the fact cannot drift away from the documents. It fails the day the pin
-    moves onto a walk that lets a caller identify itself, which is the day both are
-    rewritten.
+    Its docstring said it would fail the day the pin moved onto a walk that lets a caller
+    identify itself, and that it would be rewritten then. That is what happened, and the
+    assertion is now the one the documents can make: an operator at CAL FIRE reading their
+    logs sees a name that leads back here.
     """
     rows = [{"OBJECTID": i} for i in range(1, 3)]
     sent = install_recording(monkeypatch, _dins_handler(rows))
     acquire.acquire_dins(tmp_path)
     assert sent, "the acquisition made no request, so this test checked nothing"
     identities = {identity for _url, identity in sent}
-    assert identities == {PERIMETER_USER_AGENT}
-    assert "perimeter" in PERIMETER_USER_AGENT
-    assert acquire.USER_AGENT not in identities
+    assert identities == {acquire.USER_AGENT}
+    assert "wildfire-service-territory-overlap" in acquire.USER_AGENT
+    assert PERIMETER_USER_AGENT not in identities

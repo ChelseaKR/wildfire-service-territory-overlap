@@ -164,21 +164,27 @@ Requests pause between pages and stop rather than route around a 401, 403 or 429
 agency website is crawled: four REST endpoints are read the way their own dataset pages
 document them to be read.
 
-Requests for the two CEC layers and the county layer carry a User-Agent naming this
-project. The DINS requests do not, and this document said otherwise until 2026-09-05.
-That walk is `perimeter`'s, and `perimeter` reads its own name from a module constant no
-caller can pass, so those requests identify as
+Every request carries a User-Agent naming this project, the DINS walk included, since
+the pin moved to `3a6aa47ae9e755a256614bc124a6db960d60dc7a` on 2026-09-07.
+
+That was not true before, and this document said it was until 2026-09-05. The DINS walk
+is `perimeter`'s, and `perimeter` used to read its own name from a module constant no
+caller could pass, so the largest of the four layers at 132,522 records identified as
 `perimeter-coverage/0.1 (+https://github.com/ChelseaKR/perimeter)`, the pinned dependency
-that performs the walk. Both facts are held by `tests/test_acquire.py`, and the gap is
-recorded with the change that would close it in `docs/UPSTREAM.md`.
+performing the walk rather than the project asking for the data. That was gap 1 in
+`docs/UPSTREAM.md`; upstream now takes a `user_agent` argument and this project passes
+one. `tests/test_acquire.py` holds the sentence against the requests that are actually
+sent, and asserts the dependency's own name is not among them.
 
 ## How completeness is established
 
 Each layer is asked for its own record count before and after the walk. A walk that
 disagrees with either writes nothing. Identifiers must come back strictly increasing and
 unique. The DINS walk itself is `perimeter`'s, pinned to commit
-`dac60195c50786f33f69a8fab70b6230894ed374`, and the checks above are applied to its
-output rather than assumed of it.
+`3a6aa47ae9e755a256614bc124a6db960d60dc7a`, and the checks above are applied to its
+output rather than assumed of it. Upstream now runs a post-walk recount and identifier
+checks of its own; this project keeps its own because a consumer that stops checking a
+dependency's output is a consumer trusting a version it did not read.
 
 ## Two decisions that move the numbers
 

@@ -49,5 +49,28 @@ a test because that refusal is the one that matters most: the county products th
 easiest to find are address-level and parcel-level, and a maintainer will meet this file
 before they meet the rule.
 
+`inclusion_rule_dropping_the_cooperative.json` and `inclusion_rule_example.json` are the
+two reviewer-supplied inclusion rule files, in the shape `--inclusion-rule` reads. They
+are invented like everything else here: neither was written by a reviewer and neither
+records anybody's judgment, which is why both name their role as a fixture rather than
+as a person or a post.
+
+The first reads `IOU` and `POU` and nothing else. Against this layer, which carries no
+`Tribal` outline, that is exactly the built-in "without CO-OP" variant, and a test holds
+the two rows identical to the digit: a supplied rule goes through the same placement the
+built ones go through, or it is not a comparison. The second exists so the shape of a
+per-outline override is committed where a reviewer can copy it, and it carries one in
+each direction: an outline read out of the rule, and an outline read into it.
+
+Both are written against *this* layer's names and types. A rule file is checked against
+the retrieval it is measured over before any placement runs, so neither of these will
+run against the real retrieval unchanged, and a file written against the real one will
+not run here. That is the check working, not a fixture that has gone stale.
+
 `make report-offline` builds the whole pipeline over these files, and `make determinism`
-builds it twice and compares the trees byte for byte.
+builds it twice and compares the trees byte for byte. To see a supplied rule in the
+offline output:
+
+```
+make report-offline INCLUSION_RULES=fixtures/inclusion_rule_example.json
+```

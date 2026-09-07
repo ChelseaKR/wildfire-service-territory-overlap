@@ -226,8 +226,13 @@ docs/adr/        the decisions, with their reasoning
   as a packet a reviewer could answer in an afternoon,
   `docs/outreach/inclusion-rule-review-packet.md`, carrying each outline's published
   `Type` value, what the alternatives were measured to be worth, and the term that any
-  finding lands as a new sensitivity row rather than as an edit to the rule. Nobody has
-  read it. What is missing is the person, not the question.
+  finding lands as a new sensitivity row rather than as an edit to the rule. That term is
+  now something a reviewer can exercise without anybody editing Python on their behalf:
+  `--inclusion-rule FILE` takes a small JSON document naming the reading, the reviewer's
+  role and the date, runs it to completion over the whole record set, and publishes it as
+  one more row with its own denominator, interval and difference from the rule as built.
+  The rule as built does not move and nothing is marked better. Nobody has read the
+  packet. What is missing is the person, not the question.
 - **The publisher documents none of the six `Type` values.** As retrieved, the layer
   metadata carries no field description and no coded-value domain, the FGDC record has no
   entity and attribute section, and no data dictionary is attached. The rule reads a field

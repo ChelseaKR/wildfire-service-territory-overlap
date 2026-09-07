@@ -87,12 +87,18 @@ def build(
     counties_path: Path,
     out_dir: Path,
     is_fixture: bool,
+    inclusion_rules: Sequence[sensitivity.SuppliedRule] = (),
 ) -> tuple[Path, Path]:
     """Measure, check, and write both artifacts. Nothing is written if a check fails."""
     collections = {
         ELSE_IOU_POU.key: _read_json(iou_pou_path),
         ELSE_OTHER.key: _read_json(other_path),
     }
+    # Before the layers are projected and before a single record is placed. A rule
+    # naming a type this retrieval does not carry, or an outline it does not carry,
+    # would otherwise run to completion and publish a variant measuring less than the
+    # reviewer asked for, and the build would exit zero.
+    sensitivity.check_rules_against_retrieval(inclusion_rules, collections)
     territories, unusable = load_territories(collections)
     counties = load_counties(_read_json(counties_path))
     records, excluded = read_records(_read_json(dins_path))
@@ -128,7 +134,7 @@ def build(
         "geometry_ledger": measure.geometry_ledger(placement, territories, unusable),
         "sensitivity": {
             "type_inclusion": sensitivity.type_inclusion(
-                collections, records, excluded
+                collections, records, excluded, inclusion_rules
             ),
             "repair_strategy": sensitivity.repair_comparison(
                 collections, records, territories
@@ -176,15 +182,39 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="the inputs are the committed samples, not the real retrievals",
     )
-    args = parser.parse_args(argv)
-    artifact, document = build(
-        dins_path=args.dins,
-        iou_pou_path=args.iou_pou,
-        other_path=args.other,
-        counties_path=args.counties,
-        out_dir=args.out,
-        is_fixture=args.fixture,
+    parser.add_argument(
+        "--inclusion-rule",
+        type=Path,
+        action="append",
+        default=None,
+        metavar="FILE",
+        dest="inclusion_rule",
+        help="a reviewer-supplied inclusion rule file, published as one more "
+        "sensitivity row beside the built ones; repeatable",
     )
+    args = parser.parse_args(argv)
+    # Every supplied file is read and checked for shape before anything is measured, so
+    # a typo in the fourth file does not surface after three placements have run.
+    try:
+        rules = sensitivity.read_rule_files(args.inclusion_rule or [])
+    except sensitivity.InclusionRuleRefused as refusal:
+        print(f"inclusion rule refused. {refusal}", file=sys.stderr)
+        return 2
+    try:
+        artifact, document = build(
+            dins_path=args.dins,
+            iou_pou_path=args.iou_pou,
+            other_path=args.other,
+            counties_path=args.counties,
+            out_dir=args.out,
+            is_fixture=args.fixture,
+            inclusion_rules=rules,
+        )
+    except sensitivity.InclusionRuleRefused as refusal:
+        print(f"inclusion rule refused. {refusal}", file=sys.stderr)
+        return 2
+    for rule in rules:
+        print(f"read inclusion rule {rule.file_name} as {rule.variant!r}")
     print(f"wrote {artifact}")
     print(f"wrote {document}")
     return 0

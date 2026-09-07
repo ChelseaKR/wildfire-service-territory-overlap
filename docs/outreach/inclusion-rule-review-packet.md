@@ -205,6 +205,52 @@ the publisher.
 They can go on issue #52 in this repository, which is where roadmap item 3.3 is tracked,
 or by whatever channel suits you better.
 
+## The file to fill, if you would rather send a rule than prose
+
+Prose is fine and is the shorter path. But if your findings amount to a different
+reading of the publisher's `Type` field, there is a file that turns that reading
+straight into a published measurement, with nobody in between editing code on your
+behalf.
+
+It is a small JSON document. `fixtures/inclusion_rule_example.json` in this repository
+is a filled-in copy of it, written against the invented test layer rather than the real
+one, and the shape is this:
+
+```json
+{
+  "variant": "a short name for this reading, which becomes the row's name",
+  "reviewer_role": "your role, or how you would like to be described",
+  "reviewed_on": "2026-01-31",
+  "types_read_as_territories": ["CO-OP", "IOU", "POU", "Tribal"],
+  "outline_overrides": {
+    "Outline, exactly as the publisher names it": {
+      "read_as_a_territory": false,
+      "reason": "one line, in your words, published as you write it"
+    }
+  }
+}
+```
+
+`types_read_as_territories` is the whole rule, not a change to it: list every type your
+reading counts, including the ones you agree with. `outline_overrides` is optional and
+goes on top of the types, for the case the type field cannot express: one named outline
+read out of the rule, or one read into it, with a reason each. `reviewer_role` is a role
+rather than a name because the field is published; if you would rather be named, say so
+when you send it and it is recorded that way.
+
+Then the build runs your rule to completion over all 132,520 records and publishes it as
+one more row:
+
+```
+make report INCLUSION_RULES=path/to/your-rule.json
+```
+
+Two things it does rather than guess. A rule naming a type or an outline the pinned
+retrieval does not carry is refused before anything is measured, naming what it could
+not find, so a reading written against last year's layer cannot quietly measure less
+than you asked for. And a key it does not recognise is refused rather than ignored, so a
+misspelt field is a message and not a silently dropped instruction.
+
 ## What happens to your answer
 
 This is the part worth reading before you start, because it changes what you are signing

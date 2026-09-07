@@ -11,6 +11,7 @@ from __future__ import annotations
 import ast
 import copy
 import inspect
+import json
 import re
 from pathlib import Path
 from string import Formatter
@@ -18,19 +19,23 @@ from typing import Any
 
 import pytest
 
-from wildfire_service_territory_overlap import report
+from wildfire_service_territory_overlap import report, sensitivity
 from wildfire_service_territory_overlap.catalog import (
     ARTIFACT_DATA_FIELDS,
     ARTIFACT_PROSE_FIELDS,
     ENGLISH,
     Catalog,
     CatalogRefused,
+    _string_leaves,
     artifact_prose,
     translation,
     unclassified_string_fields,
 )
+from wildfire_service_territory_overlap.placement import read_records
+from wildfire_service_territory_overlap.sources import ELSE_IOU_POU, ELSE_OTHER
 
 ROOT = Path(__file__).resolve().parents[1]
+FIXTURES = ROOT / "fixtures"
 RENDERER = ROOT / "src" / "wildfire_service_territory_overlap" / "report.py"
 RENDERER_SOURCE = RENDERER.read_text(encoding="utf-8")
 
@@ -501,3 +506,38 @@ def test_the_document_prints_twenty_eight_of_the_artifacts_own_strings(
     assert sum(1 for _, text in prose if text in printed) == 65
     assert "inside two or more published territories" in printed
     assert "no records are placed in this territory" not in printed
+
+
+def test_a_supplied_inclusion_rule_carries_no_unclassified_string_field() -> None:
+    """The census reaches the fields only a reviewer-supplied build can produce.
+
+    `test_every_string_field_in_the_published_artifact_is_classified` reads the
+    committed artifact, which was built with no rule file and therefore carries none of
+    these fields. Without this, four new published strings could reach a reader with
+    nobody having said whether an edition will ever have to translate them, and the gate
+    that exists to ask that question would have been looking somewhere else.
+    """
+    supplied = sensitivity.read_rule_files(
+        [
+            FIXTURES / "inclusion_rule_example.json",
+            FIXTURES / "inclusion_rule_dropping_the_cooperative.json",
+        ]
+    )
+    collections = {
+        ELSE_IOU_POU.key: json.loads(
+            (FIXTURES / "else_iou_pou_sample.geojson").read_text(encoding="utf-8")
+        ),
+        ELSE_OTHER.key: json.loads(
+            (FIXTURES / "else_other_sample.geojson").read_text(encoding="utf-8")
+        ),
+    }
+    records, excluded = read_records(
+        json.loads((FIXTURES / "dins_sample.json").read_text(encoding="utf-8"))
+    )
+    block = sensitivity.type_inclusion(collections, records, excluded, supplied)
+    assert any(row.get("supplied_by_a_reviewer") for row in block["variants"])
+    assert unclassified_string_fields(block) == set()
+    prose = {field for _, field, _ in _string_leaves(block, "$", "")}
+    for field in ("reviewed_on", "reviewer_reason", "reviewer_role", "rule_file"):
+        assert field in prose, f"{field} never reached the tree, so nothing was checked"
+        assert field in ARTIFACT_DATA_FIELDS

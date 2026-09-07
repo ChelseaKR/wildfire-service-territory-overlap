@@ -367,3 +367,141 @@ def test_json_mode_leaves_stdout_empty_on_bad_usage(
 ) -> None:
     assert main(["/does/not/exist.json", "/also/missing.json", "--json"]) == 2
     assert capsys.readouterr().out == "", "a failed run printed a JSON object anyway"
+
+
+# A verdict is a claim about a comparison that happened. These are the inputs that
+# produced this tool's clean verdict without any comparison happening: the shape
+# `intervals.wilson` already refuses one layer down, where zero out of zero is not
+# zero percent but not measured.
+
+
+def _write(path: Path, tree: object) -> Path:
+    path.write_text(json.dumps(tree), encoding="utf-8")
+    return path
+
+
+def test_two_empty_artifacts_are_not_a_refresh_in_which_nothing_moved(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """`0 values compared` used to print the same verdict, and exit code, as 6,582."""
+    old = _write(tmp_path / "old.json", {})
+    new = _write(tmp_path / "new.json", {})
+
+    assert main([str(old), str(new)]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == "", "a comparison that did not happen printed a verdict"
+    assert "no value was compared" in captured.err
+    assert "No published value moved." not in captured.out
+
+
+@pytest.mark.parametrize(
+    "not_an_artifact",
+    [None, [], [1, 2], "measurements", 0, 4370],
+    ids=["null", "empty-list", "list", "string", "zero", "number"],
+)
+def test_a_side_that_is_not_a_json_object_is_refused(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path, not_an_artifact: object
+) -> None:
+    """A build that failed and wrote `null` must not read as a clean refresh.
+
+    Two `null` documents pair as one scalar leaf that equals itself: `1 values
+    compared`, `No published value moved.`, exit 0.
+    """
+    old = _write(tmp_path / "old.json", not_an_artifact)
+    new = _write(tmp_path / "new.json", not_an_artifact)
+
+    assert main([str(old), str(new)]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "not a JSON object" in captured.err
+    assert "old" in captured.err, "the refusal has to say which side was wrong"
+
+
+def test_the_new_side_is_checked_too_not_only_the_old_one(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    old = _write(tmp_path / "old.json", sample_tree())
+    new = _write(tmp_path / "new.json", None)
+
+    assert main([str(old), str(new)]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "the new artifact is not a JSON object" in captured.err
+
+
+def test_a_file_compared_with_itself_is_refused(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """A file cannot differ from itself, so its clean verdict is guaranteed, not earned."""
+    only = _write(tmp_path / "measurements.json", sample_tree())
+
+    assert main([str(only), str(only)]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "same file" in captured.err
+
+
+def test_two_paths_to_one_file_are_still_one_file(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """The refusal resolves the paths, so `./x.json` and `x.json` do not slip past."""
+    only = _write(tmp_path / "measurements.json", sample_tree())
+    indirect = tmp_path / "." / "measurements.json"
+
+    assert main([str(only), str(indirect)]) == 2
+    assert "same file" in capsys.readouterr().err
+
+
+def test_json_mode_prints_no_object_for_a_comparison_that_was_not_made(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """`--json` must not hand a caller `"refused": false` over an empty comparison."""
+    old = _write(tmp_path / "old.json", {})
+    new = _write(tmp_path / "new.json", {})
+
+    assert main([str(old), str(new), "--json"]) == 2
+    assert capsys.readouterr().out == ""
+
+
+def test_allow_removals_does_not_reach_past_the_refusals(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """The flag accepts removals. It is not a way to accept a comparison of nothing."""
+    old = _write(tmp_path / "old.json", {})
+    new = _write(tmp_path / "new.json", {})
+
+    assert main([str(old), str(new), "--allow-removals"]) == 2
+    assert capsys.readouterr().out == ""
+
+
+def test_a_real_comparison_of_two_distinct_artifacts_still_passes(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """The control: the guards narrow, they do not break the comparison they guard."""
+    old = _write(tmp_path / "old.json", sample_tree())
+    new = _write(tmp_path / "new.json", sample_tree())
+
+    assert main([str(old), str(new)]) == 0
+    out = capsys.readouterr().out
+    assert "No published value moved." in out
+    assert out.startswith(
+        f"{diff_trees(sample_tree(), sample_tree()).total} values compared"
+    )
+
+
+def test_one_side_empty_is_still_a_removal_not_a_shape_refusal(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """An artifact that lost everything is the case the tool already caught; keep it.
+
+    `{}` is a JSON object, so it passes the shape check, and the comparison is not
+    empty: every leaf of the old artifact is a removal. That must stay a refusal with
+    exit 1 and the REMOVED lines, not become the new exit-2 message.
+    """
+    old = _write(tmp_path / "old.json", sample_tree())
+    new = _write(tmp_path / "new.json", {})
+
+    assert main([str(old), str(new)]) == 1
+    out = capsys.readouterr().out
+    assert "REMOVED  $.placement_coverage.fire_records" in out
+    assert "REFUSED: published values disappeared." in out

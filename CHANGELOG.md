@@ -5,6 +5,35 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The refresh diff printed its clean verdict over comparisons it had not made.**
+  `artifact_diff` exists so that a published number cannot change quietly, and its one
+  skimmable line, `No published value moved.` with exit `0`, is the whole product. Three
+  inputs produced that line and that exit code from a run in which nothing was
+  compared, which is the failure the tool was written to prevent, wearing the tool's own
+  signature:
+
+  - **Two empty artifacts.** `{}` against `{}` agrees on all zero of its values:
+    `0 values compared`, `No published value moved.`, exit `0`: the same words and the
+    same exit code as the 6,582-value comparison of the current pin. Nothing compared is
+    not nothing moved. This is the shape `intervals.wilson` already refuses one layer
+    down, where zero out of zero is not zero percent but not measured.
+  - **A side that is not a JSON object.** A build that failed and wrote `null` gave
+    `1 values compared` and a clean verdict, because two `null` documents pair as one
+    scalar leaf that equals itself. `published/measurements.json` is an object; a file
+    that is not one did not finish being built.
+  - **The same file twice.** A file cannot differ from itself, so the clean verdict from
+    `artifact_diff X.json X.json` is guaranteed rather than earned, and the refresh step
+    it stood in for did not happen. The paths are resolved, so `x.json` and `./x.json`
+    do not slip past.
+
+  All three now print to stderr and exit `2`, with nothing on stdout, so a caller
+  reading `--json` never receives an object describing a comparison that was not made,
+  and `--allow-removals` does not reach past them. The case the tool already caught is
+  unchanged and pinned by a test: an artifact that lost everything is still a pile of
+  removals with exit `1`, not one of these refusals.
+
 ### Added
 
 - **A status column on every phase table in `docs/ROADMAP.md`, held to the tree by a

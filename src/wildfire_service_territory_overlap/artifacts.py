@@ -346,7 +346,8 @@ ORDERINGS: dict[str, tuple[str, str]] = {
     "$.sensitivity.type_inclusion.variants": (
         DECLARED,
         "the rule as built first, because every other row is published as a difference "
-        "from it, then the variants in the order ADR 0006 argues them",
+        "from it, then the variants in the order ADR 0006 argues them, then any rule a "
+        "reviewer supplied, in the filename order of the files they were read from",
     ),
     "$.sensitivity.type_inclusion.variants[].types_read_as_territories": (BY_NAME, ""),
     "$.sensitivity.untouched_outlines.outlines_no_record_falls_inside": (BY_NAME, ""),

@@ -11,6 +11,13 @@ reasoning on trust and the author had to take the size of the exposure on trust 
     does not choose between them. The point is that a reader can see which parts of the
     rule the result is sensitive to and which parts make no difference at all.
 
+    A reviewer can add an alternative of their own without touching this file. A rule
+    file names the variant, the reviewer's role, the date, the types read as service
+    territories and, optionally, per-outline overrides with a one-line reason each;
+    ``--inclusion-rule FILE`` runs it to completion over the same record set and
+    publishes it as one more row. It is measured, not adopted: the rule as built stays
+    the reference row and nothing is marked better.
+
 ``repair_comparison``
     ADR 0005 repairs an invalid published polygon with ``make_valid``. An earlier draft
     used ``buffer(0)``, and the note that survived said the two disagreed on "roughly
@@ -37,7 +44,13 @@ in the same shapes the rest of the output uses, so the publication rules in
 from __future__ import annotations
 
 import itertools
+import json
+import re
 from collections import Counter
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
 from typing import Any
 
 from wildfire_service_territory_overlap.geometry import (
@@ -74,6 +87,332 @@ TYPE_VARIANTS: tuple[tuple[str, tuple[str, ...]], ...] = (
 CONTESTED_LABEL = "inside two or more published territories"
 
 
+# --- A rule a reviewer supplies, measured the same way the built rule is -----------
+#
+# `docs/outreach/inclusion-rule-review-packet.md` promises a domain reviewer that a
+# finding "lands as a new sensitivity row rather than as an edit to the rule". Until
+# now, landing it meant editing `TYPE_VARIANTS` above, which is a Python change made by
+# somebody other than the reviewer, and it put an engineering step between the
+# reviewer's judgment and the published number the packet says there will not be.
+#
+# A supplied rule is a small JSON document. It is loaded strictly: an unknown key is
+# refused rather than ignored, because a reviewer who writes `type` instead of
+# `variant`, or `types` instead of `types_read_as_territories`, has to be told rather
+# than quietly measured under a rule they did not write. It fetches nothing, it reaches
+# no network, and it cannot change the rule as built: every supplied file is one more
+# row beside the built ones, with the built rule still the reference row.
+
+RULE_FILE_KEYS: frozenset[str] = frozenset(
+    {
+        "variant",
+        "reviewer_role",
+        "reviewed_on",
+        "types_read_as_territories",
+        "outline_overrides",
+    }
+)
+"""Every key a rule file may carry. Anything else is refused, never ignored."""
+
+REQUIRED_RULE_FILE_KEYS: frozenset[str] = frozenset(
+    {"variant", "reviewer_role", "reviewed_on", "types_read_as_territories"}
+)
+"""The four a rule file must carry. ``outline_overrides`` is the optional one."""
+
+OVERRIDE_KEYS: frozenset[str] = frozenset({"read_as_a_territory", "reason"})
+"""Every key one per-outline override may carry. Both are required."""
+
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+class InclusionRuleRefused(ValueError):
+    """A reviewer-supplied inclusion rule file this project will not measure."""
+
+
+@dataclass(frozen=True)
+class OutlineOverride:
+    """One named outline read against the type rule, with the reviewer's reason."""
+
+    outline: str
+    read_as_a_territory: bool
+    reason: str
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "read_as_a_territory": self.read_as_a_territory,
+            "reviewer_reason": self.reason,
+        }
+
+
+@dataclass(frozen=True)
+class SuppliedRule:
+    """One reviewer's reading of the ``Type`` field, as a rule this can re-place under.
+
+    ``file_name`` is the basename and never the path the file was read from. A rule
+    supplied out of a temporary directory would otherwise write that directory into
+    ``measurements.json``, and two builds of the same inputs on two machines would stop
+    being byte-identical, which is the property `make determinism` exists to hold.
+    """
+
+    file_name: str
+    variant: str
+    reviewer_role: str
+    reviewed_on: str
+    types: tuple[str, ...]
+    overrides: tuple[OutlineOverride, ...]
+
+
+def _refuse(file_name: str, message: str) -> InclusionRuleRefused:
+    return InclusionRuleRefused(f"{file_name}: {message}")
+
+
+def _string(file_name: str, key: str, value: Any) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise _refuse(file_name, f"{key} has to be a non-empty string")
+    return value.strip()
+
+
+def _read_overrides(file_name: str, value: Any) -> tuple[OutlineOverride, ...]:
+    if not isinstance(value, dict):
+        raise _refuse(
+            file_name,
+            "outline_overrides has to be an object keyed by the outline name the "
+            "publisher gives it",
+        )
+    overrides: list[OutlineOverride] = []
+    for outline in sorted(value):
+        entry = value[outline]
+        name = _string(file_name, "an outline_overrides key", outline)
+        if not isinstance(entry, dict):
+            raise _refuse(
+                file_name,
+                f"the override for {name} has to be an object carrying "
+                "read_as_a_territory and reason",
+            )
+        unknown = sorted(set(entry) - OVERRIDE_KEYS)
+        if unknown:
+            raise _refuse(
+                file_name,
+                f"the override for {name} carries keys this project does not read: "
+                f"{', '.join(unknown)}",
+            )
+        missing = sorted(OVERRIDE_KEYS - set(entry))
+        if missing:
+            raise _refuse(
+                file_name,
+                f"the override for {name} carries no {', '.join(missing)}",
+            )
+        read_as = entry["read_as_a_territory"]
+        if not isinstance(read_as, bool):
+            raise _refuse(
+                file_name,
+                f"the override for {name} gives read_as_a_territory as "
+                f"{type(read_as).__name__}, not true or false",
+            )
+        reason = _string(file_name, f"the reason for {name}", entry["reason"])
+        overrides.append(OutlineOverride(name, read_as, reason))
+    return tuple(overrides)
+
+
+def _read_document(path: Path, file_name: str) -> dict[str, Any]:
+    """The file as a JSON object, with every key it carries recognised."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise _refuse(file_name, f"cannot be read: {error.strerror}") from None
+    try:
+        document = json.loads(text)
+    except json.JSONDecodeError as error:
+        raise _refuse(file_name, f"is not JSON: {error.args[0]}") from None
+    if not isinstance(document, dict):
+        raise _refuse(file_name, "has to be a JSON object")
+    unknown = sorted(set(document) - RULE_FILE_KEYS)
+    if unknown:
+        raise _refuse(
+            file_name,
+            f"carries keys this project does not read: {', '.join(unknown)}. The keys "
+            f"a rule file may carry are {', '.join(sorted(RULE_FILE_KEYS))}.",
+        )
+    missing = sorted(REQUIRED_RULE_FILE_KEYS - set(document))
+    if missing:
+        raise _refuse(file_name, f"carries no {', '.join(missing)}")
+    read: dict[str, Any] = document
+    return read
+
+
+def _read_variant(file_name: str, value: Any) -> str:
+    variant = _string(file_name, "variant", value)
+    if variant in {label for label, _ in TYPE_VARIANTS}:
+        raise _refuse(
+            file_name,
+            f"names itself {variant!r}, which is already the name of a variant this "
+            "project builds. A supplied rule is published beside the built ones and "
+            "needs a name of its own.",
+        )
+    return variant
+
+
+def _read_role(file_name: str, value: Any) -> str:
+    """The reviewer's role, refused when it is an address.
+
+    The packet asks for a role rather than a name, and this cannot tell one from the
+    other: "Distribution planning engineer" and "Jane Doe" are both non-empty strings
+    and no rule here separates them. What it can refuse is the one personal identifier
+    that has a shape, so an address pasted into this published field is caught instead
+    of published. The rest is the reviewer's own decision, which is what the packet
+    says it is.
+    """
+    role = _string(file_name, "reviewer_role", value)
+    if "@" in role:
+        raise _refuse(
+            file_name,
+            "reviewer_role carries an address. This field is published, and it is the "
+            "reviewer's role rather than a way to reach them.",
+        )
+    return role
+
+
+def _read_date(file_name: str, value: Any) -> str:
+    reviewed_on = _string(file_name, "reviewed_on", value)
+    if not _ISO_DATE.match(reviewed_on):
+        raise _refuse(
+            file_name, f"reviewed_on is {reviewed_on!r}, not a YYYY-MM-DD date"
+        )
+    try:
+        date.fromisoformat(reviewed_on)
+    except ValueError:
+        raise _refuse(
+            file_name, f"reviewed_on is {reviewed_on!r}, which is not a real date"
+        ) from None
+    return reviewed_on
+
+
+def _read_types(file_name: str, value: Any) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value:
+        raise _refuse(
+            file_name,
+            "types_read_as_territories has to be a non-empty list of published Type "
+            "values",
+        )
+    types = tuple(_string(file_name, "a type", kind) for kind in value)
+    repeated = sorted({kind for kind in types if types.count(kind) > 1})
+    if repeated:
+        raise _refuse(file_name, f"names a type more than once: {', '.join(repeated)}")
+    return types
+
+
+def read_rule_file(path: Path) -> SuppliedRule:
+    """Load one rule file, or refuse it. Reads the file and nothing else.
+
+    Every refusal names the file and what is wrong with it. None of them is a warning:
+    a rule that cannot be read is not measured under a guess about what it meant.
+    """
+    file_name = path.name
+    document = _read_document(path, file_name)
+    return SuppliedRule(
+        file_name=file_name,
+        variant=_read_variant(file_name, document["variant"]),
+        reviewer_role=_read_role(file_name, document["reviewer_role"]),
+        reviewed_on=_read_date(file_name, document["reviewed_on"]),
+        types=_read_types(file_name, document["types_read_as_territories"]),
+        overrides=_read_overrides(file_name, document.get("outline_overrides", {})),
+    )
+
+
+def read_rule_files(paths: Sequence[Path]) -> tuple[SuppliedRule, ...]:
+    """Load every supplied rule file, in filename order, or refuse the set.
+
+    Order is the filenames', not the order they were given on the command line, so the
+    same set of files produces the same artifact whichever way round they were typed.
+    Two files with the same basename, or two rules with the same variant name, are
+    refused: both would publish two rows a reader could not tell apart.
+    """
+    rules = [read_rule_file(path) for path in paths]
+    for field, described in (("file_name", "basename"), ("variant", "variant name")):
+        seen = Counter(getattr(rule, field) for rule in rules)
+        clash = sorted(value for value, count in seen.items() if count > 1)
+        if clash:
+            raise InclusionRuleRefused(
+                f"two supplied inclusion rules share a {described}: "
+                f"{', '.join(clash)}. Each supplied rule is published as its own row "
+                "and has to be told apart from the others."
+            )
+    return tuple(sorted(rules, key=lambda rule: rule.file_name))
+
+
+def _names_present(collections: dict[str, dict[str, Any]]) -> set[str]:
+    """Every ``Utility`` name in the retrieval, read before any rule filters one out.
+
+    Read from the features for the same reason :func:`_types_present` is: the loader
+    has already dropped everything outside the inclusion rule by the time it returns,
+    so a check built on its output could never refuse an override naming an outline the
+    built rule excludes, which is exactly the override a reviewer is most likely to
+    write.
+    """
+    names: set[str] = set()
+    for collection in collections.values():
+        for feature in collection.get("features", []):
+            properties = feature.get("properties")
+            if not isinstance(properties, dict):
+                continue
+            name = properties.get("Utility")
+            if isinstance(name, str) and name.strip():
+                names.add(name.strip())
+    return names
+
+
+def check_rules_against_retrieval(
+    rules: Iterable[SuppliedRule], collections: dict[str, dict[str, Any]]
+) -> None:
+    """Refuse a rule that names something the pinned retrieval does not carry.
+
+    A review is written against one retrieval and the layers move. A file naming a type
+    the layer no longer carries, or an outline that has been renamed or withdrawn, would
+    otherwise run to completion and publish a variant that measures nothing, or measures
+    less than the reviewer asked for, with no line anywhere saying so. It is refused
+    before any placement runs instead.
+    """
+    types = set(_types_present(collections))
+    names = _names_present(collections)
+    for rule in rules:
+        unknown_types = sorted(set(rule.types) - types)
+        if unknown_types:
+            raise _refuse(
+                rule.file_name,
+                f"reads {', '.join(unknown_types)} as a service territory, and the "
+                "retrieval this build is measuring carries no outline of that type. "
+                f"The types it does carry are {', '.join(sorted(types))}.",
+            )
+        unknown_outlines = sorted(
+            override.outline
+            for override in rule.overrides
+            if override.outline not in names
+        )
+        if unknown_outlines:
+            raise _refuse(
+                rule.file_name,
+                f"overrides an outline the retrieval this build is measuring does not "
+                f"carry: {', '.join(unknown_outlines)}.",
+            )
+
+
+def _subset_for(
+    every: tuple[Territory, ...], rule: SuppliedRule
+) -> tuple[Territory, ...]:
+    """The outlines one supplied rule reads as service territories.
+
+    The type rule first, then the named overrides on top of it. ``every`` is already in
+    name order and the filter keeps that order, so nothing here sorts by a measured
+    value.
+    """
+    added = {o.outline for o in rule.overrides if o.read_as_a_territory}
+    removed = {o.outline for o in rule.overrides if not o.read_as_a_territory}
+    return tuple(
+        t
+        for t in every
+        if t.name in added or (t.kind in rule.types and t.name not in removed)
+    )
+
+
 def _outcome_counts(placement: Placement) -> dict[str, int]:
     return {
         "placed_in_exactly_one_territory": placement.placed,
@@ -89,6 +428,7 @@ def _variant_row(
     placement: Placement,
     indexed: int,
     baseline: Rate | None,
+    supplied: SuppliedRule | None = None,
 ) -> dict[str, Any]:
     total = placement.fire_records
     contested = Rate.of(CONTESTED_LABEL, placement.contested, total)
@@ -119,6 +459,17 @@ def _variant_row(
                 "counts, which are a census and not an estimate."
             ),
         ).as_dict()
+    if supplied is not None:
+        row["supplied_by_a_reviewer"] = True
+        row["reviewer_role"] = supplied.reviewer_role
+        row["reviewed_on"] = supplied.reviewed_on
+        row["rule_file"] = supplied.file_name
+        # Keyed by the outline name rather than listed, because the name is the
+        # identifier and a list would be a published collection whose order the
+        # ordering ledger would have to declare against an artifact that carries
+        # it only when a reviewer supplied one. `serialise` sorts keys, and
+        # `_read_overrides` builds them in name order, so both readings agree.
+        row["outline_overrides"] = {o.outline: o.as_dict() for o in supplied.overrides}
     return row
 
 
@@ -146,12 +497,19 @@ def type_inclusion(
     collections: dict[str, dict[str, Any]],
     records: tuple[Record, ...],
     excluded_by_hazard: int,
+    supplied: Sequence[SuppliedRule] = (),
 ) -> dict[str, Any]:
     """Re-place every record under each inclusion rule, and report what moves.
 
     The layers are read once, with every published type kept, and each variant is a
     filter over that one read. Reading them per variant would project the same polygons
     seven times for the same answer.
+
+    ``supplied`` holds the rules a reviewer wrote, already loaded and already checked
+    against this retrieval. Each one is run to completion over the same record set and
+    lands as a row after the built ones, with the same denominator, the same interval
+    and the same difference from the rule as built. The built rule stays the reference
+    row and no supplied rule replaces it.
     """
     every, _ = load_territories(collections, keep_types=PUBLISHED_TYPES)
     seen = _types_present(collections)
@@ -163,6 +521,14 @@ def type_inclusion(
         rows.append(_variant_row(label, kinds, placement, len(subset), baseline))
         if baseline is None:
             baseline = Rate.of(CONTESTED_LABEL, placement.contested, len(records))
+    for rule in supplied:
+        subset = _subset_for(every, rule)
+        placement = classify(records, subset, excluded_by_hazard)
+        rows.append(
+            _variant_row(
+                rule.variant, rule.types, placement, len(subset), baseline, rule
+            )
+        )
     return {
         "question": (
             "How much of the headline figure rests on reading CO-OP and Tribal as "

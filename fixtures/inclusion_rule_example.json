@@ -1,0 +1,16 @@
+{
+  "variant": "the fixture layer read one outline at a time",
+  "reviewer_role": "Fixture. Nobody reviewed anything to produce this file.",
+  "reviewed_on": "2026-09-06",
+  "types_read_as_territories": ["CO-OP", "IOU", "POU"],
+  "outline_overrides": {
+    "Gamma Rural Cooperative": {
+      "read_as_a_territory": false,
+      "reason": "Read out of the rule, so the shape of an override that drops a named outline is committed where a reviewer can copy it."
+    },
+    "Delta Choice Energy": {
+      "read_as_a_territory": true,
+      "reason": "Read into the rule, so the shape of an override that adds a named outline is committed too. It is an invented CCA outline and nothing here endorses reading a real one this way."
+    }
+  }
+}

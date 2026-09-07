@@ -36,6 +36,41 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **A reviewer can supply an inclusion rule as a file, and it is published as a
+  measurement** (issue #93). `docs/outreach/inclusion-rule-review-packet.md` promises a
+  domain reviewer that a finding "lands as a new sensitivity row rather than as an edit
+  to the rule". Until now, landing one meant editing `TYPE_VARIANTS` in
+  `sensitivity.py`, which is a Python change made by somebody other than the reviewer,
+  and it put an engineering step between their judgment and the published number the
+  packet says there will not be one. `--inclusion-rule FILE`, repeatable, takes a small
+  JSON document naming the variant, the reviewer's role, the date, the types read as
+  service territories and, optionally, per-outline overrides with a one-line reason
+  each. Every supplied file is run to completion over the whole record set and published
+  under `sensitivity.type_inclusion.variants` beside the built ones, with its
+  denominator, its interval and its difference from the rule as built. The rule as built
+  is untouched, it stays the reference row, nothing is marked better, and
+  `assert_no_ranking` still refuses anything that scores. `make report` and
+  `make report-offline` take `INCLUSION_RULES=...`, and a section in the review packet
+  tells a reviewer which file to fill.
+
+  Three refusals, because the alternative to each is a build that exits zero having
+  measured less than it was asked to. A key the schema does not carry is refused rather
+  than ignored, so a reviewer who writes `types` for `types_read_as_territories` is told
+  instead of quietly measured under a rule they did not write. A file naming a type the
+  pinned retrieval does not carry, or an outline it does not carry, is refused before any
+  placement runs and names what it could not find, so a review written against an older
+  layer cannot silently measure nothing. And two files that share a basename or a variant
+  name are refused together, because two rows a reader cannot tell apart are not two
+  measurements. Each exits `2` with nothing written.
+
+  A build given no rule file writes byte for byte the tree and the document it wrote
+  before the flag existed, which is checked rather than asserted, and only the filename
+  of a rule reaches the artifact so a file read out of a temporary directory cannot break
+  the byte-identical double build. The committed
+  `fixtures/inclusion_rule_dropping_the_cooperative.json` names exactly the types that
+  make it the built-in "without CO-OP" variant over the fixture layer, and a test holds
+  the two rows identical to the digit: a supplied rule goes through the placement the
+  built ones go through, or it is not a comparison.
 - **A status column on every phase table in `docs/ROADMAP.md`, held to the tree by a
   test** (issue #88). Twenty-seven rows across five tables recorded no state at all, so
   the document read as a list of intentions while sixteen of its items were built,

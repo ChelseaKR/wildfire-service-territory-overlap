@@ -7,6 +7,9 @@ arranged deliberately. Nothing here is sampled from the real retrievals.
 
 from __future__ import annotations
 
+import json
+import re
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -25,8 +28,12 @@ from wildfire_service_territory_overlap.placement import (
 )
 from wildfire_service_territory_overlap.sensitivity import (
     TYPE_VARIANTS,
+    InclusionRuleRefused,
     _transitions,
     _types_present,
+    check_rules_against_retrieval,
+    read_rule_file,
+    read_rule_files,
     repair_comparison,
     type_inclusion,
     untouched_outlines,
@@ -390,3 +397,410 @@ def test_removing_every_outline_leaves_every_record_inside_none_of_them() -> Non
     assert block["outlines_no_record_falls_inside"] == ["Empty Utility"]
     assert block["records_inside_at_least_one_of_them"]["numerator"] == 0
     assert block["records_with_a_different_outcome_without_them"]["numerator"] == 0
+
+
+# --- A rule a reviewer supplies ----------------------------------------------------
+#
+# `docs/outreach/inclusion-rule-review-packet.md` tells a domain reviewer that their
+# finding "lands as a new sensitivity row rather than as an edit to the rule". These
+# hold that promise to the code: a supplied file is loaded strictly, refused before any
+# placement runs when it names something the retrieval does not carry, and otherwise
+# measured through exactly the machinery the built variants go through.
+
+
+def write_rule(path: Path, **fields: Any) -> Path:
+    path.write_text(json.dumps(fields), encoding="utf-8")
+    return path
+
+
+def valid_rule_fields(**overrides: Any) -> dict[str, Any]:
+    fields: dict[str, Any] = {
+        "variant": "a reading a reviewer supplied",
+        "reviewer_role": "Distribution planning engineer",
+        "reviewed_on": "2026-09-06",
+        "types_read_as_territories": ["IOU"],
+    }
+    fields.update(overrides)
+    return fields
+
+
+@pytest.fixture
+def four_types() -> dict[str, dict[str, Any]]:
+    """One square per type the built variants distinguish, none of them touching."""
+    return collection(
+        feature(1, "Wires IOU", "IOU", square(-121.0, 38.0, -120.5, 38.5)),
+        feature(2, "Town POU", "POU", square(-120.0, 38.0, -119.5, 38.5)),
+        feature(3, "Rural Co-op", "CO-OP", square(-119.0, 38.0, -118.5, 38.5)),
+        feature(4, "Tribal Utility", "Tribal", square(-118.0, 38.0, -117.5, 38.5)),
+    )
+
+
+@pytest.fixture
+def one_record_per_square() -> tuple[Record, ...]:
+    return (
+        record(1, -120.75, 38.25),
+        record(2, -119.75, 38.25),
+        record(3, -118.75, 38.25),
+        record(4, -117.75, 38.25),
+    )
+
+
+def test_a_supplied_rule_that_drops_co_op_reproduces_the_built_variant(
+    four_types: dict[str, dict[str, Any]],
+    one_record_per_square: tuple[Record, ...],
+    tmp_path: Path,
+) -> None:
+    """The control the issue asks for, run rather than asserted.
+
+    The whole point of publishing a reviewer's rule beside the built ones is that both
+    went through the same placement. A supplied file naming exactly the types the built
+    "without CO-OP" variant names has to come out with the same counts, the same rates,
+    the same intervals and the same difference from the rule as built, to the digit. If
+    the supplied path had its own filter, its own denominator, or its own baseline, this
+    is where that would show.
+    """
+    rule = read_rule_file(
+        write_rule(
+            tmp_path / "drop.json",
+            **valid_rule_fields(
+                variant="without CO-OP, supplied",
+                types_read_as_territories=["IOU", "POU", "Tribal"],
+            ),
+        )
+    )
+    block = type_inclusion(four_types, one_record_per_square, 0, (rule,))
+    rows = {row["variant"]: row for row in block["variants"]}
+    built = rows["without CO-OP"]
+    supplied = rows["without CO-OP, supplied"]
+    for key in (
+        "counts",
+        "contested",
+        "placed",
+        "uncovered",
+        "territories_indexed",
+        "types_read_as_territories",
+        "contested_difference_from_the_rule_as_built",
+    ):
+        assert supplied[key] == built[key], key
+    # The built row is exactly one record short of a placement, which is what the
+    # dropped cooperative was holding. A supplied rule that measured nothing would
+    # match a built row that also measured nothing, so the figure is pinned here.
+    assert built["counts"] == {
+        "placed_in_exactly_one_territory": 3,
+        "contested_between_two_or_more": 0,
+        "covered_by_no_published_territory": 1,
+        "coordinate_not_usable": 0,
+    }
+
+
+def test_a_supplied_rule_names_its_reviewer_role_its_date_and_its_file(
+    four_types: dict[str, dict[str, Any]],
+    one_record_per_square: tuple[Record, ...],
+    tmp_path: Path,
+) -> None:
+    rule = read_rule_file(write_rule(tmp_path / "review.json", **valid_rule_fields()))
+    block = type_inclusion(four_types, one_record_per_square, 0, (rule,))
+    row = block["variants"][-1]
+    assert row["variant"] == "a reading a reviewer supplied"
+    assert row["supplied_by_a_reviewer"] is True
+    assert row["reviewer_role"] == "Distribution planning engineer"
+    assert row["reviewed_on"] == "2026-09-06"
+    assert row["rule_file"] == "review.json"
+    assert row["outline_overrides"] == {}
+
+
+def test_a_supplied_rule_never_becomes_the_reference_row(
+    four_types: dict[str, dict[str, Any]],
+    one_record_per_square: tuple[Record, ...],
+    tmp_path: Path,
+) -> None:
+    """Every supplied row carries a difference, so none of them is the baseline."""
+    rules = tuple(
+        read_rule_file(
+            write_rule(
+                tmp_path / f"{name}.json",
+                **valid_rule_fields(variant=name),
+            )
+        )
+        for name in ("alpha", "beta")
+    )
+    block = type_inclusion(four_types, one_record_per_square, 0, rules)
+    assert block["variants"][0]["variant"] == "the rule as built"
+    assert block["rule_as_built"] == ["CO-OP", "IOU", "POU", "Tribal"]
+    for row in block["variants"][1:]:
+        assert "contested_difference_from_the_rule_as_built" in row
+    assert [row["variant"] for row in block["variants"][-2:]] == ["alpha", "beta"]
+
+
+def test_supplied_rules_land_after_the_built_ones_in_filename_order(
+    tmp_path: Path,
+) -> None:
+    """Typed in one order, published in another, so the artifact does not depend on it."""
+    paths = [
+        write_rule(tmp_path / "zulu.json", **valid_rule_fields(variant="zulu")),
+        write_rule(tmp_path / "alpha.json", **valid_rule_fields(variant="alpha")),
+    ]
+    assert [rule.file_name for rule in read_rule_files(paths)] == [
+        "alpha.json",
+        "zulu.json",
+    ]
+    assert [rule.file_name for rule in read_rule_files(paths[::-1])] == [
+        "alpha.json",
+        "zulu.json",
+    ]
+
+
+def test_supplying_nothing_leaves_the_block_exactly_as_it_was(
+    four_types: dict[str, dict[str, Any]],
+    one_record_per_square: tuple[Record, ...],
+) -> None:
+    """The published artifact must not move because a flag exists that nobody used."""
+    assert type_inclusion(four_types, one_record_per_square, 0) == type_inclusion(
+        four_types, one_record_per_square, 0, ()
+    )
+    block = type_inclusion(four_types, one_record_per_square, 0)
+    assert len(block["variants"]) == len(TYPE_VARIANTS)
+    for row in block["variants"]:
+        assert "supplied_by_a_reviewer" not in row
+        assert "outline_overrides" not in row
+
+
+def test_an_override_reads_a_named_outline_out_of_the_type_rule(
+    four_types: dict[str, dict[str, Any]],
+    one_record_per_square: tuple[Record, ...],
+    tmp_path: Path,
+) -> None:
+    rule = read_rule_file(
+        write_rule(
+            tmp_path / "out.json",
+            **valid_rule_fields(
+                types_read_as_territories=["CO-OP", "IOU", "POU", "Tribal"],
+                outline_overrides={
+                    "Rural Co-op": {
+                        "read_as_a_territory": False,
+                        "reason": "Reads as a generation cooperative to this reviewer.",
+                    }
+                },
+            ),
+        )
+    )
+    block = type_inclusion(four_types, one_record_per_square, 0, (rule,))
+    row = block["variants"][-1]
+    assert row["territories_indexed"] == 3
+    assert row["counts"]["covered_by_no_published_territory"] == 1
+    assert row["outline_overrides"] == {
+        "Rural Co-op": {
+            "read_as_a_territory": False,
+            "reviewer_reason": "Reads as a generation cooperative to this reviewer.",
+        }
+    }
+
+
+def test_an_override_reads_a_named_outline_into_the_type_rule(
+    tmp_path: Path,
+) -> None:
+    """The other direction, which the type rule alone cannot express."""
+    collections = collection(
+        feature(1, "Wires IOU", "IOU", square(-121.0, 38.0, -120.5, 38.5)),
+        feature(2, "Aggregator", "CCA", square(-119.0, 38.0, -118.5, 38.5)),
+    )
+    records = (record(1, -120.75, 38.25), record(2, -118.75, 38.25))
+    rule = read_rule_file(
+        write_rule(
+            tmp_path / "in.json",
+            **valid_rule_fields(
+                types_read_as_territories=["IOU"],
+                outline_overrides={
+                    "Aggregator": {
+                        "read_as_a_territory": True,
+                        "reason": "Operates the wires in this county, says the reviewer.",
+                    }
+                },
+            ),
+        )
+    )
+    block = type_inclusion(collections, records, 0, (rule,))
+    row = block["variants"][-1]
+    assert row["territories_indexed"] == 2
+    assert row["counts"]["placed_in_exactly_one_territory"] == 2
+    assert row["counts"]["covered_by_no_published_territory"] == 0
+
+
+def test_a_rule_naming_a_type_the_retrieval_does_not_carry_is_refused(
+    four_types: dict[str, dict[str, Any]], tmp_path: Path
+) -> None:
+    """A stale review must not run to completion measuring nothing."""
+    rule = read_rule_file(
+        write_rule(
+            tmp_path / "stale.json",
+            **valid_rule_fields(types_read_as_territories=["IOU", "ADMIN"]),
+        )
+    )
+    with pytest.raises(InclusionRuleRefused, match="ADMIN"):
+        check_rules_against_retrieval((rule,), four_types)
+
+
+def test_a_rule_overriding_an_outline_the_retrieval_does_not_carry_is_refused(
+    four_types: dict[str, dict[str, Any]], tmp_path: Path
+) -> None:
+    rule = read_rule_file(
+        write_rule(
+            tmp_path / "renamed.json",
+            **valid_rule_fields(
+                outline_overrides={
+                    "Withdrawn Utility": {
+                        "read_as_a_territory": False,
+                        "reason": "Named in a retrieval this build is not measuring.",
+                    }
+                }
+            ),
+        )
+    )
+    with pytest.raises(InclusionRuleRefused, match="Withdrawn Utility"):
+        check_rules_against_retrieval((rule,), four_types)
+
+
+def test_an_override_naming_an_outline_the_built_rule_excludes_is_accepted(
+    tmp_path: Path,
+) -> None:
+    """The check reads the layer, not the loaded set, and this is why that matters.
+
+    A reviewer's most likely finding is about an outline the built rule leaves out. A
+    check built on the territories the built rule loads could never see one, so it
+    would refuse the one override it exists to let through.
+    """
+    collections = collection(
+        feature(1, "Wires IOU", "IOU", square(-121.0, 38.0, -120.5, 38.5)),
+        feature(2, "Aggregator", "CCA", square(-119.0, 38.0, -118.5, 38.5)),
+    )
+    rule = read_rule_file(
+        write_rule(
+            tmp_path / "cca.json",
+            **valid_rule_fields(
+                outline_overrides={
+                    "Aggregator": {
+                        "read_as_a_territory": True,
+                        "reason": "The reviewer reads this one as a wires operator.",
+                    }
+                }
+            ),
+        )
+    )
+    check_rules_against_retrieval((rule,), collections)
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected"),
+    [
+        ({"reviewer": "somebody"}, "reviewer"),
+        ({"variant": ""}, "variant"),
+        ({"variant": "the rule as built"}, "the rule as built"),
+        ({"reviewer_role": "reviewer@example.invalid"}, "address"),
+        ({"reviewed_on": "6 September 2026"}, "YYYY-MM-DD"),
+        ({"reviewed_on": "2026-02-30"}, "not a real date"),
+        ({"types_read_as_territories": []}, "non-empty list"),
+        ({"types_read_as_territories": "IOU"}, "non-empty list"),
+        ({"types_read_as_territories": ["IOU", "IOU"]}, "more than once"),
+        ({"outline_overrides": ["Wires IOU"]}, "keyed by the outline name"),
+        (
+            {"outline_overrides": {"Wires IOU": {"read_as_a_territory": True}}},
+            "carries no reason",
+        ),
+        (
+            {
+                "outline_overrides": {
+                    "Wires IOU": {"read_as_a_territory": "yes", "reason": "a reason"}
+                }
+            },
+            "not true or false",
+        ),
+        (
+            {
+                "outline_overrides": {
+                    "Wires IOU": {
+                        "read_as_a_territory": True,
+                        "reason": "a reason",
+                        "confidence": "high",
+                    }
+                }
+            },
+            "confidence",
+        ),
+        ({"outline_overrides": {"Wires IOU": "drop it"}}, "has to be an object"),
+    ],
+)
+def test_a_rule_file_this_project_cannot_read_is_refused_not_guessed_at(
+    overrides: dict[str, Any], expected: str, tmp_path: Path
+) -> None:
+    """Every refusal names the file and what is wrong. None of them is a warning."""
+    fields = valid_rule_fields()
+    fields.update(overrides)
+    path = write_rule(tmp_path / "bad.json", **fields)
+    with pytest.raises(InclusionRuleRefused, match=re.escape(expected)) as refusal:
+        read_rule_file(path)
+    assert "bad.json" in str(refusal.value)
+
+
+def test_a_rule_file_missing_a_required_key_is_refused(tmp_path: Path) -> None:
+    fields = valid_rule_fields()
+    del fields["reviewed_on"]
+    path = write_rule(tmp_path / "short.json", **fields)
+    with pytest.raises(InclusionRuleRefused, match="carries no reviewed_on"):
+        read_rule_file(path)
+
+
+def test_a_rule_file_that_is_not_json_is_refused(tmp_path: Path) -> None:
+    path = tmp_path / "notjson.json"
+    path.write_text("variant: a reading\n", encoding="utf-8")
+    with pytest.raises(InclusionRuleRefused, match="is not JSON"):
+        read_rule_file(path)
+
+
+def test_a_rule_file_that_is_a_json_list_is_refused(tmp_path: Path) -> None:
+    path = tmp_path / "list.json"
+    path.write_text('["IOU"]', encoding="utf-8")
+    with pytest.raises(InclusionRuleRefused, match="JSON object"):
+        read_rule_file(path)
+
+
+def test_a_rule_file_that_is_not_there_is_refused_by_name(tmp_path: Path) -> None:
+    with pytest.raises(InclusionRuleRefused, match=re.escape("absent.json")):
+        read_rule_file(tmp_path / "absent.json")
+
+
+def test_two_rule_files_that_cannot_be_told_apart_are_refused(tmp_path: Path) -> None:
+    """Two rows a reader could not tell apart are not two measurements."""
+    one = tmp_path / "one"
+    two = tmp_path / "two"
+    one.mkdir()
+    two.mkdir()
+    same_name = [
+        write_rule(one / "review.json", **valid_rule_fields(variant="first")),
+        write_rule(two / "review.json", **valid_rule_fields(variant="second")),
+    ]
+    with pytest.raises(InclusionRuleRefused, match="basename"):
+        read_rule_files(same_name)
+
+    same_variant = [
+        write_rule(tmp_path / "a.json", **valid_rule_fields(variant="one reading")),
+        write_rule(tmp_path / "b.json", **valid_rule_fields(variant="one reading")),
+    ]
+    with pytest.raises(InclusionRuleRefused, match="variant name"):
+        read_rule_files(same_variant)
+
+
+def test_a_rule_file_carries_no_path_into_the_artifact(
+    four_types: dict[str, dict[str, Any]],
+    one_record_per_square: tuple[Record, ...],
+    tmp_path: Path,
+) -> None:
+    """The determinism gate, held from the side that would break it quietly.
+
+    A rule read out of a temporary directory that wrote its full path into the tree
+    would make two builds of the same inputs on two machines differ, and the difference
+    would be in a field nobody reads.
+    """
+    rule = read_rule_file(write_rule(tmp_path / "review.json", **valid_rule_fields()))
+    block = type_inclusion(four_types, one_record_per_square, 0, (rule,))
+    assert str(tmp_path) not in json.dumps(block)
+    assert block["variants"][-1]["rule_file"] == "review.json"

@@ -345,6 +345,51 @@ def _sensitivity_types(tree: dict[str, Any], cat: Catalog) -> list[str]:
             f"{count(row['counts']['covered_by_no_published_territory'])} |"
         )
     lines.extend(["", cat["type_inclusion.closing"], ""])
+    lines.extend(_sensitivity_supplied_rules(block, cat))
+    return lines
+
+
+def _sensitivity_supplied_rules(block: dict[str, Any], cat: Catalog) -> list[str]:
+    """Who supplied each reviewer-written row, on what date, and what it overrides.
+
+    Nothing renders when no rule file was supplied, so a build that was given none
+    writes exactly the document it wrote before this section existed. The table above
+    already carries the supplied rows and their figures; this names the reviewer's
+    role and date beside each, because a measured alternative whose provenance is not
+    published is a row a reader cannot weigh.
+    """
+    supplied = [row for row in block["variants"] if row.get("supplied_by_a_reviewer")]
+    if not supplied:
+        return []
+    lines = [
+        cat["type_inclusion.supplied_heading"],
+        "",
+        cat["type_inclusion.supplied_intro"],
+        "",
+    ]
+    for row in supplied:
+        lines.append(
+            cat["type_inclusion.supplied_row"].format(
+                variant=row["variant"],
+                role=row["reviewer_role"],
+                reviewed_on=row["reviewed_on"],
+                rule_file=row["rule_file"],
+            )
+        )
+        for outline, override in sorted(row["outline_overrides"].items()):
+            # Read out of the subscript first. A key lookup left inside `cat[...]`
+            # reads to the catalog-completeness gate as a catalog key being asked
+            # for, and the artifact key would be reported as a string with no
+            # entry behind it.
+            reads_it = override["read_as_a_territory"]
+            lines.append(
+                cat[
+                    "type_inclusion.supplied_override_read"
+                    if reads_it
+                    else "type_inclusion.supplied_override_not_read"
+                ].format(outline=outline, reason=override["reviewer_reason"])
+            )
+        lines.append("")
     return lines
 
 

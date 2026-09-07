@@ -66,6 +66,16 @@ osv:  ## osv-scanner over uv.lock, the second feed; osv.yml is the gate of recor
 	}
 	osv-scanner scan source --lockfile uv.lock
 
+# Reviewer-supplied inclusion rule files, space separated, passed to `report` and
+# `report-offline` as one `--inclusion-rule` each. Empty by default, and CI leaves it
+# empty: a build given no rule file writes exactly the tree it wrote before the flag
+# existed, which is what keeps published/measurements.json comparable across builds.
+#
+#   make report-offline INCLUSION_RULES=fixtures/inclusion_rule_without_co_op.json
+#
+INCLUSION_RULES ?=
+INCLUSION_RULE_FLAGS = $(foreach rule,$(INCLUSION_RULES),--inclusion-rule $(rule))
+
 # Build the published tree from locally acquired files. data/raw/ is never in git and
 # never in CI, so this target only runs on a machine that has run `make acquire`.
 report:  ## rebuild published/ from data/raw/, which only a machine that has run acquire has
@@ -74,6 +84,7 @@ report:  ## rebuild published/ from data/raw/, which only a machine that has run
 		--iou-pou data/raw/else_iou_pou.geojson \
 		--other data/raw/else_other.geojson \
 		--counties data/raw/county_boundaries.geojson \
+		$(INCLUSION_RULE_FLAGS) \
 		--out published
 
 # The same pipeline over committed fixtures: runs anywhere, output flagged is_fixture.
@@ -83,6 +94,7 @@ report-offline:  ## the same pipeline over the committed fixtures, offline, into
 		--iou-pou fixtures/else_iou_pou_sample.geojson \
 		--other fixtures/else_other_sample.geojson \
 		--counties fixtures/county_boundaries_sample.geojson \
+		$(INCLUSION_RULE_FLAGS) \
 		--out build/offline
 
 # The gate behind the byte-identical claim. Two builds into two directories, compared by

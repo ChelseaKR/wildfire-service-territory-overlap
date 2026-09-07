@@ -135,7 +135,11 @@ ARTIFACT_DATA_FIELDS: Final[tuple[str, ...]] = (
     "published_type",
     "published_types_present_in_this_retrieval",
     "repaired",
+    "reviewed_on",
+    "reviewer_reason",
+    "reviewer_role",
     "rule_as_built",
+    "rule_file",
     "source_layer",
     "state",
     "strategies_compared",
@@ -155,6 +159,14 @@ A name CAL FIRE or the California Energy Commission published, a machine token s
 ``measured`` or ``wilson-score-95``, a retrieval date, or a landing page. None of it is
 translated in any edition: a name is reported as published, and a token names a method
 rather than describing one.
+
+``reviewed_on``, ``reviewer_reason``, ``reviewer_role`` and ``rule_file`` come from a
+reviewer-supplied inclusion rule file. They belong here rather than above for the
+reason the list above states in its first line: none of them is this repository's
+prose. A review date is a date, a role and a filename are reported as the reviewer
+wrote them, and ``reviewer_reason`` is one line a reviewer wrote about one outline,
+published in their words. No edition rewrites any of the four, and no edition should:
+translating somebody else's stated reason would be putting words in their mouth.
 """
 
 
@@ -477,6 +489,25 @@ _ENGLISH: dict[str, str] = {
         "contested column. It moves them into the last one, where they are published\n"
         "as inside no published territory, which is a statement about coverage that\n"
         "the dropped entity's own published polygon contradicts."
+    ),
+    "type_inclusion.supplied_heading": "### Rules supplied by a reviewer",
+    "type_inclusion.supplied_intro": (
+        "The rows below were not written here. Each one is a rule file a reviewer\n"
+        "supplied, run to completion over the same record set and published with its\n"
+        "own denominator, interval and difference from the rule as built. Nothing here\n"
+        "is adopted and nothing is marked better: the rule as built stays the reference\n"
+        "row, and a supplied rule is measured rather than applied. It establishes what\n"
+        "one reading would cost. It does not establish that any named organisation in\n"
+        "the layer operates a distribution system, which this project does not decide."
+    ),
+    "type_inclusion.supplied_row": (
+        "- **{variant}**, supplied by {role} on {reviewed_on}, from `{rule_file}`."
+    ),
+    "type_inclusion.supplied_override_read": (
+        "  - {outline} is read as a service territory here: {reason}"
+    ),
+    "type_inclusion.supplied_override_not_read": (
+        "  - {outline} is not read as a service territory here: {reason}"
     ),
     # The outlines that hold nothing.
     "untouched.heading": "## The outlines that hold nothing",

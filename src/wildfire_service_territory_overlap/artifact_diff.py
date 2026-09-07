@@ -46,8 +46,32 @@ carried whole there, where the prose shortens a long one for the terminal.
 ``--json`` is a second way to read the same comparison. It does not soften the removal
 refusal and it does not change an exit code.
 
+What this tool refuses to compare
+--------------------------------
+A verdict is a claim about a comparison that happened. Three inputs produce a verdict
+that no comparison earned, and all three are refused before anything is printed:
+
+* **A side that is not a JSON object.** ``measurements.json`` is an object. A file
+  holding ``null``, a list or a scalar is not an artifact, and comparing two of them
+  reads as one unchanged leaf and a clean run. A build that failed and wrote ``null``
+  must not pass for a refresh in which nothing moved.
+* **A comparison in which no value was compared.** Two empty objects agree on every
+  one of their zero values, so the tool reported ``0 values compared`` and
+  ``No published value moved.`` and exited ``0``: the same verdict, and the same exit
+  code, as the 4,370-value comparison this module was written for. That is the shape
+  :func:`wildfire_service_territory_overlap.intervals.wilson` already refuses one layer
+  down: zero out of zero is not zero percent, it is not measured. Nothing compared is
+  not nothing moved.
+* **Two paths that are the same file.** A file cannot differ from itself, so a clean
+  verdict from that comparison is guaranteed rather than earned, and the refresh step
+  it was standing in for did not happen.
+
+Each exits ``2`` and prints nothing on stdout, so a caller reading ``--json`` never
+receives an object describing a comparison that was not made.
+
 Exit codes: ``0`` when there is nothing to refuse, ``1`` when values were removed and
-``--allow-removals`` was not given, ``2`` on bad usage.
+``--allow-removals`` was not given, ``2`` on bad usage or on any of the three refusals
+above.
 """
 
 from __future__ import annotations
@@ -316,6 +340,43 @@ def as_json(result: DiffResult, *, allow_removals: bool) -> str:
     return json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
 
 
+def _not_an_artifact(side: str, tree: Any) -> str | None:
+    """Why ``tree`` cannot be one side of an artifact comparison, or ``None``.
+
+    ``published/measurements.json`` is a JSON object. Anything else read from that
+    position is a file that failed to become an artifact, and the comparison below
+    would happily give it a verdict: two ``null`` documents pair as a single scalar
+    leaf that equals itself, print ``No published value moved.`` and exit ``0``.
+    """
+
+    if isinstance(tree, dict):
+        return None
+    kind = "a list" if isinstance(tree, list) else f"{type(tree).__name__} ({tree!r})"
+    return (
+        f"the {side} artifact is not a JSON object but {kind}. "
+        "published/measurements.json is an object; a file that is not one did not "
+        "finish being built, and comparing two of them is not a comparison."
+    )
+
+
+def _compared_nothing(result: DiffResult) -> str | None:
+    """Why a comparison of zero values must not be reported, or ``None``.
+
+    Two empty objects agree on all zero of their values. The verdict for that run was
+    ``No published value moved.`` with exit ``0``, which is what this tool prints when
+    it has checked several thousand published figures and found them identical. The
+    two runs are not the same claim and must not share a verdict.
+    """
+
+    if result.total > 0:
+        return None
+    return (
+        "no value was compared. Two artifacts with nothing in them agree about "
+        "nothing, which is not the same fact as a refresh in which no published value "
+        "moved, and this tool will not print the second verdict for the first run."
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m wildfire_service_territory_overlap.artifact_diff",
@@ -347,7 +408,28 @@ def main(argv: list[str] | None = None) -> int:
     except json.JSONDecodeError as error:
         print(f"an artifact is not valid JSON: {error}", file=sys.stderr)
         return 2
+    try:
+        same_file = args.old.resolve() == args.new.resolve()
+    except OSError:  # pragma: no cover - both paths were readable a moment ago
+        same_file = False
+    if same_file:
+        print(
+            "both paths are the same file. A file cannot differ from itself, so the "
+            "clean verdict that comparison produces is guaranteed rather than earned, "
+            "and the refresh step it stands in for did not happen.",
+            file=sys.stderr,
+        )
+        return 2
+    for side, tree in (("old", old), ("new", new)):
+        complaint = _not_an_artifact(side, tree)
+        if complaint is not None:
+            print(complaint, file=sys.stderr)
+            return 2
     result = diff_trees(old, new)
+    empty = _compared_nothing(result)
+    if empty is not None:
+        print(empty, file=sys.stderr)
+        return 2
     if args.as_json:
         print(as_json(result, allow_removals=args.allow_removals))
     else:

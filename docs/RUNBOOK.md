@@ -33,7 +33,10 @@ Triggers and cadence live in `PROVENANCE.md`. The procedure:
 4. Run `make report`.
 5. Compare: `python -m wildfire_service_territory_overlap.artifact_diff "$OLD" published/measurements.json`.
    Changed and added values are expected on a real refresh; removed values stop the
-   run unless `--allow-removals` names them deliberate.
+   run unless `--allow-removals` names them deliberate. Exit `2` means the comparison
+   did not happen: `$OLD` and the new artifact are the same file, one of them is not a
+   JSON object, or the two carry no values between them. Read the stderr line; do not
+   re-run with `--allow-removals`, which accepts removals and not an empty comparison.
 6. Read the generated `published/REPORT.md` end to end. The figures are checked by
    machinery; whether they still say something coherent is not.
 7. Write a dated section into `PROVENANCE.md` saying what moved, sizes included,

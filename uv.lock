@@ -756,9 +756,9 @@ wheels = [
 ]
 
 [[package]]
-name = "perimeter"
+name = "perimeter-wildfire"
 version = "0.1.0"
-source = { git = "https://github.com/ChelseaKR/perimeter?rev=dac60195c50786f33f69a8fab70b6230894ed374#dac60195c50786f33f69a8fab70b6230894ed374" }
+source = { git = "https://github.com/ChelseaKR/perimeter?rev=3a6aa47ae9e755a256614bc124a6db960d60dc7a#3a6aa47ae9e755a256614bc124a6db960d60dc7a" }
 
 [[package]]
 name = "pip"
@@ -1152,7 +1152,7 @@ name = "wildfire-service-territory-overlap"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "perimeter" },
+    { name = "perimeter-wildfire" },
     { name = "pyproj" },
     { name = "shapely" },
 ]
@@ -1169,7 +1169,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "perimeter", git = "https://github.com/ChelseaKR/perimeter?rev=dac60195c50786f33f69a8fab70b6230894ed374" },
+    { name = "perimeter-wildfire", git = "https://github.com/ChelseaKR/perimeter?rev=3a6aa47ae9e755a256614bc124a6db960d60dc7a" },
     { name = "pyproj", specifier = ">=3.7" },
     { name = "shapely", specifier = ">=2.1" },
 ]

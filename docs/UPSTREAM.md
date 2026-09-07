@@ -11,6 +11,107 @@ permanent. Writing one down is not the same as fixing it, and this file does not
 any of these has been sent upstream. The pin is a commit rather than a branch, so an
 upstream fix reaches this project only when the pin moves, deliberately.
 
+## Re-audit of 2026-09-07, at the pin this project now runs
+
+Against `perimeter` at commit `3a6aa47ae9e755a256614bc124a6db960d60dc7a`, which is what
+`pyproject.toml` pins and what `uv.lock` installs. The audit of 2026-09-05 below is kept
+in full: it is the record of what was true at `dac60195`, which is the commit the
+retrieval currently in `published/` was acquired under.
+
+**Three of the four gaps closed upstream. Two compensations are gone from this
+repository. One gap is still open, for a reason the original entry did not anticipate.**
+
+The distribution also renamed. Upstream is now `perimeter-wildfire` on the manifest and
+still `perimeter` on the import, because `perimeter` on PyPI is YunoJuno's Django
+middleware. That is not a gap and it is worth recording, because it is a break that reads
+as something else: pinning the new commit under the old name fails with
+
+```
+Package metadata name `perimeter-wildfire` does not match given name `perimeter`
+```
+
+which a reader takes for a bad revision rather than a rename. `pyproject.toml` names the
+distribution and had to move with it. Nothing that imports `perimeter` changed.
+
+| Gap | State at `3a6aa47` | What changed here |
+|---|---|---|
+| 1. The walk sends perimeter's User-Agent | **Closed.** `_get`, `layer_record_count`, `iter_features` and `fetch_layer` all take `user_agent` | `acquire_dins` passes this project's. The DINS walk now names the caller |
+| 2. The walk cannot return geometry | **Open.** Geometry and spatial reference arrived; output format did not | Nothing. `fetch_feature_pages` stays, and so does the duplicated offset rule |
+| 3. Completeness is one count read once | **Closed upstream.** `acquire` recounts after the walk and `identifier_failure` is public | Nothing, deliberately. See below |
+| 4. No `py.typed` | **Closed.** `src/perimeter/py.typed` ships and is packaged | Both mypy overrides deleted |
+
+### Gap 1 is closed, and the compensation it named is half gone
+
+`layer_record_count`, `iter_features` and `fetch_layer` take `user_agent`, defaulting to
+upstream's own constant. `acquire_dins` now passes `USER_AGENT`, so every request this
+project makes names this project, the 132,522-record DINS layer included.
+
+Measured with the socket substituted: `tests/test_acquire.py` asserted, until today, that
+every DINS request carried `perimeter-coverage/0.1` and that this project's own name was
+absent. Its docstring said it would fail the day the pin moved onto a walk that lets a
+caller identify itself. That day is today, and the assertion is now the opposite one.
+
+The second half of gap 1 is not closed and cannot be closed on its own. The refusals
+inside the copied `_get`, HTTPS only, stop on 401, 403 and 429, refuse a non-JSON
+challenge page, refuse an error payload, still exist twice, because `fetch_feature_pages`
+still needs a fetch upstream does not expose. That duplication is downstream of gap 2 and
+goes when gap 2 does.
+
+### Gap 2 is still open, and the reason is narrower than the original entry
+
+The original entry asked for "geometry, output format and output spatial reference as
+arguments to `fetch_layer`, or the offset loop factored out". Upstream delivered the
+offset loop, as `iter_features`, with `return_geometry` and `out_sr`. It did not deliver
+the format.
+
+`iter_features` hard-codes `"f": "json"`, so it yields GeoServices features,
+`{"attributes": ..., "geometry": ...}` with Esri geometry. The two CEC territory layers
+and the county layer are read here as `f=geojson` and written as GeoJSON feature
+collections, which is what `geometry.py` and `_write` consume. Reading them through
+`iter_features` would mean converting Esri rings to GeoJSON here, which is more
+re-implementation than the offset loop it would retire, and it is conversion of the
+geometry this project's whole measurement runs on.
+
+So the ask is now one argument rather than three: an output format on `iter_features`,
+defaulting to `json` so upstream's own pinned retrievals stay byte-reproducible. Raised
+upstream rather than only recorded here, which is what roadmap 4.4 asks for.
+
+### Gap 3 is closed upstream and the local check stays anyway
+
+`perimeter.acquire.acquire` now reads the count before and after the walk and splits the
+refusal into a republication and a short walk, and `identifier_failure` checks the
+identifiers for repeats and for going backwards. That is the change this project asked
+for and it landed.
+
+It retires nothing here, and the reason is worth stating rather than leaving as an
+apparent oversight. Those checks live inside upstream's `acquire`, which writes upstream's
+own file and manifest. This project calls `layer_record_count` and `fetch_layer` directly,
+because it writes its own file in its own format, so upstream's checks are not on the path
+this project takes.
+
+`assert_walk_is_whole` therefore stays, and it would stay even if it were. A consumer that
+stops checking a dependency's output because the dependency says it checks its own is
+trusting a version of the code it has not read. The pin exists so that upstream changes
+reach this project deliberately; a check that is only as good as the pinned commit is
+exactly what the pin is there to avoid relying on.
+
+### Gap 4 is closed and both overrides are deleted
+
+`src/perimeter/py.typed` ships and `[tool.hatch.build.targets.wheel]` names it under
+`artifacts`. Measured on 2026-09-07 at this pin: `uv run mypy --strict src` reports
+`Success: no issues found in 14 source files` with
+
+- `perimeter.*` removed from the `ignore_missing_imports` override, and
+- the `disallow_subclassing_any = false` override on
+  `wildfire_service_territory_overlap.acquire` deleted entirely.
+
+`IncompleteAcquisition` subclasses upstream's `AcquisitionFailed` under `--strict` with
+nothing relaxed, because the base class resolves to a real class rather than to `Any`.
+
+`tests/test_provenance_and_standards.py` already refused an `ignore_missing_imports` entry
+naming a package that ships the marker, so this removal was forced rather than
+remembered: the pin could not move without it.
+
 ## Audit of 2026-09-05
 
 Against `perimeter` at commit `dac60195c50786f33f69a8fab70b6230894ed374`, which is what

@@ -346,12 +346,18 @@ def test_the_upstream_audit_names_the_commit_this_project_pins() -> None:
     it is a claim about code this project no longer runs.
     """
     config = tomllib.loads((ROOT / "pyproject.toml").read_text())
-    pinned = next(
+    # Matched on the repository URL, not on the distribution name. The name is
+    # `perimeter-wildfire` since 2026-09-07 and was `perimeter` before it, and a check
+    # keyed on the name went from finding the pin to finding nothing, which `next` reports
+    # as StopIteration rather than as a stale audit. The URL is the thing that identifies
+    # the dependency across a rename.
+    pins = [
         line
         for line in config["project"]["dependencies"]
-        if line.startswith("perimeter @")
-    )
-    commit = pinned.rsplit("@", 1)[1]
+        if "github.com/ChelseaKR/perimeter@" in line
+    ]
+    assert len(pins) == 1, f"expected exactly one perimeter pin, found {pins}"
+    commit = pins[0].rsplit("@", 1)[1]
     assert len(commit) == 40, f"the pin is not a full commit: {commit}"
     assert commit in UPSTREAM, (
         "docs/UPSTREAM.md was written against a different commit than pyproject.toml "
@@ -360,16 +366,26 @@ def test_the_upstream_audit_names_the_commit_this_project_pins() -> None:
     )
 
 
-def test_provenance_does_not_still_make_the_unqualified_user_agent_claim() -> None:
-    """The claim the upstream audit of 2026-09-05 found false.
+def test_provenance_says_every_request_names_this_project_and_says_when_it_did_not() -> (
+    None
+):
+    """The claim of 2026-09-05 was false and is now true, and the document says both.
 
-    Three of the four layers carry a User-Agent naming this project. The DINS walk is
-    `perimeter`'s and carries `perimeter`'s, and this document said all of them named
-    this project. `tests/test_acquire.py` holds both halves of the corrected sentence
-    against the code that sends them.
+    The audit found three of four layers naming this project and the DINS walk naming
+    `perimeter`. Since the pin moved to `3a6aa47` the walk takes a `user_agent` and this
+    project passes one, so all four name it.
+
+    A document that simply started claiming the good version would have been right today
+    and unreadable tomorrow: the interesting fact is that the claim was once wrong, and
+    the retrieval pinned in this repository was acquired under the old walk. So the
+    correction stays in the text, and this test holds both halves of it.
+    `tests/test_acquire.py` holds the live half against the requests actually sent.
     """
-    assert "Requests carry a User-Agent naming this project" not in PROVENANCE
-    assert "perimeter-coverage/0.1" in PROVENANCE
+    assert "Every request carries a User-Agent naming this project" in PROVENANCE
+    assert "perimeter-coverage/0.1" in PROVENANCE, (
+        "the document should still say what the DINS walk used to identify as; a "
+        "correction that erases what was corrected cannot be checked by a reader"
+    )
     assert "docs/UPSTREAM.md" in PROVENANCE
 
 

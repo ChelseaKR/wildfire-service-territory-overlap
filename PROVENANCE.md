@@ -231,7 +231,9 @@ The pins move only by deliberate refresh, and a refresh is a measured event:
   The 2026-08-17 section above is the pattern: 4,370 values compared, none removed,
   none changed.
 
-Cadence: at least once every twelve months, and sooner when any of these fires:
+Cadence: at least once every twelve months, and sooner when any of these fires.
+`make refresh-check` asks the first two without downloading a record, and says plainly
+that it does not ask the third; `docs/RUNBOOK.md` has what its three exit codes mean.
 
 1. **Age.** The record set grows through every fire season, so a year-old pin
    describes a year that has since been appended to it.

@@ -19,9 +19,41 @@ electric utility.
 A fixture build can never be mistaken for the real one because the flag travels inside
 the artifact itself. Never point `--out` at `published/` while passing `--fixture`.
 
+## Has the pin gone stale?
+
+`make refresh-check`. It touches the network and reads no rows: the layer's own record
+count under the walk's predicate, and the item metadata behind the two territory layers.
+Nothing is written and nothing is acquired. Before it existed the only way to answer two
+of `PROVENANCE.md`'s three triggers was to run the whole acquisition, which downloads
+180 MB and 132,522 structure records to find out whether anything had moved.
+
+Read the exit code, and read it as three states rather than two:
+
+| Exit | Means |
+|---|---|
+| `0` | Every declared trigger this command checks was checked, and none fired |
+| `1` | A declared trigger fired. Refresh, using the procedure below |
+| `2` | A declared trigger could not be checked. **Not a clean result.** The detail names the URL and what came back; chase that before concluding anything about the pin |
+
+Two things it prints on every run and does not decide:
+
+- **Trigger 3, "this pipeline changed shape", is never checked here.** It is a judgment
+  about this repository, not a fact about a server. It is listed every time as not
+  checked, so a `0` is never read as three triggers answered, and it does not move the
+  exit code. You are the one who knows whether a measurement has been added since the pin.
+- **A record count that has moved does not fire anything.** It is reported with the
+  pinned figure beside it, because a layer that has grown is the plainest evidence there
+  is that the published measurement describes a superseded file. It is not one of the
+  three triggers `PROVENANCE.md` declares, and adding a fourth is an edit to that
+  document rather than a line of code.
+
+`--json` prints the same run as one object, exit codes unchanged, for a caller that is
+not a person.
+
 ## A deliberate refresh, start to finish
 
-Triggers and cadence live in `PROVENANCE.md`. The procedure:
+Triggers and cadence live in `PROVENANCE.md`, and `make refresh-check` above answers two
+of the three without downloading anything. The procedure:
 
 1. Set the current artifact aside for comparison:
    `cp published/measurements.json "$OLD"` where `$OLD` lives outside the repository.

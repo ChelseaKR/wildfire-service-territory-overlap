@@ -11,10 +11,36 @@ permanent. Writing one down is not the same as fixing it, and this file does not
 any of these has been sent upstream. The pin is a commit rather than a branch, so an
 upstream fix reaches this project only when the pin moves, deliberately.
 
-## Re-audit of 2026-09-08, at the pin this project now runs
+## Re-audit of 2026-09-08, second pass, at the pin this project now runs
 
-Against `perimeter` at commit `b35a8d67ad1b04311663371acda1c561e520bb31`, which is what
-`pyproject.toml` pins and what `uv.lock` installs. The two audits below are kept in full,
+Against `perimeter` at commit `d0470bca45b6a1a2c254241537797fe8dc46ce38`, which is what
+`pyproject.toml` pins and what `uv.lock` installs. The pass at `b35a8d67`, below, is kept
+in full and closed gap 2; this is the gap that closing it revealed.
+
+**Gap 5, raised and closed in the same session.** The half of gap 1 that was downstream
+of gap 2 is now closed too.
+
+The pass below records that the duplicated refusals went with the duplicated walk, and
+noted that upstream's single-request reader was private. That was true and it was still a
+gap: the next thing this project needs to read is the item metadata behind a territory
+layer, so that `make refresh-check` can answer "has the publisher moved since the pin"
+without downloading 180 MB to find out. There were two ways to do that at `b35a8d67`,
+and both were bad. Write a sixth copy of the five refusals -- HTTPS only, an honest
+User-Agent, the hard stop on 401, 403 and 429, a non-JSON answer read as a challenge
+page, an error payload refused -- or import a private name and take a rename on the chin
+at some future pin.
+
+| Gap | State at `d0470bca` | What changed here |
+|---|---|---|
+| 5. The single-request reader is private, so a consumer that needs one writes the refusals again | **Closed.** `perimeter.acquire.fetch_document` is public, is a rename with no behaviour change, and its docstring says what it is for and that a caller reading a *layer* still wants `iter_features` | `refresh.py` reads item metadata through it. There is no fetch in this repository and no copy of any refusal |
+
+`refresh.py` is the first module here written with no local network code at all: it
+imports the reader, the count and the exception types, and adds only the comparisons this
+project makes.
+
+## Re-audit of 2026-09-08, first pass
+
+Against `perimeter` at commit `b35a8d67ad1b04311663371acda1c561e520bb31`. The two audits below are kept in full,
 for the same reason each of them kept the one before it: they are the record of what was
 true at `3a6aa47` and at `dac60195`, and `dac60195` is the commit the retrieval currently
 in `published/` was acquired under.

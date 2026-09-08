@@ -1,5 +1,5 @@
 .PHONY: help verify lock-check sync lint format typecheck test audit osv \
-        report report-offline determinism acquire
+        report report-offline determinism acquire refresh-check
 
 # Bare `make` runs the one gate, and says so rather than relying on `verify` happening
 # to be the first target. Making `help` the default would change what a habitual
@@ -118,5 +118,14 @@ determinism:  ## build the fixtures twice and refuse two trees that differ
 	tools/determinism.sh build/run-one build/run-two
 
 # Network. Run by hand, never from a build. See PROVENANCE.md.
-acquire:  ## the only target that touches the network: fetch the sources by hand into data/raw/
+acquire:  ## touches the network: fetch the sources by hand into data/raw/
 	uv run python -m wildfire_service_territory_overlap.acquire --out data/raw
+
+# Network, and read-only: no row is read and nothing is written. Answers PROVENANCE.md's
+# staleness triggers without the 180 MB the answer used to cost. Exit 0 means every
+# trigger it checks was checked and none fired, 1 means one fired, and 2 means one could
+# not be checked, which is not the same thing. Deliberately not a prerequisite of
+# anything: a gate that goes red on a calendar date stops every unrelated change in the
+# repository and teaches people to bypass it.
+refresh-check:  ## touches the network, read-only: has the pin gone stale?
+	uv run python -m wildfire_service_territory_overlap.refresh --check

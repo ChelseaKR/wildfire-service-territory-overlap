@@ -4,13 +4,26 @@ The point of these tests is the failure mode that produced this project's guard 
 paged walk that ends normally and is short. A download nothing checked is not an
 acquisition, so every check that would catch a short, duplicated, or reordered walk is
 exercised against a walk that should fail it.
+
+Since the pin moved onto upstream's output format, every request in this module goes
+through `perimeter.acquire`, so the refusals below are upstream's rather than this
+project's. They are still checked here, and deliberately. `docs/UPSTREAM.md` states the
+posture: a consumer that stops checking a dependency's behaviour because the dependency
+says it checks its own is trusting a version of the code it has not read, and the pin
+exists so an upstream change arrives deliberately. These assertions are what would notice
+if the next pin moved onto a walk that had lost one of them.
+
+The socket is substituted at `urllib.request`, which both modules import and therefore
+share, so patching it once covers whichever of them opens the connection.
 """
 
 from __future__ import annotations
 
 import io
 import json
+import time
 import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -48,8 +61,8 @@ def install(monkeypatch: pytest.MonkeyPatch, handler: Any) -> list[str]:
         seen.append(request.full_url)
         return handler(request.full_url)
 
-    monkeypatch.setattr(acquire.urllib.request, "urlopen", fake_urlopen)
-    monkeypatch.setattr(acquire.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
     return seen
 
 
@@ -149,39 +162,81 @@ def test_the_walk_steps_by_rows_received_not_by_the_page_it_asked_for(
 ) -> None:
     """The defect this project exists downstream of, reproduced as a test.
 
-    The service is asked for 2000 rows and hands back 1200. A walk that adds the page
-    size to its offset asks next for records from 2000 and never sees 1200 to 1999.
+    A layer holding 1400 records with a `maxRecordCount` of 1200 answers a request for
+    2000 with 1200 rows and `exceededTransferLimit`. A walk that adds the page size to its
+    offset asks next for records from 2000 and never sees 1200 to 1399, and the walk still
+    ends normally.
+
+    The walk under test now lives in `perimeter`. That is the point of the pin having
+    moved, and it is exactly why this test stays: the rule is the one thing this project
+    could not afford to consume without checking.
     """
-    pages = {
-        0: [{"properties": {"OBJECTID": i}} for i in range(1, 1201)],
-        1200: [{"properties": {"OBJECTID": i}} for i in range(1201, 1401)],
-        1400: [],
-    }
+    total, cap = 1400, 1200
+    asked: list[int] = []
 
     def handler(url: str) -> Any:
         offset = int(url.split("resultOffset=")[1].split("&")[0])
-        if offset not in pages:
+        asked.append(offset)
+        if offset % cap:
             raise AssertionError(
                 f"the walk asked for offset {offset}, which means it stepped by the "
                 "page size it requested rather than by the rows it was handed"
             )
-        return json_response({"features": pages[offset]})
+        served = max(0, min(cap, total - offset))
+        return json_response(
+            {
+                "features": [
+                    {"properties": {"OBJECTID": i}}
+                    for i in range(offset + 1, offset + served + 1)
+                ],
+                "exceededTransferLimit": offset + served < total,
+            }
+        )
 
     install(monkeypatch, handler)
     features = fetch_feature_pages(
         "https://example.test/query", ("OBJECTID",), with_geometry=True
     )
-    assert len(features) == 1400
+    assert len(features) == total
     identifiers = [f["properties"]["OBJECTID"] for f in features]
-    assert identifiers == list(range(1, 1401))
-    assert_walk_is_whole(identifiers, 1400, layer="x")
+    assert identifiers == list(range(1, total + 1))
+    assert_walk_is_whole(identifiers, total, layer="x")
+    assert asked == [0, cap], (
+        "the walk stepped by the page it was handed and stopped when the layer said "
+        "there was no more, which is two requests and not three"
+    )
 
 
 def test_a_page_that_is_not_an_array_is_refused(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    install(monkeypatch, lambda _url: json_response({"features": "no"}))
-    with pytest.raises(AcquisitionFailed, match="no features array"):
+    """The refusal moved upstream and is still asserted from here.
+
+    This project's own walk checked the type, and a compensation cannot be retired while
+    the thing it compensates for is still there, so the check went upstream with the walk
+    rather than being dropped. Asserting it here is what would notice if a later pin
+    landed on a version that had lost it: `yield from` over a mapping yields its keys and
+    the walk would emit field names as features, silently.
+    """
+    install(monkeypatch, lambda _url: json_response({"features": {"OBJECTID": 1}}))
+    with pytest.raises(AcquisitionFailed, match="rather than a list"):
+        fetch_feature_pages(
+            "https://example.test/query", ("OBJECTID",), with_geometry=False
+        )
+
+
+def test_a_page_with_no_features_key_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The other half, and the one this project never had.
+
+    An answer the walk cannot read and a layer holding nothing both produced an empty
+    list here, and both ended the walk. The count check would have caught it, loudly, and
+    only because this project reads the layer's own total twice; the walk itself said
+    nothing. Upstream now refuses it at the page.
+    """
+    install(monkeypatch, lambda _url: json_response({"objectIdFieldName": "OBJECTID"}))
+    with pytest.raises(AcquisitionFailed, match="features"):
         fetch_feature_pages(
             "https://example.test/query", ("OBJECTID",), with_geometry=False
         )
@@ -340,8 +395,9 @@ def install_recording(
 ) -> list[tuple[str, str | None]]:
     """Substitute the socket and record the identity each request carried.
 
-    `urllib.request` is one module object, so replacing `urlopen` on it reaches the walk
-    inside `perimeter` as well as the walk here. Nothing below opens a socket.
+    `urllib.request` is one module object, so replacing `urlopen` on it reaches every
+    walk this project uses, all of which now live in `perimeter`. Nothing below opens a
+    socket.
     """
     sent: list[tuple[str, str | None]] = []
 
@@ -349,8 +405,8 @@ def install_recording(
         sent.append((request.full_url, request.get_header("User-agent")))
         return handler(request.full_url)
 
-    monkeypatch.setattr(acquire.urllib.request, "urlopen", fake_urlopen)
-    monkeypatch.setattr(acquire.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
     return sent
 
 

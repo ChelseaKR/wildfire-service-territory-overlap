@@ -5,6 +5,44 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **The second paged walk is gone. Every layer is fetched through `perimeter`.** The pin
+  moves to `b35a8d67`, which carries upstream's output format, and with it the last gap
+  `docs/UPSTREAM.md` had open closes and the last two compensations go.
+
+  `fetch_feature_pages` held a second copy of the offset rule -- step by the page that
+  arrived, never by the page that was asked for -- which is the rule this whole project
+  exists downstream of, and a copy of it drifts. `_get` held a second copy of every
+  refusal around a request: HTTPS only, stop on 401, 403 and 429, refuse a non-JSON
+  challenge page, refuse an error payload. Those are promises about how this project
+  behaves towards somebody else's server, and they were made twice, so a fix to either
+  copy reached three of the four layers. There is now one copy of each, upstream, and a
+  fix to it arrives here when the pin moves.
+
+  What is left of `fetch_feature_pages` is four lines binding this project's User-Agent,
+  the GeoJSON format and the spatial reference, and one call. Measured on the diff,
+  `acquire.py` deletes 89 lines and adds 59, and no longer contains the word `urlopen`;
+  most of what was added is docstrings saying what the two remaining functions are for.
+
+  **Every refusal test stayed and every one still passes with its assertion unchanged**,
+  now exercising upstream's code from here. That is the evidence the duplication was a
+  duplication rather than two behaviours that happened to look alike, and they stay
+  because a consumer that stops checking a dependency because the dependency says it
+  checks itself is trusting a version of the code it has not read.
+
+  One thing was found on the way out. The local walk checked that `features` was a list
+  and upstream did not, and `yield from` over a mapping yields its keys: measured on
+  upstream's tree, a page carrying `{"features": {"OBJECTID": 1}}` made its walk yield the
+  field names as features and stop, silently. Keeping that one check here would have left
+  a fragment of the duplication for no reason, so it went upstream (`perimeter` #86) and
+  the pin here is the commit that carries it.
+
+  One behaviour changed: upstream stops at a short page with no `exceededTransferLimit`,
+  where the local walk paged until it was handed an empty one. Nothing rests on the
+  difference, because `assert_walk_is_whole` compares the walk against the layer's own
+  count read before and after, so a walk that stopped early writes nothing and says so.
+
 ### Fixed
 
 - **The refresh diff printed its clean verdict over comparisons it had not made.**

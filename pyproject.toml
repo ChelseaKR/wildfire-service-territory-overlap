@@ -18,6 +18,11 @@ dependencies = [
   # size. Re-implementing either would be re-implementing a bug that has already been
   # found and fixed once. Pinned to a commit, not a branch.
   #
+  # Since `b35a8d67` every layer this project fetches goes through that walk. Upstream
+  # #84 added an output format, which is what the three polygon layers needed and what
+  # kept a second walk alive here; `docs/UPSTREAM.md` records the re-audit and what was
+  # deleted.
+  #
   # The distribution is `perimeter-wildfire` and the import name is still `perimeter`.
   # Upstream renamed the distribution because `perimeter` on PyPI is YunoJuno's Django
   # middleware; the package directory did not move. This line names the distribution, so
@@ -25,7 +30,7 @@ dependencies = [
   # fails with "Package metadata name `perimeter-wildfire` does not match given name
   # `perimeter`", which reads as a bad revision rather than as a rename. Import sites are
   # unaffected.
-  "perimeter-wildfire @ git+https://github.com/ChelseaKR/perimeter@3a6aa47ae9e755a256614bc124a6db960d60dc7a",
+  "perimeter-wildfire @ git+https://github.com/ChelseaKR/perimeter@b35a8d67ad1b04311663371acda1c561e520bb31",
   "shapely>=2.1",
   "pyproj>=3.7",
 ]

@@ -11,10 +11,81 @@ permanent. Writing one down is not the same as fixing it, and this file does not
 any of these has been sent upstream. The pin is a commit rather than a branch, so an
 upstream fix reaches this project only when the pin moves, deliberately.
 
-## Re-audit of 2026-09-07, at the pin this project now runs
+## Re-audit of 2026-09-08, at the pin this project now runs
+
+Against `perimeter` at commit `b35a8d67ad1b04311663371acda1c561e520bb31`, which is what
+`pyproject.toml` pins and what `uv.lock` installs. The two audits below are kept in full,
+for the same reason each of them kept the one before it: they are the record of what was
+true at `3a6aa47` and at `dac60195`, and `dac60195` is the commit the retrieval currently
+in `published/` was acquired under.
+
+**Gap 2 is closed. Every gap this file has ever recorded is now closed, and the last two
+compensations are gone from this repository.**
+
+Upstream #84 added `out_format` to `iter_features`, defaulting to `json` so its own pinned
+retrievals stay byte-reproducible. That is the one argument the previous re-audit narrowed
+the ask down to, and it is what the three polygon layers needed.
+
+| Compensation | State |
+|---|---|
+| `fetch_feature_pages`, a second paged walk with a second copy of the offset rule | **Retired.** One call to `perimeter.acquire.iter_features` with `out_format="geojson"`. What keeps the name is a four-line binding of this project's User-Agent, the format and the spatial reference |
+| A second `_get`, with a second copy of every refusal around a request | **Deleted.** HTTPS only, stop on 401, 403 and 429, refuse a non-JSON challenge page, refuse an error payload: one copy of each, upstream, where a fix to any of them now reaches this project when the pin moves |
+| A second `layer_record_count` | **Deleted.** It existed only because it needed the local `_get`. What is left is a one-line binding so the count is always asked for under this project's own name |
+
+Measured on the diff: `src/wildfire_service_territory_overlap/acquire.py` deletes 89
+lines and adds 59, a net 30 shorter, and loses three imports (`time`, `urllib.error`,
+`urllib.request`). The module no longer contains the word `urlopen`. Most of what was
+added is the docstrings saying what the two remaining functions are for and what they
+used to be.
+
+### The refusal tests stayed, and they are the point
+
+Every refusal test in `tests/test_acquire.py` now exercises upstream's code from here, and
+every one of them still passes without its assertion changing: the non-HTTPS refusal, all
+three access-control codes, a 500, an HTML challenge page, an error payload, a
+`returnCountOnly` answer with no count, and a boolean offered as a count. That is the
+evidence the duplication was a duplication rather than two different behaviours that
+happened to look alike.
+
+They stay for the reason Gap 3 states below. A consumer that stops checking a
+dependency's behaviour because the dependency says it checks its own is trusting a
+version of the code it has not read, and the pin exists so that an upstream change
+arrives deliberately. These assertions are what would notice if a later pin landed on a
+walk that had lost one of them.
+
+### One thing was found downstream and fixed upstream, in the same session
+
+The local walk checked that `features` was a list. Upstream did not, and `yield from` over
+a mapping yields its **keys**: measured on upstream's tree before the fix, a page carrying
+`{"features": {"OBJECTID": 1, "YEAR_": 2020}}` made `iter_features` yield
+`['OBJECTID', 'YEAR_']` and stop, after one request, with nothing raised.
+
+Retiring the compensation while keeping that one check downstream would have left a
+fragment of the duplication in place for no reason, so it went upstream instead
+(`perimeter` #86) and the pin here is the commit that carries it. The assertion in
+`tests/test_acquire.py` is now made against upstream's message.
+
+### One behaviour changed, and the guard that makes it safe was already here
+
+The local walk paged until it was handed an empty page. Upstream stops earlier: a page
+shorter than the one it asked for, with no `exceededTransferLimit`, is the end of the
+layer, which is what a GeoServices layer means by that combination. The local walk made
+one more request than upstream does and did not rely on the flag.
+
+Nothing about the acquisition rests on that difference, because `assert_walk_is_whole`
+compares what the walk collected against the layer's own count, read before and after.
+A walk that stopped early writes nothing and says so.
+
+This has not been run against the live endpoints. The request this project sends is the
+same set of parameters in a different order (`outSR` moves to the end, since upstream
+sends it only when given and this project gives it), which does not change a response, but
+the sha256 figures in `sources.py` are from the retrieval of `dac60195` and the next
+acquisition is what will confirm it.
+
+## Re-audit of 2026-09-07
 
 Against `perimeter` at commit `3a6aa47ae9e755a256614bc124a6db960d60dc7a`, which is what
-`pyproject.toml` pins and what `uv.lock` installs. The audit of 2026-09-05 below is kept
+`pyproject.toml` pinned at the time and what `uv.lock` installed. The audit of 2026-09-05 below is kept
 in full: it is the record of what was true at `dac60195`, which is the commit the
 retrieval currently in `published/` was acquired under.
 
@@ -36,7 +107,7 @@ distribution and had to move with it. Nothing that imports `perimeter` changed.
 | Gap | State at `3a6aa47` | What changed here |
 |---|---|---|
 | 1. The walk sends perimeter's User-Agent | **Closed.** `_get`, `layer_record_count`, `iter_features` and `fetch_layer` all take `user_agent` | `acquire_dins` passes this project's. The DINS walk now names the caller |
-| 2. The walk cannot return geometry | **Open.** Geometry and spatial reference arrived; output format did not | Nothing. `fetch_feature_pages` stays, and so does the duplicated offset rule |
+| 2. The walk cannot return geometry | **Open at this pin.** Geometry and spatial reference arrived; output format did not. Closed at `b35a8d67`, above | Nothing yet. `fetch_feature_pages` stays, and so does the duplicated offset rule |
 | 3. Completeness is one count read once | **Closed upstream.** `acquire` recounts after the walk and `identifier_failure` is public | Nothing, deliberately. See below |
 | 4. No `py.typed` | **Closed.** `src/perimeter/py.typed` ships and is packaged | Both mypy overrides deleted |
 

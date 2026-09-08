@@ -26,6 +26,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 from perimeter.acquire import USER_AGENT as PERIMETER_USER_AGENT
@@ -436,6 +437,44 @@ def test_the_walks_written_here_name_this_project_to_the_publisher(
     assert sent, "the acquisition made no request, so this test checked nothing"
     assert {identity for _url, identity in sent} == {acquire.USER_AGENT}
     assert "wildfire-service-territory-overlap" in acquire.USER_AGENT
+
+
+def test_the_polygon_walks_ask_for_geojson_in_the_spatial_reference_this_project_reads(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The two things `fetch_feature_pages` exists to bind, asserted on the wire.
+
+    Since the pin moved, that function is a call to upstream's walk with three arguments
+    fixed: this project's User-Agent, `f=geojson`, and `outSR=4326`. Upstream defaults the
+    format to `json` and sends `outSR` only when it is given, both of which are right for
+    upstream and neither of which is right here: `geometry.py` reads GeoJSON `Feature`
+    objects with the coordinates as longitude and latitude.
+
+    None of that is visible to a test whose fake ignores the query string. Without this,
+    the format could be wired to `json` or the spatial reference dropped and every other
+    test in this file would go on passing, because they answer the shape they were going
+    to answer whatever was asked for.
+    """
+    features = [
+        {"type": "Feature", "properties": {"OBJECTID": i}, "geometry": None}
+        for i in range(1, 4)
+    ]
+    sent = install_recording(monkeypatch, _territory_handler([3, 3], features))
+    acquire.acquire_territories(ELSE_IOU_POU, tmp_path)
+    walks = [url for url, _identity in sent if "returnCountOnly=true" not in url]
+    assert walks, "no page was requested, so this test checked nothing"
+    for url in walks:
+        query = parse_qs(urlparse(url).query)
+        assert query["f"] == ["geojson"], url
+        assert query["outSR"] == [str(acquire.OUT_SR)], url
+        assert query["returnGeometry"] == ["true"], url
+    counts = [url for url, _identity in sent if "returnCountOnly=true" in url]
+    assert counts, "the layer was never asked for its own total"
+    for url in counts:
+        assert parse_qs(urlparse(url).query)["f"] == ["json"], (
+            "the count is a GeoServices call, not a GeoJSON one, and upstream reads "
+            "`count` off it"
+        )
 
 
 def test_the_dins_walk_names_this_project_and_not_the_pinned_dependency(

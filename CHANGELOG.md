@@ -5,6 +5,52 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`make refresh-check`, so the currency question stops costing 180 MB.**
+  `PROVENANCE.md` declares three staleness triggers and, until now, two of them could
+  only be answered by running the whole acquisition: 132,522 structure records
+  downloaded to find out whether anything had moved. `python -m
+  wildfire_service_territory_overlap.refresh --check` asks instead. It reads no rows and
+  writes nothing: the layer's own record count under the walk's predicate, and the item
+  metadata behind the two territory layers.
+
+  **The exit code carries three states, which is the whole reason it exists.** `0` means
+  every declared trigger this command checks was checked and none fired; `1` means one
+  fired; `2` means one could not be checked. Exit `0` meaning "I asked and the answer was
+  no" and exit `0` meaning "I could not ask" would put a stale pin and a healthy pin
+  behind the same green, which is the defect class this repository keeps finding. A
+  request that was refused, a 200 with no `modified` field, a `modified` that is not an
+  epoch timestamp, a number that is not a point in time, a source the pin records no item
+  id for, and a source whose pinned date is not a date are all `2`, each naming the URL
+  and what came back. None of them reaches "no trigger fired".
+
+  **A future retrieval date is unmeasurable, not fresh.** A negative age satisfies a
+  twelve-month check permanently; a pin dated in the future is a broken record or a broken
+  clock and the command says so rather than reporting a young pin.
+
+  **Two things it prints on every run and does not decide.** Trigger 3, "this pipeline
+  changed shape", is a judgment about this repository rather than a fact about a server,
+  so it is listed every time as not checked here and does not move the exit code: a
+  clean exit is never three triggers answered. And a record count that has moved is
+  reported with the pinned figure beside it and fires nothing, because `PROVENANCE.md`
+  declares three triggers and a fourth is an edit to that document rather than a line of
+  code.
+
+  Deliberately not a prerequisite of anything. A merge gate that goes red on a calendar
+  date stops every unrelated change in the repository and teaches people to bypass it.
+
+  **This has never been run against the live endpoints**, and nothing here does:
+  `acquire.py` is the same and both are out of CI on purpose. The record count goes
+  through the call the acquisition already makes, so its shape is proven; the item
+  metadata request is not, and every way its answer can fail to be a date is an
+  unmeasurable rather than a trigger that did not fire.
+
+  The pin moves to `d0470bca`, which makes upstream's single-request reader public.
+  `refresh.py` is the first module here with no network code of its own at all: no fetch,
+  and no copy of any refusal. `docs/UPSTREAM.md` records that as gap 5, raised and closed
+  in the same session.
+
 ### Changed
 
 - **The second paged walk is gone. Every layer is fetched through `perimeter`.** The pin

@@ -758,7 +758,7 @@ wheels = [
 [[package]]
 name = "perimeter-wildfire"
 version = "0.1.0"
-source = { git = "https://github.com/ChelseaKR/perimeter?rev=b35a8d67ad1b04311663371acda1c561e520bb31#b35a8d67ad1b04311663371acda1c561e520bb31" }
+source = { git = "https://github.com/ChelseaKR/perimeter?rev=d0470bca45b6a1a2c254241537797fe8dc46ce38#d0470bca45b6a1a2c254241537797fe8dc46ce38" }
 
 [[package]]
 name = "pip"
@@ -1169,7 +1169,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "perimeter-wildfire", git = "https://github.com/ChelseaKR/perimeter?rev=b35a8d67ad1b04311663371acda1c561e520bb31" },
+    { name = "perimeter-wildfire", git = "https://github.com/ChelseaKR/perimeter?rev=d0470bca45b6a1a2c254241537797fe8dc46ce38" },
     { name = "pyproj", specifier = ">=3.7" },
     { name = "shapely", specifier = ">=2.1" },
 ]

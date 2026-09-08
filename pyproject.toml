@@ -30,7 +30,7 @@ dependencies = [
   # fails with "Package metadata name `perimeter-wildfire` does not match given name
   # `perimeter`", which reads as a bad revision rather than as a rename. Import sites are
   # unaffected.
-  "perimeter-wildfire @ git+https://github.com/ChelseaKR/perimeter@b35a8d67ad1b04311663371acda1c561e520bb31",
+  "perimeter-wildfire @ git+https://github.com/ChelseaKR/perimeter@d0470bca45b6a1a2c254241537797fe8dc46ce38",
   "shapely>=2.1",
   "pyproj>=3.7",
 ]

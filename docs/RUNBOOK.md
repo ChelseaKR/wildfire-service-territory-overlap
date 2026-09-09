@@ -53,29 +53,91 @@ not a person.
 ## A deliberate refresh, start to finish
 
 Triggers and cadence live in `PROVENANCE.md`, and `make refresh-check` above answers two
-of the three without downloading anything. The procedure:
+of the three without downloading anything.
 
-1. Set the current artifact aside for comparison:
-   `cp published/measurements.json "$OLD"` where `$OLD` lives outside the repository.
-2. Run `make acquire`. Network, by hand, never from CI. It writes `data/raw/`.
-3. Update `src/wildfire_service_territory_overlap/sources.py`: the new retrieval dates, SHA-256 hashes, byte
-   counts and feature counts. The tests hold `PROVENANCE.md` and `README.md` to agree
-   with that file, so the document cannot be updated without the source record, or the
-   other way round.
-4. Run `make report`.
-5. Compare: `python -m wildfire_service_territory_overlap.artifact_diff "$OLD" published/measurements.json`.
-   Changed and added values are expected on a real refresh; removed values stop the
-   run unless `--allow-removals` names them deliberate. Exit `2` means the comparison
-   did not happen: `$OLD` and the new artifact are the same file, one of them is not a
-   JSON object, or the two carry no values between them. Read the stderr line; do not
-   re-run with `--allow-removals`, which accepts removals and not an empty comparison.
-6. Read the generated `published/REPORT.md` end to end. The figures are checked by
-   machinery; whether they still say something coherent is not.
-7. Write a dated section into `PROVENANCE.md` saying what moved, sizes included,
+The half a machine can do is one command:
+
+```sh
+make refresh REFRESH_WORKDIR=../refresh-2026-09-09
+```
+
+It acquires into `$REFRESH_WORKDIR/raw`, builds into `$REFRESH_WORKDIR/build`, compares
+the build against `published/measurements.json`, and stops. **It adopts nothing.**
+`published/` is read and never written, `sources.py` is read and never edited, nothing is
+committed and nothing is tagged. The last thing it writes is
+`$REFRESH_WORKDIR/refresh-receipt.json`, which is what you read before doing the rest.
+
+This used to be eight numbered steps. The reason it is one command is that a sequence can
+be run out of order, and the step that matters most is the one it is easiest to leave out:
+comparing the new artifact against the published one. Here it cannot be skipped, because
+nothing downstream of it happens if it does not run.
+
+Point `REFRESH_WORKDIR` outside the repository, at a directory that does not exist yet.
+The command refuses a workdir that already holds a `raw/` or `build/` directory rather
+than emptying it: a run on top of a previous one measures two retrievals mixed together,
+and deleting a previous acquisition is the one irreversible act available here, so it
+stays yours. Note also that it does **not** write `data/raw/`, which is what `make report`
+reads. A refresh cannot half-adopt itself by being run.
+
+### What each exit code means
+
+| Exit | Means |
+|---|---|
+| `0` | Acquire, build and compare all ran. The receipt is written |
+| `1` | A step refused. The message names the step, and nothing after it happened. No receipt was written |
+| `2` | The comparison could not be made at all: `published/measurements.json` was unreadable, was not a JSON object, or the two artifacts carried no values between them. **Not a clean result**, and not the same fact as a refresh in which nothing moved |
+
+The refusals are the ones documented below under "When acquisition refuses" and "When a
+gate refuses", reached through this command instead of through a bare `make acquire` or
+`make report`. Two are worth naming here because they are specific to the refresh:
+
+- **A short walk stops before the build.** `$REFRESH_WORKDIR/build` will not exist. A walk
+  that collected fewer rows than the layer reports is a dataset with a hole in it that
+  nothing downstream can see, so nothing downstream runs.
+- **A removed published value stops before the receipt.** The full diff is printed first,
+  so you can see what went without re-running. If the removals are deliberate, say so in
+  `PROVENANCE.md` and re-run with `--allow-removals` (the command line; `make refresh` does
+  not pass it, deliberately). If they are not, the measurement stopped producing something
+  it used to, and that is the finding.
+
+### Then, by hand
+
+The receipt lists these too, under `adoption`, because the receipt is what gets read at
+the moment the work happens.
+
+1. Read the printed diff and `$REFRESH_WORKDIR/build/REPORT.md` end to end. The figures
+   are checked by machinery; whether they still say something coherent is not.
+2. Update `src/wildfire_service_territory_overlap/sources.py` from the receipt's
+   `retrievals` block: the new retrieval dates, SHA-256 hashes, byte counts and feature
+   counts. The tests hold `PROVENANCE.md` and `README.md` to agree with that file, so the
+   document cannot be updated without the source record, or the other way round.
+   **Until this edit lands, the artifact the refresh built carries the previous pin's
+   dates in its provenance block**, because that block is read from `sources.py`.
+3. Rebuild after that edit, since the provenance block is part of the artifact:
+   `make report` with `data/raw/` holding the files from `$REFRESH_WORKDIR/raw`, or
+   `make refresh` again into a second workdir.
+4. Copy the build into `published/`.
+5. Write a dated section into `PROVENANCE.md` saying what moved, sizes included,
    following the 2026-08-17 pattern. Update the README status line if the headline
    moved. Add a `CHANGELOG.md` entry.
-8. Commit `published/` and the source-record edits together. Never commit
-   `data/raw/`.
+6. Commit `published/` and the source-record edits together. Never commit `data/raw/`.
+
+### Running the pieces separately
+
+Still supported and still what the command does internally, for when a refresh has
+already refused once and you are chasing one step:
+
+```sh
+make acquire                                     # network, writes data/raw/
+make report                                      # rebuild published/ from data/raw/
+python -m wildfire_service_territory_overlap.artifact_diff "$OLD" published/measurements.json
+```
+
+`$OLD` is a copy of `published/measurements.json` taken **before** the rebuild, kept
+outside the repository. Exit `2` from the comparison means it did not happen: `$OLD` and
+the new artifact are the same file, one of them is not a JSON object, or the two carry no
+values between them. Read the stderr line; do not re-run with `--allow-removals`, which
+accepts removals and not an empty comparison.
 
 ## The bounded county cross-check
 

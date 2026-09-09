@@ -1,5 +1,5 @@
 .PHONY: help verify lock-check sync lint format typecheck test audit osv \
-        report report-offline determinism acquire refresh-check
+        report report-offline determinism acquire refresh-check refresh
 
 # Bare `make` runs the one gate, and says so rather than relying on `verify` happening
 # to be the first target. Making `help` the default would change what a habitual
@@ -129,3 +129,24 @@ acquire:  ## touches the network: fetch the sources by hand into data/raw/
 # repository and teaches people to bypass it.
 refresh-check:  ## touches the network, read-only: has the pin gone stale?
 	uv run python -m wildfire_service_territory_overlap.refresh --check
+
+# Network, and the other half. Acquires into REFRESH_WORKDIR/raw, builds into
+# REFRESH_WORKDIR/build, compares the build against published/, and stops. Nothing is
+# adopted: published/ is read and never written, sources.py is read and never edited, and
+# the last thing it writes is a receipt for a person to read. The workdir is a variable
+# with no default inside the repository, because an acquisition writing somewhere nobody
+# named is the one thing about a refresh that must not be a surprise, and because
+# data/raw/ is what `make report` reads and a half-adopted refresh must not be able to
+# land there by running one command.
+#
+# Not a prerequisite of anything, for the reason above and one more: it downloads 180 MB.
+refresh:  ## touches the network: run the deliberate refresh into REFRESH_WORKDIR, adopting nothing
+	@test -n "$(REFRESH_WORKDIR)" || { \
+	  echo "REFRESH_WORKDIR is not set. Point it at a fresh directory outside the"; \
+	  echo "repository, for example:"; \
+	  echo "  make refresh REFRESH_WORKDIR=../refresh-$$(date -u +%Y-%m-%d)"; \
+	  exit 2; \
+	}
+	uv run python -m wildfire_service_territory_overlap.refresh --run \
+		--workdir "$(REFRESH_WORKDIR)" \
+		--published published/measurements.json

@@ -54,13 +54,16 @@ A change that does any of these will be declined regardless of how well it is wr
 ## Refreshing the data
 
 ```
-make acquire        # network, by hand, never in CI
-make report         # rebuild published/ from data/raw/
+make refresh-check                                  # network, read-only: is the pin stale?
+make refresh REFRESH_WORKDIR=../refresh-YYYY-MM-DD  # network: acquire, build, compare, stop
 ```
 
-Then copy the new feature counts, byte counts and hashes from `data/raw/acquisition.json`
-into `src/wildfire_service_territory_overlap/sources.py`, update `PROVENANCE.md` and the figures in `README.md`,
-and commit the new `published/` tree. `data/raw/` stays out of git.
+`make refresh` adopts nothing: `published/` is read and never written, `sources.py` is
+read and never edited, and it writes one receipt. Then copy the new feature counts, byte
+counts and hashes from that receipt into
+`src/wildfire_service_territory_overlap/sources.py`, rebuild, update `PROVENANCE.md` and
+the figures in `README.md`, and commit the new `published/` tree. `data/raw/` stays out of
+git. `docs/RUNBOOK.md` has the whole procedure and what each refusal means.
 
 ## Style
 

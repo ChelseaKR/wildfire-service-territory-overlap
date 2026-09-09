@@ -340,7 +340,7 @@ def as_json(result: DiffResult, *, allow_removals: bool) -> str:
     return json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
 
 
-def _not_an_artifact(side: str, tree: Any) -> str | None:
+def not_an_artifact(side: str, tree: Any) -> str | None:
     """Why ``tree`` cannot be one side of an artifact comparison, or ``None``.
 
     ``published/measurements.json`` is a JSON object. Anything else read from that
@@ -359,7 +359,7 @@ def _not_an_artifact(side: str, tree: Any) -> str | None:
     )
 
 
-def _compared_nothing(result: DiffResult) -> str | None:
+def compared_nothing(result: DiffResult) -> str | None:
     """Why a comparison of zero values must not be reported, or ``None``.
 
     Two empty objects agree on all zero of their values. The verdict for that run was
@@ -421,12 +421,12 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
     for side, tree in (("old", old), ("new", new)):
-        complaint = _not_an_artifact(side, tree)
+        complaint = not_an_artifact(side, tree)
         if complaint is not None:
             print(complaint, file=sys.stderr)
             return 2
     result = diff_trees(old, new)
-    empty = _compared_nothing(result)
+    empty = compared_nothing(result)
     if empty is not None:
         print(empty, file=sys.stderr)
         return 2

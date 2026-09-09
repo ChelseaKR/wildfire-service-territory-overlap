@@ -297,6 +297,27 @@ def acquire_counties(source: Source, out_dir: Path) -> Acquired:
     )
 
 
+def acquire_all(out_dir: Path) -> tuple[Acquired, ...]:
+    """Every layer this project reads, in the order ``sources.py`` declares them.
+
+    One function so there is one list. The command line below and
+    :func:`wildfire_service_territory_overlap.refresh.run` both need the whole set, and
+    a second copy of the list is how a layer gets added to one caller and not the other:
+    the acquisition would then succeed, the build would read a file from the previous
+    pin, and nothing between them would say so.
+
+    It raises rather than collecting failures. A refresh that acquired three of four
+    layers has not acquired the record set, and returning a partial tuple would leave
+    every caller to decide what a partial retrieval means.
+    """
+    return (
+        acquire_dins(out_dir),
+        acquire_territories(ELSE_IOU_POU, out_dir),
+        acquire_territories(ELSE_OTHER, out_dir),
+        acquire_counties(COUNTIES, out_dir),
+    )
+
+
 def main(argv: list[str] | None = None) -> int:  # pragma: no cover - network entrypoint
     parser = argparse.ArgumentParser(
         prog="wildfire-service-territory-overlap-acquire",
@@ -308,12 +329,7 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - network en
     parser.add_argument("--out", type=Path, default=Path("data/raw"))
     args = parser.parse_args(argv)
     manifest: list[dict[str, object]] = []
-    results = [
-        acquire_dins(args.out),
-        acquire_territories(ELSE_IOU_POU, args.out),
-        acquire_territories(ELSE_OTHER, args.out),
-        acquire_counties(COUNTIES, args.out),
-    ]
+    results = acquire_all(args.out)
     for result in results:
         print(
             f"{result.source_key}: {result.feature_count} features, "

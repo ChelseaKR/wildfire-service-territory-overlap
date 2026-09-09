@@ -7,6 +7,47 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`make refresh`, so the deliberate refresh is one command that cannot be run out of
+  order.** `docs/RUNBOOK.md` described it as eight numbered steps, and a sequence can be
+  run out of order: the step that matters most, comparing the new artifact against the
+  published one, is the easiest to leave out and the only one that catches a published
+  number changing quietly. `python -m wildfire_service_territory_overlap.refresh --run
+  --workdir DIR` acquires into `DIR/raw`, builds into `DIR/build`, compares the build
+  against `published/measurements.json`, and stops.
+
+  **It adopts nothing.** `published/` is read and never written, `sources.py` is read and
+  never edited, `data/raw/` is not touched at all, nothing is committed and nothing is
+  tagged. A refresh cannot half-adopt itself by being run. What it writes is
+  `refresh-receipt.json`: what each layer returned (retrieval date, feature count, byte
+  count, SHA-256) beside what the pin records and whether the two agree, the comparison
+  verbatim, which build of the tool produced it, and the list of steps a person does next.
+
+  **A receipt exists only for a run that finished.** Every refusal leaves none, and the
+  run stops at the first one. A short walk stops before the build, so there is no build
+  directory to mistake for one; a publication rule stops before the comparison; a removed
+  published value stops before the receipt, having printed the whole diff first so that
+  finding out what went does not require re-running with the flag that accepts removals.
+  A receipt written after a refused step would be a record of something that did not
+  happen, and nothing about it would say so.
+
+  **The exit code carries three states, as `--check`'s does.** `0` means acquire, build
+  and compare all ran; `1` means a step refused; `2` means the comparison could not be
+  made at all, because the published artifact was unreadable, was not a JSON object, or
+  the two artifacts carried no values between them. A comparison that did not happen is
+  not a comparison in which nothing moved.
+
+  **The provenance block in the artifact it builds is the old pin's**, because that block
+  is read from `sources.py` and only a person can update it. The receipt records what each
+  layer actually returned so that edit can be made from the receipt rather than from a
+  terminal that has scrolled, and the adoption list names the rebuild that has to follow
+  it.
+
+  `make refresh` requires `REFRESH_WORKDIR` and has no default: an acquisition writing
+  somewhere nobody named is the one thing about a refresh that must not be a surprise. A
+  workdir already holding a `raw/` or `build/` directory is refused rather than emptied,
+  because a run on top of a previous one measures two retrievals mixed together, and
+  deleting a previous acquisition is the single irreversible act available here.
+
 - **`make refresh-check`, so the currency question stops costing 180 MB.**
   `PROVENANCE.md` declares three staleness triggers and, until now, two of them could
   only be answered by running the whole acquisition: 132,522 structure records
@@ -52,6 +93,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   in the same session.
 
 ### Changed
+
+- **The acquisition's list of layers exists once.** `acquire.main` held the four calls
+  inline; `refresh --run` needs the same four, and a second copy of the list is how a
+  layer gets added to one caller and not the other, after which the acquisition succeeds,
+  the build reads a file from the previous pin, and nothing between them says so. Both go
+  through `acquire.acquire_all` now, and a test reads the command line's source to hold it
+  there.
+
+- **`artifact_diff`'s two refusal predicates are public.** `not_an_artifact` and
+  `compared_nothing` separate "this file did not finish being built" and "these two
+  artifacts carried no values between them" from a clean comparison. `refresh --run` asks
+  the same two questions, and asking them a second way would have been a second reading of
+  the same rules, free to drift.
 
 - **The second paged walk is gone. Every layer is fetched through `perimeter`.** The pin
   moves to `b35a8d67`, which carries upstream's output format, and with it the last gap

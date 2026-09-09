@@ -6,6 +6,7 @@ the engineering. Both drift the moment nothing reads them.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import inspect
 import json
@@ -113,6 +114,181 @@ def test_the_readme_never_claims_users_adopters_or_downloads() -> None:
         "trusted by",
     ):
         assert phrase not in lowered, f"the README says {phrase!r}"
+
+
+# --- Which modules open a socket, and the documents that say so ----------------------
+#
+# The README, SECURITY.md and `acquire.py`'s own docstring each stated that `acquire.py`
+# is the only module in the package that opens a socket. That was true until `refresh.py`
+# landed on 2026-09-08 asking ArcGIS Online for two items' metadata, and false from that
+# moment. Nothing read any of the three, so all three went stale in one commit and none
+# of them said so.
+#
+# SECURITY.md is the one that matters. Its "parts worth attacking" section is a scope
+# claim about outbound requests, and it omitted the newer of the two modules that make
+# them. A security document naming one of two network callers is not merely out of date;
+# it is an inventory with a gap in exactly the place an inventory exists for.
+#
+# So the set is derived rather than typed. `network_modules()` walks the package with
+# `ast`, collects every name imported from `perimeter` and every direct import of a
+# standard-library network module, and keeps the modules that import at least one name
+# that is not an exception class. The exception/reader split is resolved against the
+# imported module itself rather than against a list here, so a reader added upstream is
+# classified correctly without anybody editing this file.
+
+PACKAGE = ROOT / "src" / "wildfire_service_territory_overlap"
+
+#: Direct imports that would open a socket without going through `perimeter`. Nothing in
+#: the package does this today, and the derivation would be blind to one if it appeared,
+#: which is the whole reason this tuple is here rather than assumed empty.
+NETWORK_STDLIB = ("urllib", "http", "socket", "ssl", "ftplib")
+
+#: How the README layout block marks a module that opens a socket. The assertion on it is
+#: two-directional, so a module that stops opening one has to lose the mark: a warning
+#: that could be left on every line is a warning that carries nothing.
+SOCKET_MARK = "OPENS A SOCKET"
+
+
+def package_modules() -> set[str]:
+    return {path.stem for path in PACKAGE.glob("*.py")} - {"__init__"}
+
+
+def _imported_names(path: Path) -> tuple[set[str], set[str]]:
+    """Names imported from `perimeter`, and network modules imported from the stdlib."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    upstream: set[str] = set()
+    stdlib: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            root = node.module.split(".")[0]
+            if root == "perimeter":
+                upstream.update(alias.name for alias in node.names)
+            elif root in NETWORK_STDLIB:
+                stdlib.add(root)
+        elif isinstance(node, ast.Import):
+            stdlib.update(
+                alias.name.split(".")[0]
+                for alias in node.names
+                if alias.name.split(".")[0] in NETWORK_STDLIB
+            )
+    return upstream, stdlib
+
+
+def _is_reader(name: str) -> bool:
+    """An upstream name that is not an exception class is something that fetches.
+
+    Resolved against `perimeter.acquire` itself. A hand-written list of reader names here
+    would be a second copy of upstream's surface, and it would classify a newly added
+    reader as an exception by omission, which fails in the direction that looks safe.
+    """
+    obj = getattr(importlib.import_module("perimeter.acquire"), name, None)
+    return not (isinstance(obj, type) and issubclass(obj, BaseException))
+
+
+def network_modules() -> set[str]:
+    """Every module in the package that can open a socket, derived from its imports."""
+    found: set[str] = set()
+    for path in sorted(PACKAGE.glob("*.py")):
+        upstream, stdlib = _imported_names(path)
+        if stdlib or any(_is_reader(name) for name in upstream):
+            found.add(path.stem)
+    return found
+
+
+def readme_layout_block() -> list[str]:
+    """The lines of the README's layout listing that name a module of this package."""
+    block = README.split("## Layout", 1)[1].split("```", 2)[1]
+    return [
+        line
+        for line in block.splitlines()
+        if line.startswith("  ") and line.strip().split()[0].endswith(".py")
+    ]
+
+
+def test_the_reader_and_exception_split_can_tell_the_two_apart() -> None:
+    """The floor under the derivation, without which it could answer anything.
+
+    A classifier calling every upstream name a reader would report every module that
+    imports `AcquisitionFailed` for an `except` clause; one calling every name an
+    exception would report none at all. Both produce a set, and a set is what the checks
+    below read, so both halves are pinned against upstream's real surface.
+    """
+    assert _is_reader("fetch_document"), "a reader has to classify as a reader"
+    assert _is_reader("layer_record_count")
+    assert not _is_reader("AcquisitionFailed"), "an exception must not"
+    assert not _is_reader("AcquisitionBlocked")
+
+
+def test_the_package_holds_modules_that_open_a_socket_and_modules_that_do_not() -> None:
+    """The second floor: a walk that stopped matching returns the empty set in silence.
+
+    `acquire.py` is the module whose entire purpose is the retrieval, so its absence from
+    the derived set means the walk is broken rather than that the package changed. And a
+    derivation that returned every module would make the marking check below vacuous from
+    the other side.
+    """
+    modules = network_modules()
+    assert "acquire" in modules, (
+        "the import walk no longer sees the retrieval module, so it is deriving nothing "
+        "and every check that reads it is asserting over an empty set"
+    )
+    assert modules < package_modules(), (
+        "no module in this package is free of the network"
+    )
+
+
+def test_the_readme_layout_names_every_module_in_the_package() -> None:
+    """A layout block that omits a module is a map with a road missing.
+
+    It omitted four, including both command-line entry points and the module that had
+    just started making requests. Derived from the filesystem, so it moves only when the
+    package's shape moves and it is not a number anybody maintains.
+    """
+    listed = {
+        line.strip().split()[0].removesuffix(".py") for line in readme_layout_block()
+    }
+    every = package_modules()
+    assert listed == every, (
+        f"the README layout and the package disagree: only in the package "
+        f"{sorted(every - listed)}, only in the README {sorted(listed - every)}"
+    )
+
+
+def test_the_readme_marks_exactly_the_modules_that_open_a_socket() -> None:
+    """Two-directional, so the mark cannot be left behind on a module that stopped."""
+    marked = {
+        line.strip().split()[0].removesuffix(".py")
+        for line in readme_layout_block()
+        if SOCKET_MARK in line
+    }
+    assert marked == network_modules(), (
+        f"the README marks {sorted(marked)} as opening a socket and the package's "
+        f"imports say {sorted(network_modules())}"
+    )
+
+
+def test_security_md_names_every_module_that_opens_a_socket() -> None:
+    """The inventory this file exists to keep, held to the code rather than to a memory.
+
+    Both halves: the scope sentence has to carry the right count, and every network
+    module has to have an entry of its own under the parts worth attacking. The second is
+    the half that was missing.
+    """
+    security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    modules = network_modules()
+    counts = {1: "one place", 2: "two places", 3: "three places", 4: "four places"}
+    assert counts[len(modules)] in security, (
+        f"{len(modules)} modules in this package open a socket and SECURITY.md does not "
+        f"say so: {sorted(modules)}"
+    )
+    attackable = security.split("## The parts worth attacking", 1)[1]
+    for module in sorted(modules):
+        path = f"src/wildfire_service_territory_overlap/{module}.py"
+        assert path in attackable, (
+            f"{path} opens a socket and SECURITY.md's parts-worth-attacking section does "
+            "not name it. An inventory of outbound requests that omits one is not an "
+            "inventory."
+        )
 
 
 # Directories that hold no authored prose: the virtualenv, build output, caches, and

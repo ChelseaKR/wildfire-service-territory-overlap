@@ -194,18 +194,27 @@ would let the compensation go. None of the four has been sent upstream.
 
 ## Layout
 
+Two of these modules open a socket, and both are marked. Every other module in the
+package reads files already on disk. A test derives that set by reading which modules
+import a network reader and refuses this block if it names a different one, so the mark
+cannot go stale the way it did between 2026-09-08 and 2026-09-09.
+
 ```
 src/wildfire_service_territory_overlap/
   sources.py     provenance and the publishers' own caveats, quoted
-  acquire.py     the only module that opens a socket; run by hand, never in CI
+  acquire.py     OPENS A SOCKET: the retrieval; run by hand, never in CI
+  refresh.py     OPENS A SOCKET: has the pin gone stale, and the deliberate refresh
   geometry.py    the pinned projection, the validity ledger, boundary distances
   placement.py   the four outcomes, and the schema guard on the retrieval
   intervals.py   Wilson and Newcombe; the only route a proportion takes to an artifact
   measure.py     the measurements, and a written record of the ones not built
   sensitivity.py the judgment calls, re-run against every alternative
+  cross_check.py one county's own inspection records against this project's counts
   artifacts.py   the publication rules, enforced before anything is written
   artifact_diff.py  what a refresh moved, leaf by leaf, or the run does not pass
+  catalog.py     the report's words, so the renderer carries none of its own
   report.py      the generated document
+  cli.py         the build: files on disk in, both artifacts out
 published/       measurements.json and REPORT.md, from the real retrievals
 fixtures/        hand-written, never sampled from the real file
 docs/adr/        the decisions, with their reasoning

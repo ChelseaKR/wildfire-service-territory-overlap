@@ -10,14 +10,28 @@ report.
 
 An offline command-line tool over two public datasets. It has no server, no accounts, no
 network listener, and no runtime that anyone else operates. It opens a socket in exactly
-one place, `src/wildfire_service_territory_overlap/acquire.py`, which is run by hand and never from a build or CI.
+two places, `src/wildfire_service_territory_overlap/acquire.py` and
+`src/wildfire_service_territory_overlap/refresh.py`, both of which are run by hand and
+never from a build or CI.
+
+This section said "exactly one place" for a day after the second one landed, because
+nothing read it. A test now derives the set from the modules that import a network reader
+and refuses this file if it names a different one.
 
 ## The parts worth attacking
 
-- **`src/wildfire_service_territory_overlap/acquire.py`** is the only code that reads a remote host. It pins the
+- **`src/wildfire_service_territory_overlap/acquire.py`** is where a remote host is read
+  for the records this project measures. It pins the
   scheme to HTTPS, sends a User-Agent naming the project, stops on 401, 403 and 429
   rather than routing around them, and refuses a response that is not JSON. There is no
   fallback path and no retry under a different identity.
+- **`src/wildfire_service_territory_overlap/refresh.py`** reads a remote host too, and it
+  is the newer of the two. `--check` asks each layer for its own record count and asks
+  ArcGIS Online for the two territory items' metadata; `--run` performs the acquisition
+  above and then builds and compares. Both go through the same pinned reader, so the four
+  refusals in the bullet above apply unchanged: there is no fetch and no copy of any
+  refusal in this module. What it adds is that a 200 carrying no readable answer is
+  reported as unmeasurable rather than as nothing having changed.
 - **`src/wildfire_service_territory_overlap/artifacts.py`** decides what is allowed to be written. A change that
   weakens a rule there is a change to what this project will publish about somebody.
 - **`src/wildfire_service_territory_overlap/sources.py`** holds the reviewed endpoints. A change to a URL there

@@ -145,6 +145,38 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Three documents said one module in this package opens a socket, and two do.** The
+  README's layout block, `SECURITY.md`'s scope sentence and `acquire.py`'s own module
+  docstring each named `acquire.py` as the only one. That was true until `refresh.py`
+  landed on 2026-09-08 asking ArcGIS Online for the two territory items' metadata, and
+  false from that commit. Nothing read any of the three, so all three went stale together
+  and none of them said so.
+
+  **`SECURITY.md` is the one that mattered.** Its "parts worth attacking" section is a
+  scope claim about outbound requests, and it omitted the newer of the two modules that
+  make them. A security document naming one of two network callers is not merely out of
+  date; it is an inventory with a gap in the place an inventory exists for. `refresh.py`
+  now has its own entry there, saying what it asks for and noting that the four refusals
+  in the entry above it apply unchanged, because both go through the same pinned reader.
+
+  **The claim is derived now rather than typed.** `network_modules()` walks the package
+  with `ast`, collects every name imported from `perimeter` and every direct import of a
+  standard-library network module, and keeps the modules importing at least one name that
+  is not an exception class. The exception/reader split is resolved against
+  `perimeter.acquire` itself, so a reader added upstream is classified without anybody
+  editing the test. Two floors keep it from answering over an empty set: the split is
+  pinned in both directions against upstream's real surface, and the derived set has to
+  contain `acquire` and has to be a strict subset of the package.
+
+  Run against the unmodified documents the derivation reports two modules where all three
+  said one, which is the evidence, and the README's mark is asserted two-directionally so
+  it cannot be left behind on a module that stops opening a socket.
+
+- **The README's layout block omitted four of the package's thirteen modules**, including
+  both command-line entry points and `refresh.py`, the one that had just started making
+  requests. The block is now held to the filesystem by set equality, so it moves when the
+  package's shape moves and it is not a number anybody maintains.
+
 - **The refresh diff printed its clean verdict over comparisons it had not made.**
   `artifact_diff` exists so that a published number cannot change quietly, and its one
   skimmable line, `No published value moved.` with exit `0`, is the whole product. Three

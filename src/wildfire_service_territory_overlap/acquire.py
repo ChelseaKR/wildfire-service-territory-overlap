@@ -1,8 +1,14 @@
-"""Download the three published layers, once, by hand. The only module that opens a socket.
+"""Download the three published layers, once, by hand. One of two modules that open a socket.
 
 This never runs in a build and never runs in CI. Everything downstream reads files
 already on disk, so the measurements are reproducible without asking anybody's server
 for anything.
+
+``refresh.py`` is the other one: it asks each layer for its own record count through the
+call below, and asks ArcGIS Online for the two territory items' metadata, both through the
+same pinned reader. This docstring said ``acquire.py`` was the only module that opens a
+socket for a day after that landed, and so did the README and SECURITY.md, because nothing
+read the claim. ``tests/test_provenance_and_standards.py`` reads it now.
 
 Every layer is fetched through ``perimeter``, which carries the paged walk. That walk had
 a defect in August 2026: it advanced its offset by the page size it asked for rather than

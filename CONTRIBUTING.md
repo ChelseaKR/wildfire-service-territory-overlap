@@ -183,3 +183,12 @@ Nothing in `build/` is in git, so there is nothing to revert.
 The checklist in `.github/PULL_REQUEST_TEMPLATE.md` is `docs/DEFINITION_OF_DONE.md`
 copied item for item, and a test holds the two together. If your change adds or repairs
 a gate, say what you broke to prove it can refuse, and what it printed.
+
+## Commercial solicitation
+
+Issues here are not open to bids. They are design records, written so a decision is
+reconstructable later, rather than scope documents for outside quoting. Unsolicited offers to
+implement one for a fee will be declined.
+
+Contributions through the normal fork-and-PR process are welcome, and `good first issue` is the
+place to start.

@@ -69,9 +69,8 @@ pytestmark = [
 #: Its git-info plugin keys off ``GITHUB_ACTIONS`` -- not ``CI`` -- and, given a
 #: ``GITHUB_EVENT_PATH`` naming a pull request, runs
 #: ``git fetch origin <base sha> --depth=1`` in whatever work tree the harness's working
-#: directory belongs to. That is this repository, and the fetch writes ``.git/shallow``,
-#: which makes ``tests/test_provenance_and_standards.py`` refuse to read the tag list
-#: and fails
+#: directory belongs to. That is this repository, and the fetch writes ``.git/shallow``.
+#: In the sibling ``perimeter`` that made a tag-reading test refuse and failed
 #: ``make verify`` on branches that changed nothing related. ``playwright.config.ts``
 #: turns the capture off at the source; these are removed as well so the harness behaves
 #: the same way here as it does on a laptop, and so a future config edit cannot quietly
@@ -183,7 +182,10 @@ def test_text_that_spills_out_of_a_correctly_sized_block_fails(tmp_path: Path) -
 
 
 def test_a_scrollable_region_nobody_can_focus_fails(tmp_path: Path) -> None:
-    """The defect this harness found on the published pages, kept as a regression.
+    """The defect this harness found on the sibling `perimeter` pages, kept here too.
+
+    On this repository's page it is also the control that showed axe needed a
+    320-pixel run: removing `tabindex` from every region stayed green at 1280.
 
     A container with overflow-x: auto scrolls for a pointer and not for a keyboard. It
     is invisible to jsdom, which computes no layout and so never knows the container

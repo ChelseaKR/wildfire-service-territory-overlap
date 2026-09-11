@@ -91,7 +91,7 @@ def build(root: Path, pages: dict[str, str]) -> Path:
 
 
 # --------------------------------------------------------------------------------------
-# Inputs the gate cannot examine. ADR 0004: those are failures, not clean runs.
+# Inputs the gate cannot examine. Those are failures, not clean runs.
 # --------------------------------------------------------------------------------------
 
 
@@ -158,7 +158,8 @@ def test_a_focusable_link_inside_aria_hidden_fails(tmp_path: Path) -> None:
     """The measured regression case.
 
     axe cannot decide `aria-hidden-focus` without layout, so it files it as incomplete.
-    The gate reported this page as `ok` and exited 0 until 2026-08-18.
+    In `perimeter`, the gate this one is ported from reported this page as `ok` and
+    exited 0 until 2026-08-18.
     """
     root = build(
         tmp_path / "hidden",
@@ -235,8 +236,8 @@ def test_the_disclosure_also_prints_on_a_failing_run(tmp_path: Path) -> None:
 def test_a_declared_rule_that_never_fires_is_marked_as_such(tmp_path: Path) -> None:
     """`target-size` is declared, and axe reports it on none of these pages.
 
-    README.md called it one of two rules "suppressed for want of a renderer". Measured,
-    it lands in neither `violations` nor `incomplete`: it is not suppressed, it simply
+    `perimeter`'s README called it one of two rules "suppressed for want of a
+    renderer". Measured there, it lands in neither `violations` nor `incomplete`: it is not suppressed, it simply
     never fires, which is a different and weaker statement about what was checked.
     """
     root = build(tmp_path / "clean4", {"page.html": page("<p>Text.</p>")})

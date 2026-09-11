@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 /**
  * The directory under test, and the pages in it.
  *
- * A gate that can find nothing to examine fails rather than passing (ADR-0004), so
+ * A gate that can find nothing to examine fails rather than passing, so
  * both of these throw rather than returning an empty list. Playwright reports a throw
  * at collection time as an error and exits non-zero, which is the behaviour wanted:
  * "no pages were checked" must never read as "no problems were found".

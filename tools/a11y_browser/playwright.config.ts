@@ -28,15 +28,14 @@ export default defineConfig({
   //
   // (`node_modules/playwright/lib/runner/index.js`, `gitDiff`). The harness's working
   // directory is inside this work tree, so `--depth=1` writes `.git/shallow` at the
-  // repository root, naming `main`'s own tip. `tests/test_provenance_and_standards.py` then
-  // refuses to read the tag list -- correctly, because a shallow checkout cannot tell
-  // an untagged repository from an unfetched one -- and `make verify` fails on a branch
-  // whose diff has nothing to do with any of it.
-  //
-  // It read as intermittent: whether it failed depended on whether pytest-xdist
-  // happened to schedule tests/test_a11y_browser_gate.py before the release-claims
-  // tests. Measured on a runner 2026-09-06: `.git/shallow` is absent after checkout,
-  // absent after `make browser-sync`, and present the moment that one test module runs.
+  // repository root, naming `main`'s own tip. In the sibling `perimeter`, which this
+  // harness is ported from, that made a test reading the tag list refuse -- correctly,
+  // because a shallow checkout cannot tell an untagged repository from an unfetched
+  // one -- and `make verify` failed on branches whose diff had nothing to do with it,
+  // intermittently, depending on how pytest-xdist scheduled the browser gate tests.
+  // Measured there on a runner 2026-09-06: `.git/shallow` absent after checkout and
+  // present the moment that one test module ran. The setting is kept here because a
+  // test run has no business rewriting `.git`, whatever later reads it.
   //
   // The plugin keys off GITHUB_ACTIONS, not CI, which is why setting `CI: ""` in the
   // subprocess environment did not disable it. Turning both halves off here is the

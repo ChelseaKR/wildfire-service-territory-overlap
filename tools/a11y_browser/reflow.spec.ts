@@ -7,9 +7,10 @@ import { SITE_DIR, pagesUnderTest, urlFor } from "./pages";
  *
  * axe evaluates the DOM it is handed and has no opinion about the viewport that DOM was
  * laid out in, so a page can pass every axe rule and still force a reader to scroll
- * sideways to read each line at 320 CSS pixels. README.md listed this under "what still
- * needs a person" on the reasoning that reflow needs a viewport. The first half is
- * right; the second does not follow, because a headless browser has one.
+ * sideways to read each line at 320 CSS pixels. The sibling `perimeter` once listed
+ * this under "what still needs a person" on the reasoning that reflow needs a
+ * viewport. The first half is right; the second does not follow, because a headless
+ * browser has one.
  *
  * 320 x 256 is the criterion's own reference: 1280 x 1024 at 400% zoom. It is where a
  * reader at 400% browser zoom lands, and it is most phones.

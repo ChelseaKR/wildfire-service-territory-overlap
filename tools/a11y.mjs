@@ -4,10 +4,10 @@
 // axe-core's WCAG 2.0/2.1/2.2 A and AA rule sets plus the best-practice set, and exits
 // non-zero on any violation. It is not a substitute for a human looking at the page:
 // jsdom does no layout and computes no colours, so the rules that depend on rendered
-// geometry or on painted pixels cannot fire here. Those are named in README.md under
-// "What still needs a person", and colour contrast is measured separately, off the
-// palette itself, in tests/test_page.py -- issue #49 is the assistive-technology pass
-// no engine can stand in for.
+// geometry or on painted pixels cannot fire here. Those rules are declared in
+// UNDECIDABLE_HERE below, each with where it is decided instead, and colour contrast
+// is also measured off the palette itself in tests/test_page.py. What no engine
+// stands in for is the assistive-technology pass issue #49 asks for.
 //
 // axe returns four buckets, not two: `passes`, `violations`, `inapplicable`, and
 // `incomplete`, the rules it ran and could not decide. The obvious gate reads only

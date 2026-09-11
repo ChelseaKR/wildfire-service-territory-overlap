@@ -55,11 +55,11 @@ jobs:
     # 15 was the budget before the page toolchain arrived. `make verify` now also runs
     # `npm ci` twice and downloads a Chromium build, and a timeout below a job's real
     # runtime reads as a cancelled run rather than as a failed one, which is a verdict
-    # nobody can act on. Measured locally on 2026-09-10: 37 seconds, with both node
-    # toolchains and the browser already cached. A cold runner downloads all three and
-    # that has not been measured, so 30 is not derived from it: it is what the sibling
-    # `perimeter` job carries for the same work. The first pull-request run of this job
-    # is the cold measurement, and this budget should be re-derived from it.
+    # nobody can act on. Measured on this job's first run with the page toolchain,
+    # 2026-09-11, pull request #117: `make verify` took 82 seconds and the whole job 94,
+    # with the Python cache restored. Locally, with everything cached, 37 seconds. 30
+    # minutes is the sibling `perimeter` job's budget for the same work, and about
+    # nineteen times the measured job.
     timeout-minutes: 30
     permissions:
       contents: read

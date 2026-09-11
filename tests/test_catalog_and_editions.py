@@ -206,7 +206,15 @@ def _mirror(entry: str) -> str:
     return "".join(parts)
 
 
-MIRROR = translation("Mirror", {key: _mirror(value) for key, value in ENGLISH.items()})
+# The mirror edition is written in no language, so it declares the private-use
+# subtag rather than borrowing one. A test edition claiming to be `es` would put a
+# language code on a page nobody could read, which is the shape this catalog's own
+# `lang` requirement exists to refuse.
+MIRROR = translation(
+    "Mirror",
+    {key: _mirror(value) for key, value in ENGLISH.items()},
+    lang="qaa",
+)
 
 
 def test_a_second_edition_is_refused_unless_it_is_a_complete_one() -> None:
@@ -214,17 +222,17 @@ def test_a_second_edition_is_refused_unless_it_is_a_complete_one() -> None:
     dropped = entries.copy()
     del dropped["limits.heading"]
     with pytest.raises(CatalogRefused, match="carries no string"):
-        translation("Short", dropped)
+        translation("Short", dropped, lang="qaa")
 
     extra = entries.copy()
     extra["limits.afterword"] = "nothing renders this"
     with pytest.raises(CatalogRefused, match="nothing renders"):
-        translation("Long", extra)
+        translation("Long", extra, lang="qaa")
 
     blank = entries.copy()
     blank["limits.heading"] = ""
     with pytest.raises(CatalogRefused, match="empty string"):
-        translation("Blank", blank)
+        translation("Blank", blank, lang="qaa")
 
 
 def test_an_edition_that_drops_a_placeholder_is_refused() -> None:
@@ -238,13 +246,14 @@ def test_an_edition_that_drops_a_placeholder_is_refused() -> None:
         "{fire_records}", "some"
     )
     with pytest.raises(CatalogRefused, match="drops a measured number"):
-        translation("Lossy", entries)
+        translation("Lossy", entries, lang="qaa")
 
 
 def test_a_catalog_names_its_edition_and_refuses_an_empty_name() -> None:
     with pytest.raises(CatalogRefused, match="name its edition"):
-        Catalog("", dict(ENGLISH))
+        Catalog("", dict(ENGLISH), lang="qaa")
     assert ENGLISH.edition
+    assert ENGLISH.lang == "en"
     with pytest.raises(KeyError, match="carries no string"):
         ENGLISH["nothing.declares.this"]
 

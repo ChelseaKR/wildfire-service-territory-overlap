@@ -1,0 +1,106 @@
+# Publish site/index.html to GitHub Pages, after checking the bytes that are about to
+# be published rather than a rebuild of them.
+#
+# NOTHING HERE RUNS ON A MERGE, ON PURPOSE.
+#
+# This repository has never been a website. Turning it into one is a decision the
+# maintainer makes, not a side effect of merging a pull request, so the only trigger
+# below is `workflow_dispatch`. The two steps that make this repository a published
+# site are both hers and neither is in this file:
+#
+#   1. Settings > Pages > Build and deployment > Source > GitHub Actions.
+#   2. Add the trigger, if the site should follow `main`:
+#
+#        on:
+#          push:
+#            branches: [main]
+#          workflow_dispatch:
+#
+# Until then this workflow is a reviewed, pinned, runnable thing that does nothing by
+# itself, and `make pages` is what holds the page to its gates on every pull request.
+#
+# What the build job checks, in the order it checks it:
+#
+#   1. `make verify`, which includes the WCAG gate over the committed `site/` and the
+#      test that `site/index.html` is what the renderer produces from
+#      `published/measurements.json` right now. So a page that drifted from the
+#      artifact it claims to render cannot be deployed.
+#   2. The same html-validate and axe runs again over the exact directory being
+#      uploaded, so what is served is what passed rather than a build that resembles
+#      it.
+#
+# No network for data. `data/raw/` is not in this repository, `published/` is
+# committed, and `site/` is a rendering of `published/measurements.json`. The only
+# network this job needs is the toolchains and, for the browser half, one Chromium
+# download.
+#
+# Every action is pinned to the full 40-char commit SHA of its tag, resolved
+# 2026-09-10 via `gh api repos/OWNER/REPO/git/matching-refs/tags`, and kept as
+# `@<sha> # vX.Y.Z` so the version stays readable next to the pin.
+name: pages
+
+on:
+  workflow_dispatch:
+
+# The floor for every job. `deploy` widens it to the two Pages scopes; `build`, which
+# is the job that runs repository code, holds only this.
+permissions:
+  contents: read
+
+concurrency:
+  # One deployment at a time, and never cancel one in flight: a cancelled deploy can
+  # leave the site serving a half-uploaded artifact, which is worse than a queue.
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+          version: ">=0.11.0"
+          python-version: "3.12"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: make verify (byte-for-byte what ci.yml runs)
+        run: make verify
+
+      - name: the pages being published must pass the same HTML and WCAG gates
+        run: |
+          npx html-validate "site/*.html"
+          node tools/a11y.mjs site
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # The two scopes the Pages deployment API needs, on the one job that needs them.
+    # The build job, which is the job that runs repository code, holds neither.
+    permissions:
+      pages: write # create the Pages deployment
+      id-token: write # mint the OIDC token the deployment is authenticated with
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

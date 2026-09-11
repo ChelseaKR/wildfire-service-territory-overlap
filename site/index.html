@@ -1,0 +1,2175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which published electric service territory is a burned structure in?</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #ffffff;
+  --surface: #f3f5f7;
+  --ink: #16181c;
+  --ink-quiet: #4b5158;
+  --rule: #767d86;
+  --focus: #0b4f9e;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #121417;
+    --surface: #1b1f24;
+    --ink: #eef1f4;
+    --ink-quiet: #b9c1ca;
+    --rule: #7d868f;
+    --focus: #79b0f2;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+main {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 1rem; }
+h2 { font-size: 1.3rem; line-height: 1.3; margin: 2.5rem 0 0.75rem; }
+h3 { font-size: 1.1rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+p { margin: 0 0 1rem; overflow-wrap: anywhere; }
+ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+li { margin: 0 0 0.35rem; overflow-wrap: anywhere; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.95em;
+}
+.scroll {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  margin: 0 0 1.5rem;
+}
+table { border-collapse: collapse; width: 100%; }
+caption {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  color: var(--ink-quiet);
+  font-size: 0.9rem;
+}
+th, td {
+  border-top: 1px solid var(--rule);
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+thead th { background: var(--surface); }
+th[scope="row"] { font-weight: 600; }
+.num { text-align: right; white-space: nowrap; }
+.mid { text-align: center; }
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Which published electric service territory is a burned structure in?</h1>
+<p>Unofficial. Not affiliated with, endorsed by, or approved by CAL FIRE, the California Energy Commission, or any electric utility. This is descriptive geography over two public datasets. It is not a risk rating of any company and it contains no information about the location of anybody's infrastructure.</p>
+<p>Damage inspections retrieved 2026-08-23. Territory boundaries retrieved 2026-08-23, publisher item last modified 2026-08-12.</p>
+<p>This document is generated. Every figure below is read from <code>measurements.json</code>, which is produced by the same run.</p>
+<h2>Can the join be made at all</h2>
+<p>The record set holds 132,520 wildfire damage-inspection records. 2 records in the published file describe a hazard other than fire and are excluded here rather than counted as wildfire.</p>
+<section class="scroll" tabindex="0" aria-labelledby="can-the-join-be-made-at-all-outcome">
+<table>
+<caption id="can-the-join-be-made-at-all-outcome">Can the join be made at all: Outcome</caption>
+<thead>
+<tr>
+<th scope="col">Outcome</th>
+<th scope="col" class="num">Share</th>
+<th scope="col" class="num">Records</th>
+<th scope="col" class="num">Of</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">placed in exactly one published territory</th>
+<td class="num">62.1%</td>
+<td class="num">82,353</td>
+<td class="num">132,520</td>
+<td>61.9% to 62.4%</td>
+</tr>
+<tr>
+<th scope="row">inside two or more published territories</th>
+<td class="num">37.9%</td>
+<td class="num">50,167</td>
+<td class="num">132,520</td>
+<td>37.6% to 38.1%</td>
+</tr>
+<tr>
+<th scope="row">inside no published territory</th>
+<td class="num">0.0%</td>
+<td class="num">0</td>
+<td class="num">132,520</td>
+<td>0.000% to 0.003%</td>
+</tr>
+<tr>
+<th scope="row">coordinate not usable</th>
+<td class="num">0.0%</td>
+<td class="num">0</td>
+<td class="num">132,520</td>
+<td>0.000% to 0.003%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>A record inside two or more published territories is not awarded to either. The publisher states that the boundaries are approximate and that not all entities are represented, so public data does not say which entity such a record belongs to, and this project does not decide on its behalf.</p>
+<h2>Do the records that can be attributed look like the ones that cannot</h2>
+<section class="scroll" tabindex="0" aria-labelledby="do-the-records-that-can-be-attributed-look-like-the-ones-that-cannot-population">
+<table>
+<caption id="do-the-records-that-can-be-attributed-look-like-the-ones-that-cannot-population">Do the records that can be attributed look like the ones that cannot: Population</caption>
+<thead>
+<tr>
+<th scope="col">Population</th>
+<th scope="col" class="num">Destroyed share</th>
+<th scope="col" class="num">Destroyed</th>
+<th scope="col" class="num">Inspected</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">destroyed share among placed records</th>
+<td class="num">53.0%</td>
+<td class="num">43,609</td>
+<td class="num">82,353</td>
+<td>52.6% to 53.3%</td>
+</tr>
+<tr>
+<th scope="row">destroyed share among contested records</th>
+<td class="num">53.4%</td>
+<td class="num">26,780</td>
+<td class="num">50,167</td>
+<td>52.9% to 53.8%</td>
+</tr>
+<tr>
+<th scope="row">destroyed share among records in no published territory</th>
+<td class="num">not measured</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>Difference, placed minus contested: -0.4% (-1.0% to 0.1%, Newcombe score).</p>
+<p>The interval includes zero, so this comparison does not establish a difference between the two populations.</p>
+<h2>The placed and contested populations, by structure class</h2>
+<p>The placed-versus-contested check from above, run again inside each structure class CAL FIRE publishes. A difference confined to one class would hide inside the aggregate; a difference spread across every class is sturdier than one number. Classes in name order; none is compared against another.</p>
+<section class="scroll" tabindex="0" aria-labelledby="the-placed-and-contested-populations-by-structure-class-structure-class">
+<table>
+<caption id="the-placed-and-contested-populations-by-structure-class-structure-class">The placed and contested populations, by structure class: Structure class</caption>
+<thead>
+<tr>
+<th scope="col">Structure class</th>
+<th scope="col" class="num">Placed destroyed share</th>
+<th scope="col" class="num">Contested destroyed share</th>
+<th scope="col">Difference (Newcombe)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Agriculture</th>
+<td class="num">42.9%</td>
+<td class="num">not measured</td>
+<td>not measured</td>
+</tr>
+<tr>
+<th scope="row">Infrastructure</th>
+<td class="num">15.4%</td>
+<td class="num">5.8%</td>
+<td>9.6% (5.2% to 13.3%)</td>
+</tr>
+<tr>
+<th scope="row">Mixed Commercial/Residential</th>
+<td class="num">28.0%</td>
+<td class="num">25.7%</td>
+<td>2.3% (-9.9% to 12.4%)</td>
+</tr>
+<tr>
+<th scope="row">Multiple Residence</th>
+<td class="num">43.2%</td>
+<td class="num">18.7%</td>
+<td>24.5% (20.3% to 28.7%)</td>
+</tr>
+<tr>
+<th scope="row">Nonresidential Commercial</th>
+<td class="num">41.0%</td>
+<td class="num">34.9%</td>
+<td>6.0% (3.1% to 8.9%)</td>
+</tr>
+<tr>
+<th scope="row">Other Minor Structure</th>
+<td class="num">53.7%</td>
+<td class="num">57.6%</td>
+<td>-3.8% (-4.9% to -2.7%)</td>
+</tr>
+<tr>
+<th scope="row">Single Residence</th>
+<td class="num">54.3%</td>
+<td class="num">54.4%</td>
+<td>-0.1% (-0.8% to 0.5%)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2>Is the unattributable share a property of the data or of the fire</h2>
+<p>The headline is one number over the whole record set, which reads as a property of the two datasets. It is mostly not. The published outlines overlap in particular places, so whether a record is contested is largely settled by where its fire burned.</p>
+<p>Of 405 distinct incidents in the record set, 94.3% (91.6% to 96.2%) fall entirely on one side: every classified record contested, or none of them. Those incidents hold 62.4% of the records that carry an incident name.</p>
+<section class="scroll" tabindex="0" aria-labelledby="is-the-unattributable-share-a-property-of-the-data-or-of-the-fire-incidents">
+<table>
+<caption id="is-the-unattributable-share-a-property-of-the-data-or-of-the-fire-incidents">Is the unattributable share a property of the data or of the fire: Incidents</caption>
+<thead>
+<tr>
+<th scope="col">Incidents</th>
+<th scope="col" class="num">Share</th>
+<th scope="col" class="num">Incidents</th>
+<th scope="col" class="num">Of</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">incidents whose every classified record is contested</th>
+<td class="num">7.2%</td>
+<td class="num">29</td>
+<td class="num">405</td>
+<td>5.0% to 10.1%</td>
+</tr>
+<tr>
+<th scope="row">incidents no record of which is contested</th>
+<td class="num">87.2%</td>
+<td class="num">353</td>
+<td class="num">405</td>
+<td>83.5% to 90.1%</td>
+</tr>
+<tr>
+<th scope="row">incidents with records on both sides</th>
+<td class="num">5.7%</td>
+<td class="num">23</td>
+<td class="num">405</td>
+<td>3.8% to 8.4%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>The same thing seen by year. The boundaries are one retrieval and are identical for every row, so the movement down this column is where each year's fires burned and not a change in the published boundaries. No trend is published.</p>
+<section class="scroll" tabindex="0" aria-labelledby="is-the-unattributable-share-a-property-of-the-data-or-of-the-fire-incident-year">
+<table>
+<caption id="is-the-unattributable-share-a-property-of-the-data-or-of-the-fire-incident-year">Is the unattributable share a property of the data or of the fire: Incident year</caption>
+<thead>
+<tr>
+<th scope="col" class="num">Incident year</th>
+<th scope="col" class="num">Records</th>
+<th scope="col" class="num">Classified</th>
+<th scope="col" class="num">Contested share</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row" class="num">2013</th>
+<td class="num">279</td>
+<td class="num">279</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.4%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2014</th>
+<td class="num">310</td>
+<td class="num">310</td>
+<td class="num">15.8%</td>
+<td>12.2% to 20.3%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2015</th>
+<td class="num">3,192</td>
+<td class="num">3,192</td>
+<td class="num">0.2%</td>
+<td>0.1% to 0.5%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2016</th>
+<td class="num">944</td>
+<td class="num">944</td>
+<td class="num">3.1%</td>
+<td>2.1% to 4.4%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2017</th>
+<td class="num">12,757</td>
+<td class="num">12,757</td>
+<td class="num">60.5%</td>
+<td>59.7% to 61.4%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2018</th>
+<td class="num">28,403</td>
+<td class="num">28,403</td>
+<td class="num">7.0%</td>
+<td>6.7% to 7.3%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2019</th>
+<td class="num">2,108</td>
+<td class="num">2,108</td>
+<td class="num">86.6%</td>
+<td>85.1% to 88.0%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2020</th>
+<td class="num">28,626</td>
+<td class="num">28,626</td>
+<td class="num">19.9%</td>
+<td>19.5% to 20.4%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2021</th>
+<td class="num">12,253</td>
+<td class="num">12,253</td>
+<td class="num">0.0082%</td>
+<td>0.00% to 0.05%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2022</th>
+<td class="num">3,009</td>
+<td class="num">3,009</td>
+<td class="num">11.8%</td>
+<td>10.7% to 13.0%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2023</th>
+<td class="num">229</td>
+<td class="num">229</td>
+<td class="num">9.2%</td>
+<td>6.1% to 13.6%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2024</th>
+<td class="num">8,117</td>
+<td class="num">8,117</td>
+<td class="num">32.1%</td>
+<td>31.1% to 33.1%</td>
+</tr>
+<tr>
+<th scope="row" class="num">2025</th>
+<td class="num">32,293</td>
+<td class="num">32,293</td>
+<td class="num">92.5%</td>
+<td>92.2% to 92.8%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>The same cut by county, from CAL FIRE's own county field. In name order, never in size order, and no county is compared against another. This says where in California the published outlines overlap: 52 counties are named in the record set, and 30 records carry no county name and are left out of this cut alone.</p>
+<p>The county cut carries the contested share and nothing else. A county is not a service territory and this is not a statement about who serves it: it says where in California the published outlines overlap each other. No damage rate is published for a county, for the same reason none is published for a territory.</p>
+<section class="scroll" tabindex="0" aria-labelledby="is-the-unattributable-share-a-property-of-the-data-or-of-the-fire-county">
+<table>
+<caption id="is-the-unattributable-share-a-property-of-the-data-or-of-the-fire-county">Is the unattributable share a property of the data or of the fire: County</caption>
+<thead>
+<tr>
+<th scope="col">County</th>
+<th scope="col" class="num">Records</th>
+<th scope="col" class="num">Classified</th>
+<th scope="col" class="num">Contested share</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Alameda</th>
+<td class="num">120</td>
+<td class="num">120</td>
+<td class="num">0.8%</td>
+<td>0.1% to 4.6%</td>
+</tr>
+<tr>
+<th scope="row">Alpine</th>
+<td class="num">415</td>
+<td class="num">415</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.9%</td>
+</tr>
+<tr>
+<th scope="row">Amador</th>
+<td class="num">87</td>
+<td class="num">87</td>
+<td class="num">0.0%</td>
+<td>0.0% to 4.2%</td>
+</tr>
+<tr>
+<th scope="row">Butte</th>
+<td class="num">28,747</td>
+<td class="num">28,747</td>
+<td class="num">0.0%</td>
+<td>0.00% to 0.01%</td>
+</tr>
+<tr>
+<th scope="row">Calaveras</th>
+<td class="num">1,281</td>
+<td class="num">1,281</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Colusa</th>
+<td class="num">52</td>
+<td class="num">52</td>
+<td class="num">0.0%</td>
+<td>0.0% to 6.9%</td>
+</tr>
+<tr>
+<th scope="row">Contra Costa</th>
+<td class="num">2</td>
+<td class="num">2</td>
+<td class="num">50.0%</td>
+<td>9.5% to 90.5%</td>
+</tr>
+<tr>
+<th scope="row">El Dorado</th>
+<td class="num">4,668</td>
+<td class="num">4,668</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Fresno</th>
+<td class="num">2,984</td>
+<td class="num">2,984</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Glenn</th>
+<td class="num">52</td>
+<td class="num">52</td>
+<td class="num">0.0%</td>
+<td>0.0% to 6.9%</td>
+</tr>
+<tr>
+<th scope="row">Humboldt</th>
+<td class="num">19</td>
+<td class="num">19</td>
+<td class="num">0.0%</td>
+<td>0.0% to 16.8%</td>
+</tr>
+<tr>
+<th scope="row">Inyo</th>
+<td class="num">20</td>
+<td class="num">20</td>
+<td class="num">0.0%</td>
+<td>0.0% to 16.1%</td>
+</tr>
+<tr>
+<th scope="row">Kern</th>
+<td class="num">1,478</td>
+<td class="num">1,478</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Kings</th>
+<td class="num">1</td>
+<td class="num">1</td>
+<td class="num">0.0%</td>
+<td>0.0% to 79.3%</td>
+</tr>
+<tr>
+<th scope="row">Lake</th>
+<td class="num">3,215</td>
+<td class="num">3,215</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Lassen</th>
+<td class="num">1,020</td>
+<td class="num">1,020</td>
+<td class="num">8.3%</td>
+<td>6.8% to 10.2%</td>
+</tr>
+<tr>
+<th scope="row">Los Angeles</th>
+<td class="num">34,464</td>
+<td class="num">34,464</td>
+<td class="num">94.0%</td>
+<td>93.8% to 94.3%</td>
+</tr>
+<tr>
+<th scope="row">Madera</th>
+<td class="num">761</td>
+<td class="num">761</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.5%</td>
+</tr>
+<tr>
+<th scope="row">Mariposa</th>
+<td class="num">1,182</td>
+<td class="num">1,182</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Mendocino</th>
+<td class="num">937</td>
+<td class="num">937</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">Merced</th>
+<td class="num">3</td>
+<td class="num">3</td>
+<td class="num">0.0%</td>
+<td>0.0% to 56.1%</td>
+</tr>
+<tr>
+<th scope="row">Modoc</th>
+<td class="num">7</td>
+<td class="num">7</td>
+<td class="num">14.3%</td>
+<td>2.6% to 51.3%</td>
+</tr>
+<tr>
+<th scope="row">Mono</th>
+<td class="num">114</td>
+<td class="num">114</td>
+<td class="num">0.0%</td>
+<td>0.0% to 3.3%</td>
+</tr>
+<tr>
+<th scope="row">Monterey</th>
+<td class="num">699</td>
+<td class="num">699</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.5%</td>
+</tr>
+<tr>
+<th scope="row">Napa</th>
+<td class="num">6,320</td>
+<td class="num">6,320</td>
+<td class="num">0.2%</td>
+<td>0.1% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Nevada</th>
+<td class="num">344</td>
+<td class="num">344</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.1%</td>
+</tr>
+<tr>
+<th scope="row">Orange</th>
+<td class="num">2,510</td>
+<td class="num">2,510</td>
+<td class="num">93.9%</td>
+<td>92.9% to 94.7%</td>
+</tr>
+<tr>
+<th scope="row">Placer</th>
+<td class="num">606</td>
+<td class="num">606</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.6%</td>
+</tr>
+<tr>
+<th scope="row">Plumas</th>
+<td class="num">3,593</td>
+<td class="num">3,593</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Riverside</th>
+<td class="num">1,379</td>
+<td class="num">1,379</td>
+<td class="num">42.3%</td>
+<td>39.8% to 45.0%</td>
+</tr>
+<tr>
+<th scope="row">Sacramento</th>
+<td class="num">10</td>
+<td class="num">10</td>
+<td class="num">0.0%</td>
+<td>0.0% to 27.8%</td>
+</tr>
+<tr>
+<th scope="row">San Benito</th>
+<td class="num">42</td>
+<td class="num">42</td>
+<td class="num">2.4%</td>
+<td>0.4% to 12.3%</td>
+</tr>
+<tr>
+<th scope="row">San Bernardino</th>
+<td class="num">1,003</td>
+<td class="num">1,003</td>
+<td class="num">8.8%</td>
+<td>7.2% to 10.7%</td>
+</tr>
+<tr>
+<th scope="row">San Diego</th>
+<td class="num">1,114</td>
+<td class="num">1,114</td>
+<td class="num">45.4%</td>
+<td>42.5% to 48.4%</td>
+</tr>
+<tr>
+<th scope="row">San Joaquin</th>
+<td class="num">104</td>
+<td class="num">104</td>
+<td class="num">2.9%</td>
+<td>1.0% to 8.1%</td>
+</tr>
+<tr>
+<th scope="row">San Luis Obispo</th>
+<td class="num">110</td>
+<td class="num">110</td>
+<td class="num">0.0%</td>
+<td>0.0% to 3.4%</td>
+</tr>
+<tr>
+<th scope="row">San Mateo</th>
+<td class="num">207</td>
+<td class="num">207</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.8%</td>
+</tr>
+<tr>
+<th scope="row">Santa Barbara</th>
+<td class="num">376</td>
+<td class="num">376</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.0%</td>
+</tr>
+<tr>
+<th scope="row">Santa Clara</th>
+<td class="num">589</td>
+<td class="num">589</td>
+<td class="num">97.8%</td>
+<td>96.3% to 98.7%</td>
+</tr>
+<tr>
+<th scope="row">Santa Cruz</th>
+<td class="num">4,637</td>
+<td class="num">4,637</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Shasta</th>
+<td class="num">3,790</td>
+<td class="num">3,790</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Siskiyou</th>
+<td class="num">1,877</td>
+<td class="num">1,877</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Solano</th>
+<td class="num">2,377</td>
+<td class="num">2,377</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Sonoma</th>
+<td class="num">11,721</td>
+<td class="num">11,721</td>
+<td class="num">99.9%</td>
+<td>99.9% to 100.0%</td>
+</tr>
+<tr>
+<th scope="row">Stanislaus</th>
+<td class="num">243</td>
+<td class="num">243</td>
+<td class="num">18.9%</td>
+<td>14.5% to 24.3%</td>
+</tr>
+<tr>
+<th scope="row">Tehama</th>
+<td class="num">1,212</td>
+<td class="num">1,212</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Trinity</th>
+<td class="num">572</td>
+<td class="num">572</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.7%</td>
+</tr>
+<tr>
+<th scope="row">Tulare</th>
+<td class="num">1,036</td>
+<td class="num">1,036</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">Tuolumne</th>
+<td class="num">352</td>
+<td class="num">352</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.1%</td>
+</tr>
+<tr>
+<th scope="row">Ventura</th>
+<td class="num">3,436</td>
+<td class="num">3,436</td>
+<td class="num">52.1%</td>
+<td>50.4% to 53.7%</td>
+</tr>
+<tr>
+<th scope="row">Yolo</th>
+<td class="num">278</td>
+<td class="num">278</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.4%</td>
+</tr>
+<tr>
+<th scope="row">Yuba</th>
+<td class="num">324</td>
+<td class="num">324</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.2%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2>Does the coordinate agree with the recorded county</h2>
+<p>CAL FIRE records a county name on every row, and this project reports it as published. This section measures that field against an authoritative county boundary layer rather than trusting it or correcting it: how often a record's coordinate lands outside the county its publisher recorded. 132,490 of 132,520 records could be compared at all; the rest had no usable coordinate or a county label the boundary layer does not carry, and they stay in every other denominator in this project.</p>
+<section class="scroll" tabindex="0" aria-labelledby="does-the-coordinate-agree-with-the-recorded-county-outcome">
+<table>
+<caption id="does-the-coordinate-agree-with-the-recorded-county-outcome">Does the coordinate agree with the recorded county: Outcome</caption>
+<thead>
+<tr>
+<th scope="col">Outcome</th>
+<th scope="col" class="num">Share</th>
+<th scope="col" class="num">Records</th>
+<th scope="col" class="num">Of</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">coordinate and recorded county agree</th>
+<td class="num">100.0%</td>
+<td class="num">132,459</td>
+<td class="num">132,490</td>
+<td>99.97% to 99.98%</td>
+</tr>
+<tr>
+<th scope="row">coordinate sits outside the recorded county</th>
+<td class="num">0.0234%</td>
+<td class="num">31</td>
+<td class="num">132,490</td>
+<td>0.02% to 0.03%</td>
+</tr>
+<tr>
+<th scope="row">comparable records whose coordinate reaches no county polygon</th>
+<td class="num">0.0%</td>
+<td class="num">0</td>
+<td class="num">132,490</td>
+<td>0.000% to 0.003%</td>
+</tr>
+<tr>
+<th scope="row">records whose COUNTY label the boundary layer does not carry</th>
+<td class="num">0.0%</td>
+<td class="num">0</td>
+<td class="num">132,520</td>
+<td>0.000% to 0.003%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>Counted, never corrected. The boundary layer's publisher warns that its own boundary errors will exist, so a disagreement is evidence that two published sources differ and not a verdict on which one is right. No damage rate is published for a county here either.</p>
+<section class="scroll" tabindex="0" aria-labelledby="does-the-coordinate-agree-with-the-recorded-county-county">
+<table>
+<caption id="does-the-coordinate-agree-with-the-recorded-county-county">Does the coordinate agree with the recorded county: County</caption>
+<thead>
+<tr>
+<th scope="col">County</th>
+<th scope="col" class="num">Compared</th>
+<th scope="col" class="num">Agreed</th>
+<th scope="col" class="num">Matched no county</th>
+<th scope="col" class="num">Disagreed share</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Alameda</th>
+<td class="num">120</td>
+<td class="num">120</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 3.1%</td>
+</tr>
+<tr>
+<th scope="row">Alpine</th>
+<td class="num">415</td>
+<td class="num">415</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.9%</td>
+</tr>
+<tr>
+<th scope="row">Amador</th>
+<td class="num">87</td>
+<td class="num">87</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 4.2%</td>
+</tr>
+<tr>
+<th scope="row">Butte</th>
+<td class="num">28,747</td>
+<td class="num">28,747</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.00% to 0.01%</td>
+</tr>
+<tr>
+<th scope="row">Calaveras</th>
+<td class="num">1,281</td>
+<td class="num">1,281</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Colusa</th>
+<td class="num">52</td>
+<td class="num">52</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 6.9%</td>
+</tr>
+<tr>
+<th scope="row">Contra Costa</th>
+<td class="num">2</td>
+<td class="num">2</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 65.8%</td>
+</tr>
+<tr>
+<th scope="row">El Dorado</th>
+<td class="num">4,668</td>
+<td class="num">4,668</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Fresno</th>
+<td class="num">2,984</td>
+<td class="num">2,984</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Glenn</th>
+<td class="num">52</td>
+<td class="num">52</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 6.9%</td>
+</tr>
+<tr>
+<th scope="row">Humboldt</th>
+<td class="num">19</td>
+<td class="num">19</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 16.8%</td>
+</tr>
+<tr>
+<th scope="row">Inyo</th>
+<td class="num">20</td>
+<td class="num">20</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 16.1%</td>
+</tr>
+<tr>
+<th scope="row">Kern</th>
+<td class="num">1,478</td>
+<td class="num">1,478</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Kings</th>
+<td class="num">1</td>
+<td class="num">1</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 79.3%</td>
+</tr>
+<tr>
+<th scope="row">Lake</th>
+<td class="num">3,215</td>
+<td class="num">3,210</td>
+<td class="num">0</td>
+<td class="num">0.2%</td>
+<td>0.1% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">Lassen</th>
+<td class="num">1,020</td>
+<td class="num">1,020</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">Los Angeles</th>
+<td class="num">34,464</td>
+<td class="num">34,464</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.00% to 0.01%</td>
+</tr>
+<tr>
+<th scope="row">Madera</th>
+<td class="num">761</td>
+<td class="num">761</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.5%</td>
+</tr>
+<tr>
+<th scope="row">Mariposa</th>
+<td class="num">1,182</td>
+<td class="num">1,181</td>
+<td class="num">0</td>
+<td class="num">0.1%</td>
+<td>0.0% to 0.5%</td>
+</tr>
+<tr>
+<th scope="row">Mendocino</th>
+<td class="num">937</td>
+<td class="num">937</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">Merced</th>
+<td class="num">3</td>
+<td class="num">3</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 56.1%</td>
+</tr>
+<tr>
+<th scope="row">Modoc</th>
+<td class="num">7</td>
+<td class="num">7</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 35.4%</td>
+</tr>
+<tr>
+<th scope="row">Mono</th>
+<td class="num">114</td>
+<td class="num">114</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 3.3%</td>
+</tr>
+<tr>
+<th scope="row">Monterey</th>
+<td class="num">699</td>
+<td class="num">699</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.5%</td>
+</tr>
+<tr>
+<th scope="row">Napa</th>
+<td class="num">6,320</td>
+<td class="num">6,315</td>
+<td class="num">0</td>
+<td class="num">0.1%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Nevada</th>
+<td class="num">344</td>
+<td class="num">344</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.1%</td>
+</tr>
+<tr>
+<th scope="row">Orange</th>
+<td class="num">2,510</td>
+<td class="num">2,510</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Placer</th>
+<td class="num">606</td>
+<td class="num">606</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.6%</td>
+</tr>
+<tr>
+<th scope="row">Plumas</th>
+<td class="num">3,593</td>
+<td class="num">3,593</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Riverside</th>
+<td class="num">1,379</td>
+<td class="num">1,379</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Sacramento</th>
+<td class="num">10</td>
+<td class="num">10</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 27.8%</td>
+</tr>
+<tr>
+<th scope="row">San Benito</th>
+<td class="num">42</td>
+<td class="num">42</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 8.4%</td>
+</tr>
+<tr>
+<th scope="row">San Bernardino</th>
+<td class="num">1,003</td>
+<td class="num">1,003</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">San Diego</th>
+<td class="num">1,114</td>
+<td class="num">1,114</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">San Joaquin</th>
+<td class="num">104</td>
+<td class="num">102</td>
+<td class="num">0</td>
+<td class="num">1.9%</td>
+<td>0.5% to 6.7%</td>
+</tr>
+<tr>
+<th scope="row">San Luis Obispo</th>
+<td class="num">110</td>
+<td class="num">109</td>
+<td class="num">0</td>
+<td class="num">0.9%</td>
+<td>0.2% to 5.0%</td>
+</tr>
+<tr>
+<th scope="row">San Mateo</th>
+<td class="num">207</td>
+<td class="num">207</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.8%</td>
+</tr>
+<tr>
+<th scope="row">Santa Barbara</th>
+<td class="num">376</td>
+<td class="num">376</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.0%</td>
+</tr>
+<tr>
+<th scope="row">Santa Clara</th>
+<td class="num">589</td>
+<td class="num">587</td>
+<td class="num">0</td>
+<td class="num">0.3%</td>
+<td>0.1% to 1.2%</td>
+</tr>
+<tr>
+<th scope="row">Santa Cruz</th>
+<td class="num">4,637</td>
+<td class="num">4,636</td>
+<td class="num">0</td>
+<td class="num">0.0216%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Shasta</th>
+<td class="num">3,790</td>
+<td class="num">3,788</td>
+<td class="num">0</td>
+<td class="num">0.1%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Siskiyou</th>
+<td class="num">1,877</td>
+<td class="num">1,877</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Solano</th>
+<td class="num">2,377</td>
+<td class="num">2,377</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.2%</td>
+</tr>
+<tr>
+<th scope="row">Sonoma</th>
+<td class="num">11,721</td>
+<td class="num">11,716</td>
+<td class="num">0</td>
+<td class="num">0.0427%</td>
+<td>0.0% to 0.1%</td>
+</tr>
+<tr>
+<th scope="row">Stanislaus</th>
+<td class="num">243</td>
+<td class="num">241</td>
+<td class="num">0</td>
+<td class="num">0.8%</td>
+<td>0.2% to 3.0%</td>
+</tr>
+<tr>
+<th scope="row">Tehama</th>
+<td class="num">1,212</td>
+<td class="num">1,212</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Trinity</th>
+<td class="num">572</td>
+<td class="num">572</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.7%</td>
+</tr>
+<tr>
+<th scope="row">Tulare</th>
+<td class="num">1,036</td>
+<td class="num">1,036</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 0.4%</td>
+</tr>
+<tr>
+<th scope="row">Tuolumne</th>
+<td class="num">352</td>
+<td class="num">350</td>
+<td class="num">0</td>
+<td class="num">0.6%</td>
+<td>0.2% to 2.0%</td>
+</tr>
+<tr>
+<th scope="row">Ventura</th>
+<td class="num">3,436</td>
+<td class="num">3,433</td>
+<td class="num">0</td>
+<td class="num">0.1%</td>
+<td>0.0% to 0.3%</td>
+</tr>
+<tr>
+<th scope="row">Yolo</th>
+<td class="num">278</td>
+<td class="num">278</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.4%</td>
+</tr>
+<tr>
+<th scope="row">Yuba</th>
+<td class="num">324</td>
+<td class="num">324</td>
+<td class="num">0</td>
+<td class="num">0.0%</td>
+<td>0.0% to 1.2%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2>Every published territory, in name order</h2>
+<p>Counts, and two within-territory shares. No damage rate is published for a territory and no territory is ordered against another. The concentration column is why: where one incident supplies most of a territory's records, a territory-level damage rate would be a statement about that one fire.</p>
+<p>A territory appears in more than one row of the contested count, because a record inside three outlines is contested for all three.</p>
+<section class="scroll" tabindex="0" aria-labelledby="every-published-territory-in-name-order-territory">
+<table>
+<caption id="every-published-territory-in-name-order-territory">Every published territory, in name order: Territory</caption>
+<thead>
+<tr>
+<th scope="col">Territory</th>
+<th scope="col">Type</th>
+<th scope="col" class="num">Placed</th>
+<th scope="col" class="num">Contested</th>
+<th scope="col" class="num">Incidents</th>
+<th scope="col">Largest incident share</th>
+<th scope="col">Within 250 m of the edge</th>
+<th scope="col">Geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Aha Macav Power Service</th>
+<td>Tribal</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Alameda Power &amp; Telecom</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Anza Electric Cooperative, Inc.</th>
+<td>CO-OP</td>
+<td class="num">305</td>
+<td class="num">0</td>
+<td class="num">11</td>
+<td>39.0%</td>
+<td>5.2%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Azusa Light &amp; Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Bear Valley Electric Service</th>
+<td>IOU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Biggs Municipal Utilities</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Burbank Water &amp; Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City and County of San Francisco - Hetch Hetchy Water and Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">4</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">City of Anaheim Public Utilities Department</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">46</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Banning Electric Department</th>
+<td>POU</td>
+<td class="num">23</td>
+<td class="num">0</td>
+<td class="num">2</td>
+<td>69.6%</td>
+<td>95.7%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Cerritos</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Corona Department of Water &amp; Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Healdsburg Electric Department</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">69</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">City of Industry</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Lompoc Electric Division</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Needles</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Palo Alto</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">City of Pittsburg</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Riverside</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">42</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Shasta Lake</th>
+<td>POU</td>
+<td class="num">25</td>
+<td class="num">0</td>
+<td class="num">1</td>
+<td>100.0%</td>
+<td>0.0%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Ukiah Electric Utilities Division</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">City of Vernon Municipal Light Department</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Colton Electric Utility Department</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Eastside Power Authority</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Glendale Water &amp; Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Gridley Electric Utility</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Imperial Irrigation District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Kirkwood Meadows Public Utility District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Lassen Municipal Utility District</th>
+<td>POU</td>
+<td class="num">203</td>
+<td class="num">85</td>
+<td class="num">10</td>
+<td>47.3%</td>
+<td>20.7%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Lathrop Irrigation District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Liberty Utilities</th>
+<td>IOU</td>
+<td class="num">1,512</td>
+<td class="num">0</td>
+<td class="num">2</td>
+<td>73.8%</td>
+<td>5.0%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Lodi Electric Utility</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Los Angeles Department of Water &amp; Power</th>
+<td>POU</td>
+<td class="num">18</td>
+<td class="num">9,794</td>
+<td class="num">2</td>
+<td>77.8%</td>
+<td>0.0%</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">Merced Irrigation District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Metropolitan Water District of So. Cal</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">37,727</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">Modesto Irrigation District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">40</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Moreno Valley Utility</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Morongo Band of Mission Indians</th>
+<td>Tribal</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">PacifiCorp</th>
+<td>IOU</td>
+<td class="num">1,957</td>
+<td class="num">1</td>
+<td class="num">32</td>
+<td>22.9%</td>
+<td>0.9%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Pacific Gas &amp; Electric Company</th>
+<td>IOU</td>
+<td class="num">65,865</td>
+<td class="num">12,285</td>
+<td class="num">271</td>
+<td>35.9%</td>
+<td>0.4%</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">Pasadena Water &amp; Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">1,880</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Plumas-Sierra Rural Electric Cooperative</th>
+<td>CO-OP</td>
+<td class="num">1,060</td>
+<td class="num">85</td>
+<td class="num">5</td>
+<td>48.5%</td>
+<td>4.4%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Port of Oakland</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Port of Stockton</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Power and Water Resource Pooling Authority</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">12,310</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">Rancho Cucamonga Municipal Utility</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Redding Electric Utility</th>
+<td>POU</td>
+<td class="num">399</td>
+<td class="num">0</td>
+<td class="num">2</td>
+<td>99.7%</td>
+<td>21.6%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Roseville Electric</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Sacramento Municipal Utility District</th>
+<td>POU</td>
+<td class="num">10</td>
+<td class="num">0</td>
+<td class="num">2</td>
+<td>60.0%</td>
+<td>0.0%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">San Diego Gas &amp; Electric</th>
+<td>IOU</td>
+<td class="num">608</td>
+<td class="num">620</td>
+<td class="num">8</td>
+<td>73.4%</td>
+<td>0.0%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Shelter Cove Resort Improvement District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Silicon Valley Power</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Southern California Edison</th>
+<td>IOU</td>
+<td class="num">9,638</td>
+<td class="num">25,345</td>
+<td class="num">46</td>
+<td>16.2%</td>
+<td>1.6%</td>
+<td>repaired</td>
+</tr>
+<tr>
+<th scope="row">Surprise Valley Electrification Corporation</th>
+<td>CO-OP</td>
+<td class="num">41</td>
+<td class="num">1</td>
+<td class="num">5</td>
+<td>82.9%</td>
+<td>0.0%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Trinity Public Utilities District</th>
+<td>POU</td>
+<td class="num">574</td>
+<td class="num">0</td>
+<td class="num">5</td>
+<td>50.5%</td>
+<td>0.0%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Truckee Donner Public Utilities District</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Turlock Irrigation District</th>
+<td>POU</td>
+<td class="num">115</td>
+<td class="num">0</td>
+<td class="num">1</td>
+<td>100.0%</td>
+<td>19.1%</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Valley Electrical Association</th>
+<td>CO-OP</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+<tr>
+<th scope="row">Victorville Municipal Utilities Services</th>
+<td>POU</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td class="num">0</td>
+<td>not measured</td>
+<td>not measured</td>
+<td>as_published</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2>Where the published boundaries overlap</h2>
+<p>Counts of records falling inside each combination of published outlines. This is a description of the boundary layer, not of any utility. The combinations are listed by size because size is what is being reported.</p>
+<p>The last column is the share of each combination's records sitting within 250 metres of the nearest edge among the outlines involved. A contested record stops being contested when any of them ceases to contain it, so that is the edge an approximation error moves first; a combination near 100% here is a thin seam between outlines, and one near 0% is an interior region where two published territories genuinely cover the same ground.</p>
+<section class="scroll" tabindex="0" aria-labelledby="where-the-published-boundaries-overlap-published-outlines-a-record-falls-inside">
+<table>
+<caption id="where-the-published-boundaries-overlap-published-outlines-a-record-falls-inside">Where the published boundaries overlap: Published outlines a record falls inside</caption>
+<thead>
+<tr>
+<th scope="col">Published outlines a record falls inside</th>
+<th scope="col" class="num">Records</th>
+<th scope="col" class="num">Within 250 m of an edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Metropolitan Water District of So. Cal, Southern California Edison</th>
+<td class="num">25,345</td>
+<td class="num">13.8% (13.4% to 14.2%)</td>
+</tr>
+<tr>
+<th scope="row">Pacific Gas &amp; Electric Company, Power and Water Resource Pooling Authority</th>
+<td class="num">12,241</td>
+<td class="num">0.5% (0.4% to 0.6%)</td>
+</tr>
+<tr>
+<th scope="row">Los Angeles Department of Water &amp; Power, Metropolitan Water District of So. Cal</th>
+<td class="num">9,794</td>
+<td class="num">7.5% (7.0% to 8.0%)</td>
+</tr>
+<tr>
+<th scope="row">Metropolitan Water District of So. Cal, Pasadena Water &amp; Power</th>
+<td class="num">1,880</td>
+<td class="num">72.4% (70.4% to 74.4%)</td>
+</tr>
+<tr>
+<th scope="row">Metropolitan Water District of So. Cal, San Diego Gas &amp; Electric</th>
+<td class="num">620</td>
+<td class="num">18.4% (15.5% to 21.6%)</td>
+</tr>
+<tr>
+<th scope="row">Lassen Municipal Utility District, Plumas-Sierra Rural Electric Cooperative</th>
+<td class="num">85</td>
+<td class="num">7.1% (3.3% to 14.6%)</td>
+</tr>
+<tr>
+<th scope="row">City of Healdsburg Electric Department, Power and Water Resource Pooling Authority</th>
+<td class="num">69</td>
+<td class="num">100.0% (94.7% to 100.0%)</td>
+</tr>
+<tr>
+<th scope="row">City of Anaheim Public Utilities Department, Metropolitan Water District of So. Cal</th>
+<td class="num">46</td>
+<td class="num">10.9% (4.7% to 23.0%)</td>
+</tr>
+<tr>
+<th scope="row">City of Riverside, Metropolitan Water District of So. Cal</th>
+<td class="num">42</td>
+<td class="num">2.4% (0.4% to 12.3%)</td>
+</tr>
+<tr>
+<th scope="row">Modesto Irrigation District, Pacific Gas &amp; Electric Company</th>
+<td class="num">40</td>
+<td class="num">0.0% (0.0% to 8.8%)</td>
+</tr>
+<tr>
+<th scope="row">City and County of San Francisco - Hetch Hetchy Water and Power, Pacific Gas &amp; Electric Company</th>
+<td class="num">4</td>
+<td class="num">75.0% (30.1% to 95.4%)</td>
+</tr>
+<tr>
+<th scope="row">PacifiCorp, Surprise Valley Electrification Corporation</th>
+<td class="num">1</td>
+<td class="num">0.0% (0.0% to 79.3%)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2>The published polygons, as they arrived</h2>
+<p>59 outlines were read as electric service territories. 8 of them failed an OGC validity check on retrieval and were repaired before any containment question was asked of them, because an invalid polygon answers that question undefined rather than refusing it. The repaired ones are named here and flagged in the table above.</p>
+<ul>
+<li>City and County of San Francisco - Hetch Hetchy Water and Power</li>
+<li>City of Healdsburg Electric Department</li>
+<li>City of Palo Alto</li>
+<li>Los Angeles Department of Water &amp; Power</li>
+<li>Metropolitan Water District of So. Cal</li>
+<li>Pacific Gas &amp; Electric Company</li>
+<li>Power and Water Resource Pooling Authority</li>
+<li>Southern California Edison</li>
+</ul>
+<p>75,521 placed records, 91.7% of the placed total (91.5% to 91.9%), sit inside one of those repaired polygons. A different repair would place a different set, so that figure is the size of this project's exposure to the choice.</p>
+<p>0 outlines could not be repaired into a testable shape. Those are removed from the index and are not reported as holding zero records.</p>
+<p>Two published entity types are not read as service territories:</p>
+<ul>
+<li><strong>ADMIN</strong>: A federal power marketing administration. The polygon is a marketing and transmission administration area, not a retail service territory.</li>
+<li><strong>CCA</strong>: A community choice aggregator is defined at Public Utilities Code section 331.1 as a local government electricity buyers' programme, and section 366.2 leaves metering, billing and delivery with the electrical corporation. Its polygon overlays another entity's distribution footprint rather than being one, so counting a record into both would count it twice.</li>
+</ul>
+<h2>What the repair is worth</h2>
+<p>All 3 repairs (<code>make_valid</code>, <code>buffer_zero</code>, <code>make_valid_structure</code>) run to completion over the same records. 927 of 132,520 records, 0.7% (0.66% to 0.75%), come out differently under at least one pair of them. That count is a census of the disagreement and not an estimate of it, and it bounds how much of the result the choice of repair can move. The pairwise counts:</p>
+<section class="scroll" tabindex="0" aria-labelledby="what-the-repair-is-worth-between">
+<table>
+<caption id="what-the-repair-is-worth-between">What the repair is worth: Between</caption>
+<thead>
+<tr>
+<th scope="col">Between</th>
+<th scope="col" class="num">Records</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row"><code>buffer_zero</code> and <code>make_valid_structure</code></th>
+<td class="num">0</td>
+</tr>
+<tr>
+<th scope="row"><code>make_valid</code> and <code>buffer_zero</code></th>
+<td class="num">927</td>
+</tr>
+<tr>
+<th scope="row"><code>make_valid</code> and <code>make_valid_structure</code></th>
+<td class="num">927</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>The pair ADR 0007 documents in detail: 927 of 132,520 records, 0.7% (0.66% to 0.75%), come out differently under <code>buffer_zero</code> than under <code>make_valid</code>.</p>
+<section class="scroll" tabindex="0" aria-labelledby="what-the-repair-is-worth-under-the-repair-used-here">
+<table>
+<caption id="what-the-repair-is-worth-under-the-repair-used-here">What the repair is worth: Under the repair used here</caption>
+<thead>
+<tr>
+<th scope="col">Under the repair used here</th>
+<th scope="col">Under the alternative</th>
+<th scope="col" class="num">Records</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">contested between two or more</th>
+<td>contested between two or more</td>
+<td class="num">157</td>
+</tr>
+<tr>
+<th scope="row">placed in exactly one territory</th>
+<td>contested between two or more</td>
+<td class="num">770</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>What each repair places in total, over the whole record set, rather than only the records whose outcome moved.</p>
+<section class="scroll" tabindex="0" aria-labelledby="what-the-repair-is-worth-repair">
+<table>
+<caption id="what-the-repair-is-worth-repair">What the repair is worth: Repair</caption>
+<thead>
+<tr>
+<th scope="col">Repair</th>
+<th scope="col" class="num">Placed share</th>
+<th scope="col" class="num">Placed</th>
+<th scope="col" class="num">Of</th>
+<th scope="col">95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">placed in exactly one published territory, under make_valid</th>
+<td class="num">62.1%</td>
+<td class="num">82,353</td>
+<td class="num">132,520</td>
+<td>61.9% to 62.4%</td>
+</tr>
+<tr>
+<th scope="row">placed in exactly one published territory, under buffer_zero</th>
+<td class="num">61.6%</td>
+<td class="num">81,583</td>
+<td class="num">132,520</td>
+<td>61.3% to 61.8%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>Difference in the placed share: 0.6% (0.2% to 1.0%, Newcombe score). The same records are placed twice, so that interval is the conservative bound.</p>
+<p>No repair is correct. Each is an answer to a question the published polygon does not answer, and the disagreement between them is the size of the ambiguity the invalid geometry leaves behind. The default did not move to gain this measurement; it was already <code>make_valid</code> under ADR 0007.</p>
+<h2>What the inclusion rule is worth</h2>
+<p>Which published outlines count as a service territory is a judgment, and this is the whole record set placed again under each way that judgment could have gone. The first row is the rule this project uses. Nothing here chooses between them, and the difference column is the conservative bound rather than the tight one, because the same records are being measured twice.</p>
+<p>The inclusion rule reads the publisher's Type field, and the publisher documents none of its values. As retrieved, the layer metadata carries no description on the Type field and no coded-value domain, the FGDC record carries no entity and attribute section, and no data dictionary is attached to either item. What each value means is therefore inferred from the value itself, which is why the rule is published with its sensitivity and why the README asks for a domain review.</p>
+<section class="scroll" tabindex="0" aria-labelledby="what-the-inclusion-rule-is-worth-inclusion-rule">
+<table>
+<caption id="what-the-inclusion-rule-is-worth-inclusion-rule">What the inclusion rule is worth: Inclusion rule</caption>
+<thead>
+<tr>
+<th scope="col">Inclusion rule</th>
+<th scope="col" class="num">Outlines</th>
+<th scope="col" class="num">Contested</th>
+<th scope="col" class="num">Contested share</th>
+<th scope="col">95% interval</th>
+<th scope="col">Difference from the rule as built</th>
+<th scope="col" class="num">Inside no published territory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">the rule as built</th>
+<td class="num">59</td>
+<td class="num">50,167</td>
+<td class="num">37.9%</td>
+<td>37.6% to 38.1%</td>
+<td>reference</td>
+<td class="num">0</td>
+</tr>
+<tr>
+<th scope="row">without CO-OP</th>
+<td class="num">55</td>
+<td class="num">50,081</td>
+<td class="num">37.8%</td>
+<td>37.5% to 38.1%</td>
+<td>-0.1% (-0.4% to 0.3%)</td>
+<td class="num">1,406</td>
+</tr>
+<tr>
+<th scope="row">without Tribal</th>
+<td class="num">57</td>
+<td class="num">50,167</td>
+<td class="num">37.9%</td>
+<td>37.6% to 38.1%</td>
+<td>0.0% (-0.4% to 0.4%)</td>
+<td class="num">0</td>
+</tr>
+<tr>
+<th scope="row">without CO-OP or Tribal</th>
+<td class="num">53</td>
+<td class="num">50,081</td>
+<td class="num">37.8%</td>
+<td>37.5% to 38.1%</td>
+<td>-0.1% (-0.4% to 0.3%)</td>
+<td class="num">1,406</td>
+</tr>
+<tr>
+<th scope="row">with CCA read as a territory</th>
+<td class="num">84</td>
+<td class="num">74,661</td>
+<td class="num">56.3%</td>
+<td>56.1% to 56.6%</td>
+<td>18.5% (18.1% to 18.9%)</td>
+<td class="num">0</td>
+</tr>
+<tr>
+<th scope="row">with ADMIN read as a territory</th>
+<td class="num">60</td>
+<td class="num">98,541</td>
+<td class="num">74.4%</td>
+<td>74.1% to 74.6%</td>
+<td>36.5% (36.2% to 36.9%)</td>
+<td class="num">0</td>
+</tr>
+<tr>
+<th scope="row">every published type read as a territory</th>
+<td class="num">85</td>
+<td class="num">119,704</td>
+<td class="num">90.3%</td>
+<td>90.2% to 90.5%</td>
+<td>52.5% (52.2% to 52.8%)</td>
+<td class="num">0</td>
+</tr>
+</tbody>
+</table>
+</section>
+<p>A rule that drops an included type does not only move records out of the contested column. It moves them into the last one, where they are published as inside no published territory, which is a statement about coverage that the dropped entity's own published polygon contradicts.</p>
+<h2>The outlines that hold nothing</h2>
+<p>Whether a particular named entity in the published layer operates a retail distribution system is the publisher's classification to make, and this project does not make it. The narrower question can be answered with a count: could that outline be moving a figure here?</p>
+<p>35 of the 59 outlines read as service territories hold no record at all. 0 records of 132,520 fall inside one of them (0.000% to 0.003%). Placing the whole record set again with all of them removed changes the outcome of 0 records (0.000% to 0.003%), so no figure in this document depends on any of them.</p>
+<ul>
+<li>Aha Macav Power Service</li>
+<li>Alameda Power &amp; Telecom</li>
+<li>Azusa Light &amp; Power</li>
+<li>Bear Valley Electric Service</li>
+<li>Biggs Municipal Utilities</li>
+<li>Burbank Water &amp; Power</li>
+<li>City of Cerritos</li>
+<li>City of Corona Department of Water &amp; Power</li>
+<li>City of Industry</li>
+<li>City of Lompoc Electric Division</li>
+<li>City of Needles</li>
+<li>City of Palo Alto</li>
+<li>City of Pittsburg</li>
+<li>City of Ukiah Electric Utilities Division</li>
+<li>City of Vernon Municipal Light Department</li>
+<li>Colton Electric Utility Department</li>
+<li>Eastside Power Authority</li>
+<li>Glendale Water &amp; Power</li>
+<li>Gridley Electric Utility</li>
+<li>Imperial Irrigation District</li>
+<li>Kirkwood Meadows Public Utility District</li>
+<li>Lathrop Irrigation District</li>
+<li>Lodi Electric Utility</li>
+<li>Merced Irrigation District</li>
+<li>Moreno Valley Utility</li>
+<li>Morongo Band of Mission Indians</li>
+<li>Port of Oakland</li>
+<li>Port of Stockton</li>
+<li>Rancho Cucamonga Municipal Utility</li>
+<li>Roseville Electric</li>
+<li>Shelter Cove Resort Improvement District</li>
+<li>Silicon Valley Power</li>
+<li>Truckee Donner Public Utilities District</li>
+<li>Valley Electrical Association</li>
+<li>Victorville Municipal Utilities Services</li>
+</ul>
+<p>This is a count, not a classification. It does not establish that any of the outlines named here is or is not a retail service territory, and this project does not decide that; see ADR 0002 and ADR 0010. What it establishes is that the question cannot change a figure published here, because the outlines it would be asked about hold nothing.</p>
+<h2>What this does not measure</h2>
+<ul>
+<li><strong>Nothing about physical infrastructure.</strong> No pole, conductor, substation, or circuit position is read, inferred, approximated, or published, from these sources or any other. An analysis that would need one is not built here.</li>
+<li><strong>No comparison between utilities.</strong> A territory's damage figures are driven by which fires burned in it, and the concentration column shows how strongly. Nothing here says any utility is more or less exposed than any other.</li>
+<li><strong>No rate against population, housing, customers, or meters.</strong> The record set is defined by fire and by state responsibility area. A denominator drawn from a differently defined population would not contain this numerator.</li>
+<li><strong>Coverage is not exposure.</strong> A territory with few placed records may have burned little, may sit mostly outside the state responsibility area, or may have most of its records contested. These are different facts and this project does not merge them.</li>
+</ul>
+</main>
+</body>
+</html>

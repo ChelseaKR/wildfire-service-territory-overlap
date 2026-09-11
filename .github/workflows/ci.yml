@@ -20,7 +20,11 @@
 # version is readable next to the SHA.
 #
 # CI never touches the network for data. `data/raw/` is not in the repository, so the test
-# suite runs against committed fixtures and the committed `published/` tree.
+# suite runs against committed fixtures and the committed `published/` tree. The served
+# page is a rendering of `published/measurements.json`, which is committed, so `verify`
+# rebuilds it and holds the committed bytes to it. The only network the `verify` job
+# needs beyond the Python toolchain is npm and the Chromium download for the browser
+# half of the WCAG gate; no page is served and no port is opened.
 name: ci
 
 on:
@@ -48,7 +52,15 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 15 was the budget before the page toolchain arrived. `make verify` now also runs
+    # `npm ci` twice and downloads a Chromium build, and a timeout below a job's real
+    # runtime reads as a cancelled run rather than as a failed one, which is a verdict
+    # nobody can act on. Measured locally on 2026-09-10: 37 seconds, with both node
+    # toolchains and the browser already cached. A cold runner downloads all three and
+    # that has not been measured, so 30 is not derived from it: it is what the sibling
+    # `perimeter` job carries for the same work. The first pull-request run of this job
+    # is the cold measurement, and this budget should be re-derived from it.
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -62,9 +74,20 @@ jobs:
           version: ">=0.11.0"
           python-version: "3.12"
 
-      # Byte-for-byte the local target. `make verify` runs the lockfile-drift gate, ruff,
-      # the formatter check, mypy --strict, pytest with the coverage floor, pip-audit, an
-      # offline build over the fixtures, and the determinism gate.
+      # `make node-sync` and `make browser-sync` run `npm ci`, which needs a node. The
+      # version is pinned rather than floating, because npm's lockfile format depends on
+      # it: a lockfile written by npm 11 is not installable by the npm 10 that node 22
+      # ships, and the failure reads as a broken dependency rather than as a version
+      # skew. Both package-lock.json files in this repository are written with npm 10.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      # Byte-for-byte the local target. `make verify` runs the lockfile-drift gate, both
+      # node toolchains, ruff, the formatter check, mypy --strict, pytest with the
+      # coverage floor, pip-audit, an offline build over the fixtures, the determinism
+      # gate, and the WCAG gate over the committed site/.
       - name: make verify
         run: make verify
 

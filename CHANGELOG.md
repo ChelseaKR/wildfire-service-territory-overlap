@@ -92,6 +92,74 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and no copy of any refusal. `docs/UPSTREAM.md` records that as gap 5, raised and closed
   in the same session.
 
+- **The report, served: `site/index.html`, gated in two engines.** The output was
+  `published/REPORT.md` and `measurements.json`, read on GitHub. A negative result
+  reaches somebody who will never open a JSON file only if there is a page to open, and
+  the assistive-technology pass issue #49 asks for is a pass over markup rendered by
+  GitHub unless this project controls it.
+
+  **The page is a total function of the Markdown, not a second renderer over the
+  artifact.** `page.py` converts the exact string `report.render` produced. Two
+  renderers reading one artifact would be two places a row can be dropped and only one
+  of them is the published document; a converter cannot disagree with its input. What
+  that buys is the test the issue's own acceptance criterion could not give: *"every
+  figure on the page equals the artifact's"* catches a wrong number and not a missing
+  one, because the figures a renderer does publish are still correct. The comparison
+  here is every text node against every text node, in order, with multiplicity, in both
+  directions: **333 of 333 content units**, with a parser that has never seen the
+  renderer. A dropped row fails it.
+
+  **The converter refuses what it cannot render.** A fenced block, a link, an unclosed
+  code or strong span, a ragged table row, a table with no delimiter row, an orphan
+  indented bullet, an empty document and a document that does not open at heading level
+  one each raise and write nothing. A converter that passed an unrecognised line through
+  would publish `**` to a reader, and one that dropped it would be worse.
+
+  **Every table is in a focusable scroll region with a caption and `scope` on every
+  header cell.** The caption is composed from the table's own section heading and its
+  own first column header, so it carries no word the document has not already published
+  and three tables in one section get three captions without anybody maintaining a
+  list. It is the one thing on the page that is not a text node of the Markdown, and the
+  count of that exemption is asserted.
+
+  **`lang` comes from the catalog**, which now has to name the language it is written
+  in, with no default. A default would be a Spanish edition announcing itself as English
+  to every screen reader that asked.
+
+  **The gate reads the bytes that get served**, not a rebuild of them: html-validate for
+  HTML conformance and the markup-level rules, axe-core in a headless DOM, the same rule
+  sets again in Chromium at 1280 and at 320 pixels wide, where nothing is undecidable,
+  and WCAG 2.2 SC 1.4.10 Reflow at 320 by 256, which no engine decides from a DOM alone.
+  Colour contrast is measured arithmetically off the palette in `tests/test_page.py`, in
+  both presentations, because jsdom paints no pixels. Each half has its own tests running
+  it against pages that must fail: 14 for the jsdom half and 14 for the browser half.
+
+  **`target-size` is declared and has never had an input**, because the page ships no
+  link and no button. The disclosure says so on every run rather than letting a rule
+  with nothing to read count as a rule that passed.
+
+  **This change's own controls found a defect every engine passed.** Deleting `tabindex`
+  from all fourteen scroll regions left axe green in Chromium, because at the default
+  1280-pixel viewport no table overflowed and `scrollable-region-focusable` had nothing
+  to decide. Why no table overflowed was worse: every cell was allowed to break
+  anywhere, so a wide table shrank instead of scrolling, and at 320 pixels 396 of 711
+  numeric cells printed a figure split across two lines while 1 of 14 regions scrolled.
+  html-validate, axe in both engines and the reflow check were all green over it,
+  because a split number is still text. Cells now break only between words and numeric
+  columns never wrap: at 320 pixels 14 of 14 regions scroll and 0 of 1,091 numbers in
+  table cells are split. axe now also runs at 320 by 256, with a floor that at least one
+  region really scrolls there, and `tools/a11y_browser/numbers.spec.ts` holds every
+  number in every table cell to one line at both widths, printing how many it examined.
+
+  Unlike `published/`, `site/` can be checked by anybody: it is a rendering of
+  `published/measurements.json`, which is committed, so `make verify` rebuilds it and
+  holds the committed bytes to it. `make site` is what a person runs after a refresh.
+
+  `.github/workflows/pages.yml` is here, pinned and reviewed, and **runs on nothing but
+  `workflow_dispatch`**. This repository has never been a website and becoming one is
+  not a side effect of a merge; the two steps that publish it are named in the
+  workflow's own header and both are the maintainer's.
+
 ### Changed
 
 - **The acquisition's list of layers exists once.** `acquire.main` held the four calls

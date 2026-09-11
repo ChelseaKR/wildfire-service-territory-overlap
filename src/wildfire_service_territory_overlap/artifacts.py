@@ -514,7 +514,7 @@ NON_DESCRIPTIVE_LINK_TEXT: frozenset[str] = frozenset(
 )
 
 _FENCE = re.compile(r"^\s*(?:```|~~~)")
-_HEADING = re.compile(r"^(#{1,6})\s+\S")
+HEADING = re.compile(r"^(#{1,6})\s+\S")
 _DELIMITER_CELL = re.compile(r"^:?-+:?$")
 _HTML_TAG = re.compile(r"</?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^<>]*)?/?>")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]*)\]\(")
@@ -573,7 +573,15 @@ def table_cells(row: str) -> list[str]:
     return [part.strip() for part in parts]
 
 
-def _is_delimiter_row(row: str) -> bool:
+def is_delimiter_row(row: str) -> bool:
+    """Is this the row of dashes that makes the row above it a header?
+
+    Public, with :data:`HEADING` and :func:`table_cells`, because
+    :mod:`wildfire_service_territory_overlap.page` renders the same document into
+    HTML and has to agree with this module about what a table is. A second module
+    compiling its own idea of the syntax is two readers of one grammar, and the one
+    that drifts is whichever is not the gate.
+    """
     cells = table_cells(row)
     return bool(cells) and all(_DELIMITER_CELL.match(cell) for cell in cells)
 
@@ -602,8 +610,8 @@ def assert_tables_have_a_header_row(document: str) -> None:
     """
     for block in _table_blocks(document):
         line, row = block[0]
-        header_is_real = not _is_delimiter_row(row)
-        has_delimiter = len(block) > 1 and _is_delimiter_row(block[1][1])
+        header_is_real = not is_delimiter_row(row)
+        has_delimiter = len(block) > 1 and is_delimiter_row(block[1][1])
         if not (header_is_real and has_delimiter):
             raise PublicationRefused(
                 f"line {line}: a table with no header row. A row is a header only "
@@ -673,7 +681,7 @@ def assert_no_table_cell_is_empty(document: str) -> None:
     """
     for block in _table_blocks(document):
         for line, row in block:
-            if _is_delimiter_row(row):
+            if is_delimiter_row(row):
                 continue
             for index, cell in enumerate(table_cells(row)):
                 if not cell:
@@ -694,7 +702,7 @@ def assert_headings_do_not_skip_a_level(document: str) -> None:
     """
     previous = 0
     for line, text in _prose_lines(document):
-        match = _HEADING.match(text)
+        match = HEADING.match(text)
         if match is None:
             continue
         level = len(match.group(1))

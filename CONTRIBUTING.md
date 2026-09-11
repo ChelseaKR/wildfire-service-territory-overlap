@@ -171,6 +171,8 @@ Nothing in `build/` is in git, so there is nothing to revert.
 |---|---|
 | `lock-check` | `uv.lock` no longer satisfies `pyproject.toml`. Run `uv lock`. |
 | `sync` | The locked dependency set would not install. |
+| `node-sync` | `npm ci` could not install the pinned html-validate, axe-core and jsdom. |
+| `browser-sync` | Playwright or the Chromium binary would not install. |
 | `lint` | ruff found a lint error, including a complexity over the cap of 10. |
 | `format` | Code is not formatted. Run `uv run ruff format .`; the gate never rewrites for you. |
 | `typecheck` | `mypy --strict` rejected `src`. |
@@ -178,6 +180,7 @@ Nothing in `build/` is in git, so there is nothing to revert.
 | `audit` | pip-audit found a known vulnerability in the installed set. |
 | `report-offline` | The pipeline refused to build, usually a publication rule in `artifacts.py`. |
 | `determinism` | Two builds of byte-identical inputs disagreed. |
+| `pages` | The served page failed HTML conformance, axe in either engine, or reflow at 320 pixels. |
 
 `make help` lists every target with one line. Bare `make` runs `verify`, not `help`.
 

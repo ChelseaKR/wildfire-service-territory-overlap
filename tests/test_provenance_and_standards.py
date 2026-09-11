@@ -305,6 +305,13 @@ DASH_SKIP_DIRS = frozenset(
         "data",
         "dist",
         "node_modules",
+        # Playwright's own output, created and deleted by every browser run. Under
+        # `pytest -n auto` the browser gate tests run Playwright in another worker while
+        # this sweep walks the tree, and on 2026-09-10 the walk listed
+        # `tools/a11y_browser/test-results/.last-run.json` and then found it gone:
+        # FileNotFoundError, one run in two. Generated and gitignored, like `build`.
+        "playwright-report",
+        "test-results",
     }
 )
 DASH_SUFFIXES = frozenset(
@@ -312,12 +319,15 @@ DASH_SUFFIXES = frozenset(
         ".cff",
         ".cfg",
         ".geojson",
+        ".html",
         ".ini",
         ".json",
         ".md",
+        ".mjs",
         ".py",
         ".sh",
         ".toml",
+        ".ts",
         ".txt",
         ".yaml",
         ".yml",
@@ -372,6 +382,14 @@ def test_the_dash_check_reads_the_places_it_used_to_be_blind_to() -> None:
         "fixtures/README.md",
         "CITATION.cff",
         "pyproject.toml",
+        # The page toolchain. Four authored file types arrived with it, and a rule
+        # stated as repository wide that does not read them is a rule over the files
+        # it happened to be written for.
+        "tools/a11y.mjs",
+        "tools/a11y_browser/axe.spec.ts",
+        ".htmlvalidate.mjs",
+        "site/index.html",
+        "package.json",
     ):
         assert previously_unread in seen, (
             f"{previously_unread} is outside the dash check again"
@@ -570,6 +588,12 @@ def test_provenance_says_every_request_names_this_project_and_says_when_it_did_n
 VERIFY_GATES: tuple[str, ...] = (
     "lock-check",
     "sync",
+    # Both node toolchains are installed before `test`, not only before `pages`.
+    # tests/test_a11y_gate.py runs tools/a11y.mjs and tests/test_a11y_browser_gate.py
+    # runs the Playwright specs, each against pages that should fail them, and without
+    # the toolchain those tests skip -- and a skipped gate test reads as a passing one.
+    "node-sync",
+    "browser-sync",
     "lint",
     "format",
     "typecheck",
@@ -577,6 +601,7 @@ VERIFY_GATES: tuple[str, ...] = (
     "audit",
     "report-offline",
     "determinism",
+    "pages",
 )
 
 
@@ -1001,15 +1026,54 @@ def test_the_pull_request_template_asks_whether_published_figures_moved() -> Non
 
 
 def test_no_issue_template_was_added_under_workflows() -> None:
-    """Issue #19 scoped this change out of `.github/workflows`, which tests read."""
+    """Issue #19 scoped this change out of `.github/workflows`, which tests read.
+
+    The set is exact in both directions on purpose: it is what makes an issue form
+    landing here fail, and it is also what makes a workflow arriving without anybody
+    reading the checks above it fail. `pages.yml` joined the set when the served page
+    did, and it is dispatch-only until the maintainer decides this repository is a
+    website.
+    """
     workflow_names = {path.name for path in WORKFLOWS}
     assert workflow_names == {
         "ci.yml",
         "codeql.yml",
         "osv.yml",
+        "pages.yml",
         "release.yml",
         "scorecard.yml",
     }
+
+
+def test_the_pages_workflow_deploys_nothing_without_a_person() -> None:
+    """A website must not appear as a side effect of merging a pull request.
+
+    Two halves, because either alone would be satisfied by the wrong file: the only
+    trigger is `workflow_dispatch`, and the deploy job's scopes are on the deploy job
+    rather than at the top of the file where the job that runs repository code would
+    inherit them.
+    """
+    raw = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
+    # Comment lines first. The header of this workflow prints the `push:` block a
+    # maintainer would add, and a raw scan reports the file as doing the one thing it
+    # is written not to do. This is the third time in this portfolio that a check has
+    # matched a tool name inside a comment; here it would fail rather than pass, which
+    # is at least loud, and the exclusion is pinned below so it cannot exempt nothing.
+    assert "#            branches: [main]" in raw, (
+        "the header no longer shows the trigger a maintainer would add, so the comment "
+        "filter below is exempting nothing and this test has stopped being about "
+        "anything"
+    )
+    text = _uncommented(raw)
+    triggers = text.split("permissions:")[0]
+    assert "workflow_dispatch:" in triggers
+    assert "push:" not in triggers, (
+        "pages.yml would deploy on a merge; enabling that is the maintainer's call"
+    )
+    assert "schedule:" not in triggers
+    top, _, jobs = text.partition("\njobs:")
+    assert "pages: write" not in top and "id-token: write" not in top
+    assert "pages: write" in jobs and "id-token: write" in jobs
 
 
 GLOSSARY = (ROOT / "docs" / "GLOSSARY.md").read_text(encoding="utf-8")

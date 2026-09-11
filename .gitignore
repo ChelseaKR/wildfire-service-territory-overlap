@@ -15,3 +15,10 @@ coverage.xml
 # agents. A tool's scratch space is not the repository, which is why build/ and the
 # cache directories above are here too.
 .claude/
+
+# The two page-checking toolchains. Both are locked (package-lock.json and
+# tools/a11y_browser/package-lock.json are tracked) and installed by `make node-sync`
+# and `make browser-sync`; the trees themselves are not the repository.
+node_modules/
+tools/a11y_browser/test-results/
+tools/a11y_browser/playwright-report/

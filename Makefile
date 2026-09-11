@@ -1,5 +1,7 @@
 .PHONY: help verify lock-check sync lint format typecheck test audit osv \
-        report report-offline determinism acquire refresh-check refresh
+        report report-offline determinism acquire refresh-check refresh \
+        site pages node-sync htmlvalidate a11y node-audit browser-sync \
+        a11y-browser browser-audit
 
 # Bare `make` runs the one gate, and says so rather than relying on `verify` happening
 # to be the first target. Making `help` the default would change what a habitual
@@ -17,7 +19,14 @@ help:  ## list every target with one line; bare `make` still runs verify, not th
 
 # CI and `make verify` run the same list. The two MUST stay identical.
 # See CONTRIBUTING.md and .github/workflows/ci.yml.
-verify: lock-check sync lint format typecheck test audit report-offline determinism  ## the one gate: lock-check, sync, lint, format, typecheck, test, audit, report-offline, determinism, which is exactly what CI runs
+#
+# node-sync and browser-sync run before test, not only as part of pages.
+# tests/test_a11y_gate.py runs tools/a11y.mjs and tests/test_a11y_browser_gate.py runs
+# the Playwright specs, both against pages that should fail them, which needs both
+# toolchains present; without them those tests skip, and a skipped gate test reads as a
+# passing one. Make builds each target once per invocation, so pages naming them too
+# costs nothing.
+verify: lock-check sync node-sync browser-sync lint format typecheck test audit report-offline determinism pages  ## the one gate: lock-check, sync, node-sync, browser-sync, lint, format, typecheck, test, audit, report-offline, determinism, pages, which is exactly what CI runs
 
 # The lockfile-drift gate. `uv sync --frozen` is not one: against a pyproject.toml the
 # lockfile does not satisfy, `uv lock --check` exits 1, `uv sync --locked` exits 1, and
@@ -150,3 +159,57 @@ refresh:  ## touches the network: run the deliberate refresh into REFRESH_WORKDI
 	uv run python -m wildfire_service_territory_overlap.refresh --run \
 		--workdir "$(REFRESH_WORKDIR)" \
 		--published published/measurements.json
+
+# The served page. `site/index.html` is a rendering of `published/measurements.json`,
+# which is committed, so unlike `published/` itself this artifact can be rebuilt by
+# anybody and compared byte for byte. That is what
+# tests/test_page.py::test_the_committed_page_is_what_the_renderer_produces_now does on
+# every run, so this target is what a person runs after a refresh has moved the
+# artifact, and the test is what fails if they forget.
+#
+# It writes into site/ deliberately. A target that regenerated the committed copy
+# somewhere else would leave the drift it exists to fix un-fixed; a *gate* that
+# regenerated site/ would repair the drift it exists to report, which is why the
+# comparison is a test and not this.
+site:  ## rebuild the served page from published/measurements.json into site/
+	uv run python -m wildfire_service_territory_overlap.page \
+		--artifact published/measurements.json \
+		--out site
+
+# The WCAG gate over the bytes that get served, not over a rebuild of them. Four
+# readings of the same directory: html-validate for HTML conformance and the
+# markup-level accessibility rules, axe-core in a headless DOM for the WCAG 2.0/2.1/2.2
+# A and AA rule sets, the same rule sets again in Chromium where nothing is
+# undecidable, and WCAG 2.2 SC 1.4.10 Reflow at a 320x256 viewport, which no engine
+# decides from a DOM alone. Colour contrast is additionally measured off the palette
+# itself in tests/test_page.py, so `make verify` still has a floor if a toolchain is
+# unavailable. What none of it can do is look at the page; issue #49 is the pass that
+# needs a person.
+pages: node-sync htmlvalidate a11y node-audit browser-sync a11y-browser browser-audit  ## HTML conformance, axe in two engines, and reflow, over the committed site/
+
+node-sync:  ## install the pinned html-validate, axe-core and jsdom
+	npm ci
+
+htmlvalidate:  ## HTML conformance and the markup-level accessibility rules
+	npx html-validate "site/*.html"
+
+a11y:  ## axe-core over site/ in a headless DOM, undecided rules failing
+	node tools/a11y.mjs site
+
+node-audit:  ## npm audit over the checker's own dependency tree
+	npm audit --audit-level=high
+
+# The browser half. Chromium reads the committed page off disk as a file:// URL:
+# nothing is served, no port is opened, and CI reaches the network only to fetch the
+# browser. `--with-deps` is a no-op on macOS and installs the shared libraries the
+# browser needs on a Linux runner, so the same line works in both places.
+browser-sync:  ## install the pinned Playwright and the Chromium binary
+	cd tools/a11y_browser && npm ci
+	cd tools/a11y_browser && npx playwright install --with-deps chromium
+
+a11y-browser:  ## axe in Chromium plus SC 1.4.10 Reflow at 320 by 256
+	cd tools/a11y_browser && npx playwright test
+
+# A gate's own toolchain is not exempt from the check the gate exists to apply.
+browser-audit:  ## npm audit over the browser harness's dependency tree
+	cd tools/a11y_browser && npm audit --audit-level=high

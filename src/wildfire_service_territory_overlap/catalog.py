@@ -48,12 +48,22 @@ def _fields(entry: str) -> frozenset[str]:
 
 
 class Catalog(Mapping[str, str]):
-    """One edition of the report's strings, keyed by a key that never changes."""
+    """One edition of the report's strings, keyed by a key that never changes.
 
-    def __init__(self, edition: str, entries: Mapping[str, str]) -> None:
+    ``lang`` is the BCP 47 language subtag the edition is written in. It is required
+    and it has no default: the served page puts it in the document's ``lang``
+    attribute, and a default would mean a Spanish edition announcing itself as
+    English to every screen reader that asked. An edition's language is a fact about
+    the edition, and this is the only place that fact exists.
+    """
+
+    def __init__(self, edition: str, entries: Mapping[str, str], *, lang: str) -> None:
         if not edition:
             raise CatalogRefused("a catalog has to name its edition")
+        if not lang:
+            raise CatalogRefused(f"{edition} has to name the language it is written in")
         self.edition = edition
+        self.lang = lang
         self._entries: dict[str, str] = dict(entries)
         for key, value in self._entries.items():
             if not value:
@@ -75,7 +85,7 @@ class Catalog(Mapping[str, str]):
         return f"Catalog({self.edition!r}, {len(self._entries)} entries)"
 
 
-def translation(edition: str, entries: Mapping[str, str]) -> Catalog:
+def translation(edition: str, entries: Mapping[str, str], *, lang: str) -> Catalog:
     """A second edition, refused unless it is a complete edition of the English one.
 
     What is checked is shape: the same keys, and the same placeholder fields inside
@@ -97,7 +107,7 @@ def translation(edition: str, entries: Mapping[str, str]) -> Catalog:
                 f"the English entry carries {sorted(wanted)}; an edition that drops a "
                 "placeholder drops a measured number out of the document"
             )
-    return Catalog(edition, entries)
+    return Catalog(edition, entries, lang=lang)
 
 
 ARTIFACT_PROSE_FIELDS: Final[tuple[str, ...]] = (
@@ -545,4 +555,4 @@ _ENGLISH: dict[str, str] = {
     ),
 }
 
-ENGLISH = Catalog("English", _ENGLISH)
+ENGLISH = Catalog("English", _ENGLISH, lang="en")

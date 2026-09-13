@@ -26,6 +26,10 @@ in hand: a random, real-shaped AWS key planted in one commit and removed in the
 next left `gitleaks git . --log-opts=-1` exiting 0, while `gitleaks git .`
 exited 1 on the same history. The tip tree was byte-identical to the baseline
 throughout, so the credential was reachable only from history.
+
+What `gitleaks git .` walks with no range is `git log --all`, every commit in the
+checkout, rather than one ref's ancestry. Measured on the runner, pull request
+#118: `91 commits scanned`.
 """
 
 from __future__ import annotations
@@ -51,8 +55,8 @@ def test_the_scanner_is_never_handed_a_range() -> None:
     text = _ci_code()
     assert "gitleaks git . --no-banner --redact --exit-code 1" in text, (
         "the secret scan no longer runs `gitleaks git .`. Whatever replaces it must "
-        "still walk every commit reachable from HEAD on every event, not a range "
-        "chosen from the event that triggered the run."
+        "still walk every commit in the checkout on every event, not a range chosen "
+        "from the event that triggered the run."
     )
     assert "--log-opts" not in text, (
         "`--log-opts` scopes gitleaks to a commit range. A range picked from the "

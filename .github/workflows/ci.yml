@@ -119,9 +119,11 @@ jobs:
         # deleted in the next was invisible to a required check named `secret-scan`.
         #
         # A pinned, checksum-verified binary invoked as `gitleaks git .` with no
-        # `--log-opts` walks every commit reachable from HEAD on every event, so the
-        # range no longer depends on how the run was triggered. The checksum is the
-        # published one for the release, so a substituted archive fails before it runs.
+        # `--log-opts` is handed no range at all: it walks `git log --all`, every commit
+        # the checkout above put on disk, whatever event triggered the run. Measured on
+        # this job's first run, pull request #118: `91 commits scanned`, against the one
+        # the action read. The checksum is the published one for the release, so a
+        # substituted archive fails before it runs.
         run: |
           set -euo pipefail
           GL=8.30.1

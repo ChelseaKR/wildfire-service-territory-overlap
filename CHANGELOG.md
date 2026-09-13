@@ -232,9 +232,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
   **The fix is at the invocation.** The action is replaced by the gitleaks 8.30.1 release
   binary, downloaded and checked against its published SHA-256 before it is unpacked, and
-  invoked as `gitleaks git .` with no `--log-opts`. With no range it walks every commit
-  reachable from HEAD, on push and on pull request alike, so what the check reads no
-  longer depends on how the run was triggered. The job id and display name are unchanged,
+  invoked as `gitleaks git .` with no `--log-opts`. Handed no range it walks `git log
+  --all`, every commit the checkout put on disk, on push and on pull request alike, so
+  what the check reads no longer depends on how the run was triggered. Measured on the
+  runner, pull request #118: `91 commits scanned`, against the one the action read. The
+  job id and display name are unchanged,
   because `secret-scan` is a required status-check context in
   `.github/rulesets/main.json`. The job's `pull-requests: read` scope and its
   `GITHUB_TOKEN` are gone with the action that needed them to scope a scan.

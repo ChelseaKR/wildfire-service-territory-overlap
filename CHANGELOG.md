@@ -213,6 +213,43 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The required `secret-scan` check read 1 of `main`'s 59 commits.** The job ran
+  `gitleaks/gitleaks-action`, which does not scan a repository: it picks a commit range
+  out of the event that triggered the run. On a push of N commits it runs
+  `gitleaks detect --log-opts=--no-merges --first-parent BASE^..HEAD`; on a push of one
+  commit it runs `--log-opts=-1`, exactly one commit; on a pull request it reads the
+  pull request's own commits. Every squash merge into `main` is a one-commit push, and
+  `ci.yml` has no `schedule` and no `workflow_dispatch`, which are the two events the
+  action would have scanned the whole history on. So no lane in this repository has ever
+  read more than one commit, and a credential added in one commit and deleted in the
+  next would have left the check green on every run it ever had.
+
+  **`fetch-depth: 0` was already on that checkout and did not prevent it.** That setting
+  decides how much history `actions/checkout` puts on disk; what the scanner reads is
+  decided by how the scanner is invoked. A checkout deep enough to scan sitting above an
+  invocation that declines to is exactly the state this job was in, and it is the reason
+  the defect was not visible from the workflow file at a glance.
+
+  **The fix is at the invocation.** The action is replaced by the gitleaks 8.30.1 release
+  binary, downloaded and checked against its published SHA-256 before it is unpacked, and
+  invoked as `gitleaks git .` with no `--log-opts`. Handed no range it walks `git log
+  --all`, every commit the checkout put on disk, on push and on pull request alike, so
+  what the check reads no longer depends on how the run was triggered. Measured on the
+  runner, pull request #118: `91 commits scanned`, against the one the action read. The
+  job id and display name are unchanged,
+  because `secret-scan` is a required status-check context in
+  `.github/rulesets/main.json`. The job's `pull-requests: read` scope and its
+  `GITHUB_TOKEN` are gone with the action that needed them to scope a scan.
+
+  **Measured, not argued.** In a throwaway clone of this repository with its remote
+  removed, a random real-shaped AWS key was committed and then deleted in the next
+  commit, leaving a tip tree byte-identical to `main`'s. The old invocation,
+  `gitleaks git . --log-opts=-1`, exited 0. The new invocation, `gitleaks git .`, exited
+  non-zero on the same history. `tests/test_secret_scan_reads_history.py` now asserts the
+  invocation rather than the checkout depth, reads `ci.yml` with its comments stripped so
+  that the comment naming the removed action cannot satisfy it, and keeps the
+  `fetch-depth: 0` assertion as the precondition it is.
+
 - **Three documents said one module in this package opens a socket, and two do.** The
   README's layout block, `SECURITY.md`'s scope sentence and `acquire.py`'s own module
   docstring each named `acquire.py` as the only one. That was true until `refresh.py`

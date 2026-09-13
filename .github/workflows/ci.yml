@@ -95,22 +95,43 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
+      # `pull-requests: read` and a `GITHUB_TOKEN` were here so the removed action could
+      # list a pull request's commits and scope its scan to them. Nothing scopes the scan
+      # now, so nothing needs to read the pull request.
       contents: read
-      # The action lists the PR's commits to scope its scan to them. Read only.
-      pull-requests: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Puts all 59 commits on disk. Necessary, and on its own not sufficient: what
+          # the scanner reads is decided by how it is invoked, in the step below, not by
+          # how much of the repository was fetched. This line was already here while the
+          # check read one commit.
           fetch-depth: 0
           persist-credentials: false
-      # Comments off, so the job needs nothing beyond contents:read. With them on the
-      # action asks for pull-requests:write to annotate the PR and a least-privilege token
-      # gets a 403 instead. Findings still fail the job and appear in the log.
-      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_ENABLE_COMMENTS: "false"
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+      - name: Secret scan (gitleaks, full history)
+        # This step used to be `gitleaks/gitleaks-action`, which picks its scan range
+        # from the triggering event rather than scanning the repository: on a push it
+        # runs `gitleaks detect --log-opts=--no-merges --first-parent BASE^..HEAD`, and
+        # when the push carries a single commit it runs `--log-opts=-1`, exactly one
+        # commit. Every squash merge into `main` is a single-commit push, and this
+        # workflow has no `schedule` and no `workflow_dispatch`, so no lane here ever
+        # read more than 1 of `main`'s 59 commits. A credential added in one commit and
+        # deleted in the next was invisible to a required check named `secret-scan`.
+        #
+        # A pinned, checksum-verified binary invoked as `gitleaks git .` with no
+        # `--log-opts` walks every commit reachable from HEAD on every event, so the
+        # range no longer depends on how the run was triggered. The checksum is the
+        # published one for the release, so a substituted archive fails before it runs.
+        run: |
+          set -euo pipefail
+          GL=8.30.1
+          BASE="https://github.com/gitleaks/gitleaks/releases/download/v${GL}"
+          ARCHIVE="gitleaks_${GL}_linux_x64.tar.gz"
+          curl -sSfL -o "/tmp/${ARCHIVE}" "${BASE}/${ARCHIVE}"
+          curl -sSfL -o /tmp/gitleaks_checksums.txt "${BASE}/gitleaks_${GL}_checksums.txt"
+          (cd /tmp && grep "  ${ARCHIVE}$" gitleaks_checksums.txt | sha256sum --check --strict)
+          tar -xzf "/tmp/${ARCHIVE}" -C /tmp gitleaks
+          /tmp/gitleaks git . --no-banner --redact --exit-code 1
 
   sast:
     runs-on: ubuntu-latest

@@ -9,7 +9,7 @@ Accepted.
 ## Context
 
 The obvious way to make this project impressive is to publish a rate that sounds like
-risk: structures destroyed per thousand housing units, per customer, per square kilometre
+risk: structures destroyed per thousand housing units, per customer, per square kilometer
 of territory. Every one of those needs a denominator drawn from outside the damage
 inspection file.
 

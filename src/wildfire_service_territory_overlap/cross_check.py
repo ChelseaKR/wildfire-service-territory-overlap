@@ -4,7 +4,7 @@ Every other measurement here is drawn from CAL FIRE's file. The county cut reads
 FIRE's ``COUNTY`` field, and the coordinate comparison checks that field against a
 second publisher's boundaries, but the records being checked are still the same
 records. This module is the one place that holds them against a set a different
-organisation collected by walking the same ground.
+organization collected by walking the same ground.
 
 Usage::
 
@@ -20,13 +20,13 @@ section a reader learns to skip before the run where it says something.
 The search for a source is finished and its answer is recorded in ``docs/adr/0018``.
 One county record set in California meets all four of ADR 0015's criteria, Napa
 County's own ATC damage assessments for 2020, and it is deliberately not pinned: the
-two organisations name the same fires differently, so the comparison joins nothing and
+two organizations name the same fires differently, so the comparison joins nothing and
 ``_refuse_a_comparison_that_did_not_join`` below stops it. The command still runs the
 moment a joinable file exists, and ``docs/RUNBOOK.md`` carries the hand-run steps.
 
 What is compared, and what is not
 ---------------------------------
-Two organisations inspecting one fire do not inspect the same structures. CAL FIRE's
+Two organizations inspecting one fire do not inspect the same structures. CAL FIRE's
 file is bounded by the state responsibility area and by 300 feet of the fire perimeter;
 a county's own survey is bounded by its jurisdiction. A structure-level join is not
 available, would need the locations this project refuses to fetch, and would not mean
@@ -51,7 +51,7 @@ because they mean three different things.
 
 Nothing is corrected. No record moves, no county label is edited, no fire is
 reconciled, and neither side is treated as the truth. No rate is taken between the two
-record sets in either direction: two organisations counting two populations under two
+record sets in either direction: two organizations counting two populations under two
 rules means neither file is the other's denominator. No damage rate is published for
 the county, from either file.
 
@@ -308,7 +308,7 @@ def _refuse_an_oversized_union(union: set[str], ceiling: int) -> None:
 def _refuse_a_comparison_that_did_not_join(rows: tuple[IncidentRow, ...]) -> None:
     """Refuse a comparison where both sides name fires here and no name is shared.
 
-    ADR 0015 reads an agreement of zero across a set of fires both organisations
+    ADR 0015 reads an agreement of zero across a set of fires both organizations
     plainly worked as a fault in the comparison rather than as a result, and until
     2026-09-05 that reading lived only in prose. The command would print the block and
     a reader would meet a naming convention rendered as total disagreement.
@@ -318,7 +318,7 @@ def _refuse_a_comparison_that_did_not_join(rows: tuple[IncidentRow, ...]) -> Non
     LIGHTNING COMPLEX 2020``; CAL FIRE's file names the same two ground events
     ``Glass`` and ``LNU Lightning Cmplx`` and carries neither county spelling anywhere
     in the state. Every fire falls into a disagreement bucket, agreement is zero, and
-    nothing about either organisation's inspections has been measured.
+    nothing about either organization's inspections has been measured.
 
     The guard needs both sides to have named something in this county. Where this
     project counts no incident name here, the share over that denominator is already
@@ -340,7 +340,7 @@ def _refuse_a_comparison_that_did_not_join(rows: tuple[IncidentRow, ...]) -> Non
     raise CrossCheckRefused(
         f"the county's record set names {named_there} fires here, this project counts "
         f"{named_here}, and not one name is shared. ADR 0015 reads that as a fault in "
-        "the comparison and not as a finding: two organisations that inspected the "
+        "the comparison and not as a finding: two organizations that inspected the "
         "same county share no fire name only when the join did not happen, and the "
         "usual cause is that each publisher spells its incidents its own way. Check "
         "the incident column against the county cut in published/REPORT.md before "
@@ -428,7 +428,7 @@ def compare(
 
 
 AGREEMENT_NOTE: Final[str] = (
-    "Counted, never corrected. Two organisations inspecting one fire inspect different "
+    "Counted, never corrected. Two organizations inspecting one fire inspect different "
     "structures under different rules, so this compares which fires each set carries "
     "records for in this county and does not compare structure against structure. A "
     "disagreement says the two record sets differ; it does not say which one is right."
@@ -436,7 +436,7 @@ AGREEMENT_NOTE: Final[str] = (
 
 NO_RATE_NOTE: Final[str] = (
     "No rate is taken between the two record sets in either direction. Two "
-    "organisations counting two populations under two rules means neither file is the "
+    "organizations counting two populations under two rules means neither file is the "
     "other's denominator, and the quotient would read as coverage of one by the other. "
     "No damage rate is published for this county from either file, for the reason ADR "
     "0004 gives for a territory and ADR 0009 gives for a county."
@@ -570,7 +570,7 @@ def main(argv: list[str] | None = None) -> int:
     except (CrossCheckRefused, SchemaError, artifacts.PublicationRefused) as error:
         print(f"cross-check refused: {error}", file=sys.stderr)
         return 1
-    print(artifacts.serialise(block), end="")
+    print(artifacts.serialize(block), end="")
     return 0
 
 

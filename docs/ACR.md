@@ -20,7 +20,7 @@ a document are still that, and are marked as such.
 ## What this project's accessibility surface is
 
 Two generated artifacts, `published/REPORT.md` and `published/measurements.json`, plus
-the repository documents around them. No web UI, no colour, no images, no animation,
+the repository documents around them. No web UI, no color, no images, no animation,
 no time-dependent content.
 
 ## What was checked, and what holds it
@@ -39,14 +39,14 @@ watched refuse is not a gate.
 | Every data table has a header row (`\| Outcome \| Share \| ...`) | Enforced by `assert_tables_have_a_header_row`, which refuses a table whose first row is not sitting over a delimiter row. The delimiter row is the whole of what makes a row a header in Markdown. Refusal watched by `test_a_table_with_no_delimiter_row_is_refused` |
 | Every table is introduced by a heading or a sentence, rather than dropped in bare | Enforced by `assert_every_table_is_introduced`, which refuses a table whose nearest non-blank line above it is another table's row, and a table that opens a document. Two tables one blank line apart are two tables on the page and one undifferentiated run to a reader going through in order. Refusal watched by `test_a_table_following_a_table_with_nothing_between_them_is_refused` |
 | Table cells carry their own context (denominator columns sit beside share columns) | Partly enforced. `assert_tables_are_rectangular` refuses a row that does not carry the column count its header declares, so a value arriving with a `\|` in it cannot shift every later cell under the wrong column name; `assert_no_table_cell_is_empty` refuses a cell that would be announced as its column name and then silence; `assert_rates_are_denominated` keeps the denominator beside the share in the artifact the table is rendered from. Whether the column names are the right names is still a human reading |
-| No meaning conveyed by colour anywhere in the output | Enforced by `assert_nothing_is_carried_by_styling`, which refuses an ANSI escape sequence or a markup tag anywhere in the document. This was the basis the 2026-08-22 pass gave for the claim, and nothing was reading it |
+| No meaning conveyed by color anywhere in the output | Enforced by `assert_nothing_is_carried_by_styling`, which refuses an ANSI escape sequence or a markup tag anywhere in the document. This was the basis the 2026-08-22 pass gave for the claim, and nothing was reading it |
 | No meaning conveyed by shape, size, or position alone | Partly enforced. `assert_collections_are_ordered_as_declared` refuses a collection published in an order nobody declared, and `ORDERINGS` carries the reason for each of the orders that is not by name. Whether each row is self-describing once read out of its table is a human reading |
 | Not-measured values render as words ("not measured"), never as blank or zero | Enforced at both ends. `assert_rates_are_denominated` refuses a not-measured rate carrying a value, `report.pct` and `report.rate_line` render the absence as words, and as of this pass `assert_no_table_cell_is_empty` refuses the blank half in the document itself rather than only in the tree behind it |
 | Intervals print both ends, widening precision when the ends would round together | Enforced by `report.span`, held by `test_an_interval_never_prints_its_two_ends_as_the_same_number`. "0.7% to 0.7%" cannot be emitted for two ends that differ |
 | No em dash or en dash in any document or source file | Enforced by `test_no_file_in_the_repository_uses_an_em_or_en_dash`, which reads every authored file in the repository, and by `test_no_dash_character_appears_in_the_published_documents`. Screen readers read these inconsistently mid-sentence |
 | Headings are hierarchical (`#`, then `##` sections) | Enforced by `assert_headings_do_not_skip_a_level`, which refuses a document opening below level one and a heading more than one level deeper than the heading before it. A skipped level puts a section in the heading list with no parent |
 | Links are descriptive phrases, never bare URLs or "here" | Enforced by `assert_links_are_descriptive`, over the generated report at write time and over `README.md`, `PROVENANCE.md` and this document by `test_the_documents_this_review_makes_claims_about_pass_the_document_rules`. The generated report carries no links at all today, so over that document the rule is a guard against the first one rather than a check on present content, and this row says so rather than counting it as coverage it does not have |
-| The JSON artifact is machine-readable for transform into any accessible format | Enforced by `artifacts.serialise`, one stable serialisation with sorted keys, held by `test_serialise_is_stable_for_the_same_tree` and by the `determinism` gate, which builds twice and refuses two trees that differ |
+| The JSON artifact is machine-readable for transform into any accessible format | Enforced by `artifacts.serialize`, one stable serialization with sorted keys, held by `test_serialize_is_stable_for_the_same_tree` and by the `determinism` gate, which builds twice and refuses two trees that differ |
 
 ## What this pass found
 

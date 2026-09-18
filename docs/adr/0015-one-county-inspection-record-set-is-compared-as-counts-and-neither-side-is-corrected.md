@@ -10,7 +10,7 @@ the data exists, in the manner of ADR 0012.
 Extended by `docs/adr/0018` on 2026-09-05, which finishes the search this decision left
 open. Nothing below is withdrawn. What changed is that the search ended: one California
 county record set meets all four criteria stated here, Napa County's own ATC damage
-assessments for 2020, and it is still not pinned, because the two organisations name the
+assessments for 2020, and it is still not pinned, because the two organizations name the
 same fires differently and the comparison decided below joins nothing. The paragraph
 headed "A defect, not a finding" is now enforced in code rather than stated here alone.
 
@@ -20,7 +20,7 @@ Every measurement in this repository is drawn from one inspection file. The coun
 of ADR 0009 reads CAL FIRE's own `COUNTY` field. The comparison of ADR 0013 checks that
 field against a coordinate, using a boundary layer from a second publisher, but the
 records being checked are still CAL FIRE's. Nothing here has ever been held against a
-record set that a different organisation collected by walking the same ground.
+record set that a different organization collected by walking the same ground.
 
 Roadmap item 3.4 is that check, deliberately bounded: one county's own inspection
 records against this project's counts for that county, reported as agreement and
@@ -96,7 +96,7 @@ recorded rather than filled.
 
 ### The comparison is per fire, by name, and never per structure
 
-Two organisations inspecting one fire do not inspect the same structures. CAL FIRE's
+Two organizations inspecting one fire do not inspect the same structures. CAL FIRE's
 file is bounded by the state responsibility area and by 300 feet of the fire perimeter,
 which its own metadata states and this project already quotes. A county's survey is
 bounded by its jurisdiction, which includes local responsibility area ground CAL FIRE's
@@ -127,15 +127,15 @@ publish inspection scope as if it were error.
 ### Neither side is corrected and neither is the truth
 
 Nothing in the comparison edits a county label, moves a record, drops a fire, or
-reconciles a name. This is ADR 0013's posture applied to a second organisation instead
+reconciles a name. This is ADR 0013's posture applied to a second organization instead
 of to a second boundary layer: the output says how often two record sets answer one
 question differently and does not say which one is right. The county's set does not
 become a correction of CAL FIRE's file, and CAL FIRE's file does not become a test the
 county's survey passed or failed.
 
-### Incident names are matched as published, normalised only for case and whitespace
+### Incident names are matched as published, normalized only for case and whitespace
 
-Two organisations name fires their own way. A name that differs between the two sets
+Two organizations name fires their own way. A name that differs between the two sets
 falls into "absent from this record set" and "not named by the county record set" at the
 same time, and both counts carry it. That is a fact about the two record sets and it is
 not repaired by a fuzzy match, because a fuzzy match is this project deciding that two
@@ -161,7 +161,7 @@ not measured. It is never a zero.
 
 The number of records in one file over the number in the other is not published, in
 either direction. `measure.py` already refuses a rate whose denominator is drawn from
-outside the record set it counts, and two organisations counting two populations under
+outside the record set it counts, and two organizations counting two populations under
 two rules is exactly that case: neither file is the other's denominator, and the
 quotient would read as coverage of one by the other.
 
@@ -175,13 +175,13 @@ not create an exception. The cross-check counts inspections, never destruction.
   even then it bears on CAL FIRE's `COUNTY` field rather than on code in this
   repository, in exactly the way ADR 0013's disagreement count does. A large count here
   is a published limit on the county cut of ADR 0009: its rows rest on a field two
-  organisations do not agree about.
+  organizations do not agree about.
 - **"Absent from this record set" and "not named by the county record set" are
   inspection scope**, not error. A fire the county inspected outside the state
   responsibility area was never going to be in CAL FIRE's file, and a fire in the file
   that the county did not publish says nothing about either.
 - **A defect, not a finding**: agreement of zero across a set of fires both
-  organisations plainly worked would mean the two sets were not joined at all, most
+  organizations plainly worked would mean the two sets were not joined at all, most
   likely a county name or an incident name that does not match for a mechanical reason.
   That is read as a fault in the comparison and investigated, not published as a result.
 - **Nothing here falsifies the placement, the geometry repair, the overlap counts, or
@@ -201,7 +201,7 @@ pinned. It was rejected. A section in the published report that says nothing on 
 run is a section a reader learns to skip before the run where it says something, and
 adding it would mean regenerating the published tree to carry a block with no
 measurement in it. The rule this project runs on is that a measurement which could not
-be made is never a zero; the cleanest way to honour it here is for the block not to
+be made is never a zero; the cleanest way to honor it here is for the block not to
 exist until the retrieval does. When the source is pinned, the block joins the artifact,
 its incident collection joins `artifacts.ORDERINGS` in the same change, and the refresh
 goes through the deliberate procedure like any other.

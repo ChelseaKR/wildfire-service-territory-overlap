@@ -17,7 +17,7 @@ What is published
    contributed by its single largest incident. Alphabetical.
 4. **Per territory, how much of it sits near a published edge.** The publisher says the
    boundaries are approximate. This says how much would move if they are off by 100,
-   250, 500 or 1000 metres.
+   250, 500 or 1000 meters.
 5. **Whether being unattributable is a property of the data or of the fire.** The share
    of incidents whose classified records fall entirely on one side of the contested
    line, the contested share within each incident year, and the contested share within
@@ -297,7 +297,7 @@ def geometry_ledger(
 ) -> dict[str, Any]:
     """Which published polygons arrived invalid, and how much rests on the repair.
 
-    Naming the repaired polygons is not enough on its own. The repair is a modelling
+    Naming the repaired polygons is not enough on its own. The repair is a modeling
     decision, a different repair puts a different set of records inside a different set
     of outlines, and a reader deciding how much to trust the result needs the size of
     the exposure rather than the fact of it.
@@ -454,7 +454,7 @@ def attributability_by_fire(placement: Placement) -> dict[str, Any]:
     the years and none can be: the territory layer is a single retrieval, so a
     year-over-year change in the contested share is a change in where fires burned
     against fixed boundaries, not a change in the boundaries. The dispersion is the
-    finding; a direction over time would be an artefact.
+    finding; a direction over time would be an artifact.
     """
     return {
         "question": (

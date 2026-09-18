@@ -1,4 +1,4 @@
-"""The refresh diff, held to the behaviour the refresh procedure will rely on."""
+"""The refresh diff, held to the behavior the refresh procedure will rely on."""
 
 from __future__ import annotations
 

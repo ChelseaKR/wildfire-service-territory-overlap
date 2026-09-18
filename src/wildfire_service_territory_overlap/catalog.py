@@ -392,7 +392,7 @@ _ENGLISH: dict[str, str] = {
     ),
     "contested.edge_note": (
         "The last column is the share of each combination's records sitting\n"
-        "within 250 metres of the nearest edge among the outlines involved. A\n"
+        "within 250 meters of the nearest edge among the outlines involved. A\n"
         "contested record stops being contested when any of them ceases to\n"
         "contain it, so that is the edge an approximation error moves first; a\n"
         "combination near 100% here is a thin seam between outlines, and one\n"
@@ -507,7 +507,7 @@ _ENGLISH: dict[str, str] = {
         "own denominator, interval and difference from the rule as built. Nothing here\n"
         "is adopted and nothing is marked better: the rule as built stays the reference\n"
         "row, and a supplied rule is measured rather than applied. It establishes what\n"
-        "one reading would cost. It does not establish that any named organisation in\n"
+        "one reading would cost. It does not establish that any named organization in\n"
         "the layer operates a distribution system, which this project does not decide."
     ),
     "type_inclusion.supplied_row": (

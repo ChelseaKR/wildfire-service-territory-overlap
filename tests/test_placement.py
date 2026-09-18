@@ -197,7 +197,7 @@ def test_the_incident_split_counts_only_records_that_got_an_outcome(
 def test_the_faster_containment_route_answers_what_the_predicate_form_answers(
     territories: tuple[Territory, ...], records: tuple[tuple[Record, ...], int]
 ) -> None:
-    """The two-step query is an optimisation, so it has to be exactly equivalent.
+    """The two-step query is an optimization, so it has to be exactly equivalent.
 
     ``STRtree.query(predicate="intersects")`` re-walks every ring on every test and
     costs about forty seconds over the real record set. The tree-then-prepared-test form
@@ -445,14 +445,14 @@ def test_a_thin_overlap_sits_wholly_inside_the_first_band() -> None:
     state = placement.contested_distance_state[names]
     bands = placement.contested_bands[names]
     assert state == "measured"
-    # The strip is roughly 90 metres wide, so both records sit within the 100 m band
+    # The strip is roughly 90 meters wide, so both records sit within the 100 m band
     # of some edge in the combination.
     assert bands[100] == 2
     assert bands[1000] == 2
 
 
 def test_an_interior_overlap_has_records_outside_every_band() -> None:
-    """Deep overlap: a central record is over a kilometre from any edge involved."""
+    """Deep overlap: a central record is over a kilometer from any edge involved."""
     deep_left = _square_feature(
         3, "Wide West", "IOU", _ring(-122.00, 37.00, -121.96, 37.04)
     )
@@ -468,7 +468,7 @@ def test_an_interior_overlap_has_records_outside_every_band() -> None:
     assert placement.contested_groups[names] == 2
     bands = placement.contested_bands[names]
     # The edge-hugging record sits within 100 m of the shared western edge; the
-    # central one is more than a kilometre from every edge of either outline.
+    # central one is more than a kilometer from every edge of either outline.
     assert bands[100] == 1
     assert bands[1000] == 1
     assert placement.contested_distance_state[names] == "measured"

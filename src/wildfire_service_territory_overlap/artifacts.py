@@ -465,7 +465,7 @@ def check_all(tree: dict[str, Any], *, max_rows: int) -> None:
         assert_territories_sorted_by_name(rows)
 
 
-def serialise(tree: dict[str, Any]) -> str:
+def serialize(tree: dict[str, Any]) -> str:
     """One representation, so an unchanged measurement is an unchanged file."""
     return json.dumps(tree, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
 
@@ -474,7 +474,7 @@ def write_json(tree: dict[str, Any], path: Path, *, max_rows: int) -> Path:
     """Check, then write. An artifact that fails a rule is not written at all."""
     check_all(tree, max_rows=max_rows)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(serialise(tree), encoding="utf-8")
+    path.write_text(serialize(tree), encoding="utf-8")
     return path
 
 
@@ -728,7 +728,7 @@ def _is_descriptive(label: str) -> bool:
 
 
 def assert_links_are_descriptive(document: str) -> None:
-    """Refuse a link labelled with a URL, or with a word that names nothing.
+    """Refuse a link labeled with a URL, or with a word that names nothing.
 
     Link text is pulled out of its sentence and read in a list of links, where "here"
     is indistinguishable from every other "here" on the page and a URL is announced
@@ -745,7 +745,7 @@ def assert_links_are_descriptive(document: str) -> None:
         for match in _MARKDOWN_LINK.finditer(text):
             if not _is_descriptive(match.group(1)):
                 raise PublicationRefused(
-                    f"line {line}: a link labelled {match.group(1).strip()!r}. Link "
+                    f"line {line}: a link labeled {match.group(1).strip()!r}. Link "
                     "text is read in a list of links, out of the sentence that gave "
                     "it its meaning. Say where it goes."
                 )
@@ -755,13 +755,13 @@ def assert_nothing_is_carried_by_styling(document: str) -> None:
     """Refuse an escape sequence or a markup tag in a published document.
 
     The claim this replaces was that the artifacts hold no ANSI codes and no styling,
-    so nothing in them is said by colour. It was true when it was written and nothing
-    was reading it. Colour is not announced; the escape sequence that produces it is.
+    so nothing in them is said by color. It was true when it was written and nothing
+    was reading it. Color is not announced; the escape sequence that produces it is.
     """
     if "\x1b" in document:
         raise PublicationRefused(
             "an ANSI escape sequence reached a published document. Nothing here may "
-            "say anything by colour, and the escape itself is what gets read out."
+            "say anything by color, and the escape itself is what gets read out."
         )
     for line, text in _prose_lines(document):
         tag = _HTML_TAG.search(text)

@@ -196,7 +196,7 @@ def test_boundary_segments_handle_a_multipolygon() -> None:
     assert len(boundary_segments(MultiPolygon([a, b]))) == 8
 
 
-def test_boundary_distance_is_measured_in_metres_from_the_nearest_edge() -> None:
+def test_boundary_distance_is_measured_in_meters_from_the_nearest_edge() -> None:
     box = Polygon([(0, 0), (1000, 0), (1000, 1000), (0, 1000)])
     xs = np.array([500.0, 10.0, 999.0])
     ys = np.array([500.0, 500.0, 500.0])

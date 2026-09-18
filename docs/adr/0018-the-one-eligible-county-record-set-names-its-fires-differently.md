@@ -26,7 +26,7 @@ below are reached through the indexes that carry them rather than through hostna
 
 | Avenue | Query | What came back |
 |---|---|---|
-| `data.ca.gov` package API | `organization_list` with `all_fields=true` and `limit=1000` | 62 organisations, every one a state department, board or commission. No county publishes on `data.ca.gov` at all, so filtering that portal by owning organisation cannot reach a county's own record set, and CAL FIRE's ownership of the Camp Fire package is not an accident of one dataset |
+| `data.ca.gov` package API | `organization_list` with `all_fields=true` and `limit=1000` | 62 organizations, every one a state department, board or commission. No county publishes on `data.ca.gov` at all, so filtering that portal by owning organization cannot reach a county's own record set, and CAL FIRE's ownership of the Camp Fire package is not an accident of one dataset |
 | ArcGIS Online item search | Three keyword queries over damage, destruction, structure status, inspection, assessment, rebuild and recovery, each crossed with fire, bounded to California and paged to exhaustion | 477 distinct feature services. One of them is a county-collected wildfire structure inspection set carrying an incident name |
 | ArcGIS Hub dataset index | Free-text queries for structure damage inspection, county damage assessment and Butte County Camp Fire damage | The same county items the item search returned, plus federal, academic and out-of-state sets. Nothing new in California |
 | Layer and item metadata | Item, service and layer JSON for every California candidate the two searches surfaced | The schemas recorded in the next section, read from the publishers' own endpoints rather than inferred from titles |
@@ -81,7 +81,7 @@ whether they got the same thing, and it is not in `sources.py` for the reason be
 
 ### Why the comparison still cannot be made
 
-The two organisations do not name the same fires the same way, and the join is by name.
+The two organizations do not name the same fires the same way, and the join is by name.
 
 Napa County's set carries two incident names, 1,109 records under `GLASS COMPLEX 2020`
 and 576 under `NAPA LIGHTNING COMPLEX 2020`. CAL FIRE's file names ten fires in Napa
@@ -99,7 +99,7 @@ Run as ADR 0015 decided it, the comparison therefore returns an agreement of zer
 county names land in "absent from this record set", all ten CAL FIRE names land in "not
 named by the county record set", and both shares are zero over their own denominators.
 ADR 0015 already says what that is. It is the paragraph headed "A defect, not a finding":
-an agreement of zero across fires both organisations plainly worked means the two sets
+an agreement of zero across fires both organizations plainly worked means the two sets
 were not joined at all, and it is investigated rather than published as a result.
 
 The investigation is this section, and its answer is that the mismatch is not a bug. The
@@ -171,5 +171,5 @@ which candidates not to spend the afternoon on.
 The cost is that this project still has no external confirmation of anything, and the
 roadmap row stays open for a second reason after being open for a first. The comparison
 is decided, built, tested, and now guarded against the one way it could have reported a
-naming convention as total disagreement. What it has never had is a second organisation's
+naming convention as total disagreement. What it has never had is a second organization's
 file it can join, and this decision says so rather than manufacturing one.

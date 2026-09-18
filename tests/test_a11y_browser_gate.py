@@ -210,7 +210,7 @@ def test_a_scrollable_region_nobody_can_focus_fails(tmp_path: Path) -> None:
 
 def test_text_below_the_contrast_threshold_fails(tmp_path: Path) -> None:
     """jsdom paints nothing and files this as undecided; a browser decides it."""
-    body = "<p class='faint'>Grey on white, below 4.5:1.</p>"
+    body = "<p class='faint'>Gray on white, below 4.5:1.</p>"
     result = run(
         "axe.spec.ts",
         site(tmp_path, body, style=".faint{color:#aaa;background:#fff}"),
@@ -267,7 +267,7 @@ def test_a_missing_directory_fails_rather_than_passing(
 
 
 def wide_table(*, rows: int = 12, columns: int = 12) -> str:
-    """A labelled, focusable scroll region holding a numeric table too wide for 320px."""
+    """A labeled, focusable scroll region holding a numeric table too wide for 320px."""
     head = "".join(f"<th scope='col' class='num'>Col {c}</th>" for c in range(columns))
     body = "".join(
         f"<tr><th scope='row'>Row {r}</th>"

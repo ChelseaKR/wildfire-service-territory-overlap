@@ -12,7 +12,7 @@ The one thing on the page that is not a text node of the document is each table'
 exempt, and :func:`test_the_exemption_is_exactly_the_captions` counts the exemption so it
 cannot quietly grow.
 
-Colour is measured here rather than by an engine because jsdom paints no pixels: the
+Color is measured here rather than by an engine because jsdom paints no pixels: the
 contrast rule is one of the four ``tools/a11y.mjs`` declares it cannot decide. Chromium
 does decide it, in ``tools/a11y_browser/axe.spec.ts``. This module is the arithmetic
 floor under both.
@@ -262,7 +262,7 @@ def test_no_two_tables_carry_the_same_caption(markup: str) -> None:
     assert len(set(found)) == len(found), sorted(found)
 
 
-def test_every_scroll_region_is_labelled_by_its_own_caption(markup: str) -> None:
+def test_every_scroll_region_is_labeled_by_its_own_caption(markup: str) -> None:
     """A container a keyboard can focus has to say what it is.
 
     ``tabindex="0"`` on the scroll container is WCAG 2.1.1: a region that scrolls for
@@ -345,14 +345,14 @@ def test_a_catalog_has_to_name_a_language() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Nothing loads, nothing is said by colour.
+# Nothing loads, nothing is said by color.
 # ---------------------------------------------------------------------------
 
 
 def test_the_page_loads_nothing_and_runs_nothing(markup: str) -> None:
     """No script, no font, no image, no network reference of any kind.
 
-    A served page that fetches something is a page whose behaviour depends on a third
+    A served page that fetches something is a page whose behavior depends on a third
     party, and a measurement that reads differently depending on who is reachable is
     not a measurement.
     """
@@ -364,7 +364,7 @@ def test_the_page_loads_nothing_and_runs_nothing(markup: str) -> None:
     assert "style=" not in markup
 
 
-def test_every_colour_on_the_page_is_a_declared_palette_colour(markup: str) -> None:
+def test_every_color_on_the_page_is_a_declared_palette_color(markup: str) -> None:
     declared = {
         value for palette in page.PALETTES.values() for value in palette.values()
     }
@@ -402,13 +402,13 @@ def test_the_contrast_arithmetic_agrees_with_the_published_reference_values() ->
     assert page.contrast("#777777", "#ffffff") == pytest.approx(4.48, abs=0.01)
 
 
-def test_the_pair_list_covers_every_colour_the_stylesheet_puts_together(
+def test_the_pair_list_covers_every_color_the_stylesheet_puts_together(
     markup: str,
 ) -> None:
     """Self-limiting, both directions.
 
-    A pair naming a colour the sheet does not carry exempts nothing; a colour used as
-    a foreground with no pair for it is a colour nothing measured.
+    A pair naming a color the sheet does not carry exempts nothing; a color used as
+    a foreground with no pair for it is a color nothing measured.
     """
     sheet = page.stylesheet()
     named = {name for pair in page.PAIRS for name in (pair.foreground, pair.background)}
@@ -420,9 +420,9 @@ def test_the_pair_list_covers_every_colour_the_stylesheet_puts_together(
         assert pair.where and pair.minimum in {3.0, 4.5}
 
 
-def test_a_colour_that_is_not_a_lowercase_hex_triple_is_refused() -> None:
+def test_a_color_that_is_not_a_lowercase_hex_triple_is_refused() -> None:
     for bad in ("#FFF", "white", "#12345", "rgb(0,0,0)"):
-        with pytest.raises(page.PageRefused, match="hex colour"):
+        with pytest.raises(page.PageRefused, match="hex color"):
             page.luminance(bad)
 
 

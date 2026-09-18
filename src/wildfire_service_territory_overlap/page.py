@@ -19,14 +19,14 @@ dropped a row fails, not only one that invented a number.
 
 **The converter is total or it refuses.** Every construct it does not understand
 raises :class:`PageRefused` and no file is written. A Markdown-to-HTML converter that
-passes an unrecognised line through is a converter that publishes ``**`` and ``|`` to
+passes an unrecognized line through is a converter that publishes ``**`` and ``|`` to
 a reader; one that drops it is worse. Neither happens here.
 
-**Nothing is said by colour and nothing is scripted.** The page carries no script, no
+**Nothing is said by color and nothing is scripted.** The page carries no script, no
 web font, no image and no network reference of any kind. The palette is data below,
-one entry per colour, and :mod:`tests.test_page` measures every foreground and
+one entry per color, and :mod:`tests.test_page` measures every foreground and
 background pair that the stylesheet actually uses against the WCAG 2.2 thresholds,
-arithmetically, in both the light and the dark presentation -- because a colour
+arithmetically, in both the light and the dark presentation -- because a color
 contrast rule is one of the four an accessibility engine cannot decide in a DOM with
 no layout.
 """
@@ -61,7 +61,7 @@ class PageRefused(ValueError):
 # The palette, as data.
 #
 # One dictionary per presentation, the same keys in both, and the stylesheet below is
-# generated from them -- so a colour cannot be used on the page without being here,
+# generated from them -- so a color cannot be used on the page without being here,
 # and tests/test_page.py asserts that in both directions. The pairs that actually
 # occur are declared in PAIRS; the contrast test reads that list and would rather fail
 # than assume.
@@ -119,34 +119,34 @@ PAIRS: tuple[Pair, ...] = (
 
 
 def _channel(value: int) -> float:
-    """One sRGB channel, linearised, per WCAG 2.x relative luminance."""
+    """One sRGB channel, linearized, per WCAG 2.x relative luminance."""
     fraction = value / 255
     if fraction <= 0.04045:
         return fraction / 12.92
     return float(((fraction + 0.055) / 1.055) ** 2.4)
 
 
-def luminance(colour: str) -> float:
-    """Relative luminance of a ``#rrggbb`` colour."""
-    if not re.fullmatch(r"#[0-9a-f]{6}", colour):
+def luminance(color: str) -> float:
+    """Relative luminance of a ``#rrggbb`` color."""
+    if not re.fullmatch(r"#[0-9a-f]{6}", color):
         raise PageRefused(
-            f"{colour!r} is not a lowercase six-digit hex colour. The contrast "
+            f"{color!r} is not a lowercase six-digit hex color. The contrast "
             "arithmetic reads channels out of the string, so a shorthand or a named "
-            "colour would be measured as something it is not."
+            "color would be measured as something it is not."
         )
-    red, green, blue = (int(colour[index : index + 2], 16) for index in (1, 3, 5))
+    red, green, blue = (int(color[index : index + 2], 16) for index in (1, 3, 5))
     return 0.2126 * _channel(red) + 0.7152 * _channel(green) + 0.0722 * _channel(blue)
 
 
 def contrast(foreground: str, background: str) -> float:
-    """The WCAG contrast ratio between two colours, 1.0 to 21.0."""
+    """The WCAG contrast ratio between two colors, 1.0 to 21.0."""
     first, second = luminance(foreground), luminance(background)
     lighter, darker = max(first, second), min(first, second)
     return (lighter + 0.05) / (darker + 0.05)
 
 
 def stylesheet() -> str:
-    """The whole stylesheet, with every colour read out of the palettes above.
+    """The whole stylesheet, with every color read out of the palettes above.
 
     The dark presentation is a media query rather than a toggle: there is no script
     on this page to hold a preference with, and a control that does nothing is worse

@@ -3,9 +3,9 @@
 // This is the WCAG gate. It loads each page into a real DOM implementation and runs
 // axe-core's WCAG 2.0/2.1/2.2 A and AA rule sets plus the best-practice set, and exits
 // non-zero on any violation. It is not a substitute for a human looking at the page:
-// jsdom does no layout and computes no colours, so the rules that depend on rendered
+// jsdom does no layout and computes no colors, so the rules that depend on rendered
 // geometry or on painted pixels cannot fire here. Those rules are declared in
-// UNDECIDABLE_HERE below, each with where it is decided instead, and colour contrast
+// UNDECIDABLE_HERE below, each with where it is decided instead, and color contrast
 // is also measured off the palette itself in tests/test_page.py. What no engine
 // stands in for is the assistive-technology pass issue #49 asks for.
 //
@@ -97,7 +97,7 @@ async function checkPage(path) {
   // "outside-only" gives us an eval to inject axe with, without ever running a script
   // that came out of the page. These pages ship no script, and the checker should not
   // start executing one if that ever changes.
-  // axe probes for a canvas to decide whether it can sample colours. jsdom has none, so
+  // axe probes for a canvas to decide whether it can sample colors. jsdom has none, so
   // it reports that once per page. Everything else the page or axe says is forwarded.
   const console_ = new VirtualConsole();
   console_.forwardTo(console, { jsdomErrors: "none" });

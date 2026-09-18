@@ -96,7 +96,7 @@ that has been taken toward one beyond making one possible.
 
 The English document did not move. Every branch of the renderer was run before and
 after the extraction against the published artifact, the fixture artifact, and
-synthesised trees exercising the two-repair rendering, the empty-transitions rendering
+synthesized trees exercising the two-repair rendering, the empty-transitions rendering
 and a tree in which nothing is measured; all twelve came out byte for byte identical,
 `published/REPORT.md` still renders exactly from `published/measurements.json`, and the
 determinism gate is unchanged.

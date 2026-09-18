@@ -198,7 +198,7 @@ def test_the_block_passes_the_publication_rules_it_declares(
 def test_the_comparison_is_deterministic() -> None:
     first = cross_check(EAST, read(DINS_SAMPLE), read(COUNTY_SAMPLE))
     second = cross_check(EAST, read(DINS_SAMPLE), read(COUNTY_SAMPLE))
-    assert artifacts.serialise(first) == artifacts.serialise(second)
+    assert artifacts.serialize(first) == artifacts.serialize(second)
 
 
 def test_the_county_is_reported_in_this_project_s_own_spelling() -> None:

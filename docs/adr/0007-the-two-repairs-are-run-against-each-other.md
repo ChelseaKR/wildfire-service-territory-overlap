@@ -65,7 +65,7 @@ under the alternative actually available.
 That the two repairs differ at all is a finding about the published boundaries and not
 about this code. Eight of the fifty-nine outlines arrive failing an OGC validity check,
 and the disagreement between two standard repairs of them covers thousands of square
-kilometres of California. It is reported in the README on that basis.
+kilometers of California. It is reported in the README on that basis.
 
 Both figures are honest and neither is reassuring on its own. A reader who wants to
 discount the repaired territories can see which they are; a reader who wants to know

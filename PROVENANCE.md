@@ -45,7 +45,7 @@ reading it fetches no position.
 are still four. The Napa layer was retrieved once, on 2026-09-05, as four columns with
 geometry suppressed, to establish that it can be retrieved and read within this
 project's rules; the result is a working file this repository does not carry and
-`sources.py` gains no entry for it. It is not pinned because the two organisations name
+`sources.py` gains no entry for it. It is not pinned because the two organizations name
 the same fires differently, so the comparison joins nothing, which ADR 0015 already
 reads as a defect rather than as a finding.
 
@@ -191,7 +191,7 @@ dependency's output is a consumer trusting a version it did not read.
 **The projection is pinned as a pipeline.** California Albers, GRS80, no datum step, so
 no PROJ grid files are involved and the arithmetic is identical on any machine. A WGS84
 coordinate is therefore treated as though it were on GRS80, a shift of roughly one to two
-metres in California. Every distance published here is a band at 100 metres or wider.
+meters in California. Every distance published here is a band at 100 meters or wider.
 `tests/test_geometry.py` checks the pipeline against EPSG:3310.
 
 **Eight of the published polygons arrive invalid and are repaired.** Ring

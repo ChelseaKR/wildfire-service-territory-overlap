@@ -112,7 +112,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   **The converter refuses what it cannot render.** A fenced block, a link, an unclosed
   code or strong span, a ragged table row, a table with no delimiter row, an orphan
   indented bullet, an empty document and a document that does not open at heading level
-  one each raise and write nothing. A converter that passed an unrecognised line through
+  one each raise and write nothing. A converter that passed an unrecognized line through
   would publish `**` to a reader, and one that dropped it would be worse.
 
   **Every table is in a focusable scroll region with a caption and `scope` on every
@@ -130,7 +130,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   HTML conformance and the markup-level rules, axe-core in a headless DOM, the same rule
   sets again in Chromium at 1280 and at 320 pixels wide, where nothing is undecidable,
   and WCAG 2.2 SC 1.4.10 Reflow at 320 by 256, which no engine decides from a DOM alone.
-  Colour contrast is measured arithmetically off the palette in `tests/test_page.py`, in
+  Color contrast is measured arithmetically off the palette in `tests/test_page.py`, in
   both presentations, because jsdom paints no pixels. Each half has its own tests running
   it against pages that must fail: 14 for the jsdom half and 14 for the browser half.
 
@@ -195,7 +195,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
   **Every refusal test stayed and every one still passes with its assertion unchanged**,
   now exercising upstream's code from here. That is the evidence the duplication was a
-  duplication rather than two behaviours that happened to look alike, and they stay
+  duplication rather than two behaviors that happened to look alike, and they stay
   because a consumer that stops checking a dependency because the dependency says it
   checks itself is trusting a version of the code it has not read.
 
@@ -206,7 +206,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a fragment of the duplication for no reason, so it went upstream (`perimeter` #86) and
   the pin here is the commit that carries it.
 
-  One behaviour changed: upstream stops at a short page with no `exceededTransferLimit`,
+  One behavior changed: upstream stops at a short page with no `exceededTransferLimit`,
   where the local walk paged until it was handed an empty one. Nothing rests on the
   difference, because `assert_walk_is_whole` compares the walk against the layer's own
   count read before and after, so a walk that stopped early writes nothing and says so.
@@ -369,7 +369,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`docs/adr/0018`: the search for a county inspection source finished, and the answer
   is a negative with an address** (issue #53). Roadmap 3.4 has been waiting on a county
   record set that can be pinned. The supply of published California county data was
-  enumerated rather than sampled: `data.ca.gov` carries 62 organisations and not one is
+  enumerated rather than sampled: `data.ca.gov` carries 62 organizations and not one is
   a county, so the sets that exist live in ArcGIS portals, and three keyword sweeps
   bounded to California returned 477 distinct feature services. One is a county-collected
   wildfire structure inspection set carrying an incident name. Napa County Emergency
@@ -386,7 +386,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of the four criteria each fails, is in the ADR so nobody repeats the search.
 - **The comparison now refuses a pair of record sets that share no fire name**
   (`cross_check._refuse_a_comparison_that_did_not_join`). ADR 0015 said in prose that an
-  agreement of zero across fires both organisations plainly worked is a fault to
+  agreement of zero across fires both organizations plainly worked is a fault to
   investigate and not a result to publish, and nothing enforced it: the command would
   print the block, and a block a command prints is a block a maintainer can paste into a
   document. It is the eighth refusal in the module and it is driven by two tests, one of
@@ -443,7 +443,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   name.** Such a row was dropped from the sum, so the artifact was refused with a message
   saying a combination had been cut for sitting past the cap, which it had not been. The
   row is now named with its index and the reason it is unreadable.
-- `tests/test_artifacts.py` asserted the permissive behaviour as intended
+- `tests/test_artifacts.py` asserted the permissive behavior as intended
   (`test_the_contested_check_stays_quiet_when_there_is_nothing_to_compare`, whose
   docstring read "a tree without the coverage block is not an artifact this rule can
   judge"). It now covers only the absence that really is quiet, the one where no table is
@@ -706,7 +706,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a published territory name arriving with a `|` in it would produce;
   `assert_no_table_cell_is_empty` refuses a cell that reads as its column name followed
   by silence; `assert_headings_do_not_skip_a_level` refuses a document opening below
-  level one or skipping a level; `assert_links_are_descriptive` refuses a link labelled
+  level one or skipping a level; `assert_links_are_descriptive` refuses a link labeled
   with a bare URL or with "here"; `assert_nothing_is_carried_by_styling` refuses an ANSI
   escape or a markup tag. Every one is fed output that breaks it in
   `tests/test_artifacts.py`, and `docs/ACR.md` now separates what is enforced from what
@@ -753,7 +753,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Every refusal has a test that fires it, including the cap, which is computed from the
   record set rather than written down as a number and is driven past from both sides.
   `placement._key` became the public `fold_name` so the coordinate-county comparison
-  and this one share one name normalisation instead of two that can drift.
+  and this one share one name normalization instead of two that can drift.
 
 - **The coordinate-county comparison** (`docs/adr/0013`). CAL FIRE's `COUNTY` field is
   now measured, not just trusted: 132,490 records carry both a usable coordinate and a
@@ -775,13 +775,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the party using them defines. Both are marked draft and unsent; sending dates and
   outcomes belong in `PROVENANCE.md`.
 - Edge bands for contested groups. Each overlapping combination now carries how
-  much of it sits within 100, 250, 500 and 1000 metres of the nearest edge among the
+  much of it sits within 100, 250, 500 and 1000 meters of the nearest edge among the
   outlines involved, with its own denominator and Wilson interval: a contested record
   stops being contested when any outline in its combination ceases to contain it, so
   that nearest edge is what an approximation error moves first. A combination near
-  100% at 250 metres is a thin seam between outlines; one near 0% is interior ground
+  100% at 250 meters is a thin seam between outlines; one near 0% is interior ground
   two published territories genuinely cover together. The report's overlap table gains
-  the 250 metre column and still renders artifacts from before it existed unchanged.
+  the 250 meter column and still renders artifacts from before it existed unchanged.
 - `main` is protected by a branch ruleset: force push and deletion refused, every
   change arriving as a merged pull request, the six PR-facing checks required green.
   One bypass actor stands, the repository admin role at `bypass_mode: always`. This
@@ -838,7 +838,7 @@ before the tag was cut, to fold in the roadmap execution that shipped the same d
   to what a defect could publish or sign, plus the secret-leak procedure.
 - ADR 0012, written before the data exists: when the second territory-layer
   retrieval lands, comparisons against the first are paired per-value diffs and
-  per-record transition counts, never a modelled direction. Each snapshot keeps its
+  per-record transition counts, never a modeled direction. Each snapshot keeps its
   own denominator, nothing is differenced into a single headline, and any figure
   spanning both retrievals dates its rows. The by-year cut keeps ADR 0008's no-trend
   rule unchanged within each snapshot.
@@ -895,7 +895,7 @@ before the tag was cut, to fold in the roadmap execution that shipped the same d
 - Per-territory counts in name order, with the share of each territory's placed records
   contributed by its single largest incident. No damage rate is published for any
   territory and no territory is ordered against another.
-- Boundary-proximity bands at 100, 250, 500 and 1000 metres, operationalizing the
+- Boundary-proximity bands at 100, 250, 500 and 1000 meters, operationalizing the
   publisher's statement that the boundaries are approximate.
 - A geometry ledger naming the eight published polygons that arrive failing an OGC
   validity check, and measuring what share of the placed total depends on the repair.

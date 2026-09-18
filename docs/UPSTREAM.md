@@ -32,7 +32,7 @@ at some future pin.
 
 | Gap | State at `d0470bca` | What changed here |
 |---|---|---|
-| 5. The single-request reader is private, so a consumer that needs one writes the refusals again | **Closed.** `perimeter.acquire.fetch_document` is public, is a rename with no behaviour change, and its docstring says what it is for and that a caller reading a *layer* still wants `iter_features` | `refresh.py` reads item metadata through it. There is no fetch in this repository and no copy of any refusal |
+| 5. The single-request reader is private, so a consumer that needs one writes the refusals again | **Closed.** `perimeter.acquire.fetch_document` is public, is a rename with no behavior change, and its docstring says what it is for and that a caller reading a *layer* still wants `iter_features` | `refresh.py` reads item metadata through it. There is no fetch in this repository and no copy of any refusal |
 
 `refresh.py` is the first module here written with no local network code at all: it
 imports the reader, the count and the exception types, and adds only the comparisons this
@@ -70,11 +70,11 @@ Every refusal test in `tests/test_acquire.py` now exercises upstream's code from
 every one of them still passes without its assertion changing: the non-HTTPS refusal, all
 three access-control codes, a 500, an HTML challenge page, an error payload, a
 `returnCountOnly` answer with no count, and a boolean offered as a count. That is the
-evidence the duplication was a duplication rather than two different behaviours that
+evidence the duplication was a duplication rather than two different behaviors that
 happened to look alike.
 
 They stay for the reason Gap 3 states below. A consumer that stops checking a
-dependency's behaviour because the dependency says it checks its own is trusting a
+dependency's behavior because the dependency says it checks its own is trusting a
 version of the code it has not read, and the pin exists so that an upstream change
 arrives deliberately. These assertions are what would notice if a later pin landed on a
 walk that had lost one of them.
@@ -91,7 +91,7 @@ fragment of the duplication in place for no reason, so it went upstream instead
 (`perimeter` #86) and the pin here is the commit that carries it. The assertion in
 `tests/test_acquire.py` is now made against upstream's message.
 
-### One behaviour changed, and the guard that makes it safe was already here
+### One behavior changed, and the guard that makes it safe was already here
 
 The local walk paged until it was handed an empty page. Upstream stops earlier: a page
 shorter than the one it asked for, with no `exceededTransferLimit`, is the end of the

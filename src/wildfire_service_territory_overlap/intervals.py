@@ -4,7 +4,7 @@ A count without a denominator is not a rate, and a rate without an interval is n
 comparison. Both rules are enforced here rather than remembered: :class:`Rate` is the
 only way a proportion reaches an artifact in this project, it cannot be constructed
 without its denominator, and :func:`wildfire_service_territory_overlap.artifacts.assert_rates_are_denominated`
-refuses to serialise a rate-shaped object that is missing either.
+refuses to serialize a rate-shaped object that is missing either.
 
 The interval is Wilson's score interval, which is used here rather than the normal
 approximation for the reason that matters in this data: several territories carry very
@@ -53,14 +53,14 @@ def wilson(numerator: int, denominator: int, z: float = Z_95) -> tuple[float, fl
     p = numerator / n
     z2 = z * z
     denom = 1.0 + z2 / n
-    centre = (p + z2 / (2.0 * n)) / denom
+    center = (p + z2 / (2.0 * n)) / denom
     half = (z / denom) * math.sqrt(p * (1.0 - p) / n + z2 / (4.0 * n * n))
     # Clamped to the exact endpoint at the extremes. With no successes the score interval
     # evaluates to a value a few times 1e-21 rather than to zero, which is arithmetically
     # fine and reads as an interval that does not contain its own point estimate. The
     # bound at zero successes is zero; the bound at every success is one.
-    low = 0.0 if numerator == 0 else max(0.0, centre - half)
-    high = 1.0 if numerator == denominator else min(1.0, centre + half)
+    low = 0.0 if numerator == 0 else max(0.0, center - half)
+    high = 1.0 if numerator == denominator else min(1.0, center + half)
     return (low, high)
 
 

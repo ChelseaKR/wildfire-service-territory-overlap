@@ -20,7 +20,7 @@ records are one fire has a "damage rate" that is that fire's damage rate.
 
 Printed as a table, ordered or not, a set of per-utility destroyed shares is read as a
 comparison. Readers rank tables. The ranking would track fire history and inspection
-coverage, and it would be labelled with company names.
+coverage, and it would be labeled with company names.
 
 ## Decision
 

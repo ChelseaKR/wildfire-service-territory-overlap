@@ -42,7 +42,7 @@ concurrency:
   # to `main` compete for a single slot, and a burst of merges deletes the verdict for
   # whichever commit was waiting: not a failure anyone can see, an absence.
   # `cancel-in-progress` neither causes nor prevents that -- it only decides whether the
-  # loss is visible (cancelled with jobs) or invisible (cancelled with zero jobs).
+  # loss is visible (canceled with jobs) or invisible (canceled with zero jobs).
   # Carrying the SHA gives each commit on `main` its own slot. Pull request supersession
   # is unchanged: pull requests still share a per-ref group, so a new push to a branch
   # still cancels the run it replaces.
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     # 15 was the budget before the page toolchain arrived. `make verify` now also runs
     # `npm ci` twice and downloads a Chromium build, and a timeout below a job's real
-    # runtime reads as a cancelled run rather than as a failed one, which is a verdict
+    # runtime reads as a canceled run rather than as a failed one, which is a verdict
     # nobody can act on. Measured on this job's first run with the page toolchain,
     # 2026-09-11, pull request #117: `make verify` took 82 seconds and the whole job 94,
     # with the Python cache restored. Locally, with everything cached, 37 seconds. 30

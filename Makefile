@@ -181,7 +181,7 @@ site:  ## rebuild the served page from published/measurements.json into site/
 # markup-level accessibility rules, axe-core in a headless DOM for the WCAG 2.0/2.1/2.2
 # A and AA rule sets, the same rule sets again in Chromium where nothing is
 # undecidable, and WCAG 2.2 SC 1.4.10 Reflow at a 320x256 viewport, which no engine
-# decides from a DOM alone. Colour contrast is additionally measured off the palette
+# decides from a DOM alone. Color contrast is additionally measured off the palette
 # itself in tests/test_page.py, so `make verify` still has a floor if a toolchain is
 # unavailable. What none of it can do is look at the page; issue #49 is the pass that
 # needs a person.

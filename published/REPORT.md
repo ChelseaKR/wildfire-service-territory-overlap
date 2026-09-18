@@ -318,7 +318,7 @@ is a description of the boundary layer, not of any utility. The combinations
 are listed by size because size is what is being reported.
 
 The last column is the share of each combination's records sitting
-within 250 metres of the nearest edge among the outlines involved. A
+within 250 meters of the nearest edge among the outlines involved. A
 contested record stops being contested when any of them ceases to
 contain it, so that is the edge an approximation error moves first; a
 combination near 100% here is a thin seam between outlines, and one

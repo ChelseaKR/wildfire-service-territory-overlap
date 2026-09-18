@@ -48,7 +48,7 @@ permissions:
   contents: read
 
 concurrency:
-  # One deployment at a time, and never cancel one in flight: a cancelled deploy can
+  # One deployment at a time, and never cancel one in flight: a canceled deploy can
   # leave the site serving a half-uploaded artifact, which is worse than a queue.
   group: pages
   cancel-in-progress: false

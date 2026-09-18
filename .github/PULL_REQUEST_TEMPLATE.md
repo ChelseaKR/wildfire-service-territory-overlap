@@ -29,8 +29,8 @@ so an item added there and not here fails the build.
 
 Everything above, plus:
 
-- [ ] New behaviour has tests, including at least one refusal path: what the code does
-      when it declines to measure is part of the behaviour.
+- [ ] New behavior has tests, including at least one refusal path: what the code does
+      when it declines to measure is part of the behavior.
 - [ ] Every rate the change produces carries numerator, denominator and interval, and
       passes `artifacts.check_all`; if it cannot be measured, it is not-measured
       shaped, never zero.

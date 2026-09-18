@@ -43,10 +43,10 @@ structure was connected to:
 - `Tribal`
 
 Two are excluded, for reasons about what the polygon represents rather than about any
-organisation:
+organization:
 
 - `CCA`. A community choice aggregator is defined at Public Utilities Code section 331.1
-  as a local government electricity buyers' programme, and section 366.2 leaves
+  as a local government electricity buyers' program, and section 366.2 leaves
   metering, billing and delivery with the electrical corporation. Its polygon overlays
   another entity's distribution footprint rather than being one, so counting a record
   into both would count it twice.
@@ -159,7 +159,7 @@ document that copies numbers is a document that goes stale. The table under
 the 59 outlines: the published type, how many records are placed inside it alone, how
 many are contested between it and another outline, how many distinct incidents those
 records come from, what share came from the largest single incident, and how much of its
-total sits within 250 metres of the published edge. Read that table beside this one.
+total sits within 250 meters of the published edge. Read that table beside this one.
 Two things that are not there, and never will be:
 
 - **No damage rate for any territory.** Not ordered, not unordered, not side by side. A
@@ -248,8 +248,8 @@ make report INCLUSION_RULES=path/to/your-rule.json
 Two things it does rather than guess. A rule naming a type or an outline the pinned
 retrieval does not carry is refused before anything is measured, naming what it could
 not find, so a reading written against last year's layer cannot quietly measure less
-than you asked for. And a key it does not recognise is refused rather than ignored, so a
-misspelt field is a message and not a silently dropped instruction.
+than you asked for. And a key it does not recognize is refused rather than ignored, so a
+misspelled field is a message and not a silently dropped instruction.
 
 ## What happens to your answer
 

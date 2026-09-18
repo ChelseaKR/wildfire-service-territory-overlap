@@ -17,7 +17,7 @@ There are four answers, and the point of this module is that they stay four answ
 A point lying exactly on a shared edge is counted as being in both polygons and is
 therefore contested. That is the conservative direction: the alternative is a rule that
 silently awards edge cases to whichever polygon a floating-point comparison happens to
-favour, which is the kind of tie-break that is invisible in the output.
+favor, which is the kind of tie-break that is invisible in the output.
 
 Nothing in this module divides anything. It counts, and :mod:`wildfire_service_territory_overlap.measure` forms
 the rates, so that every proportion in the published output goes through one place.
@@ -120,7 +120,7 @@ def assert_columns(rows: list[dict[str, Any]]) -> None:
     A file fetched without ``HAZARDTYPE`` filters to zero fire records and produces a
     report in which every rate is honestly marked not measured. That output is correct
     and useless, and it looks like a finding. A missing column is an acquisition fault,
-    so it is raised as one here instead of travelling downstream as data.
+    so it is raised as one here instead of traveling downstream as data.
     """
     if not rows:
         raise SchemaError("the retrieval holds no rows")
@@ -549,7 +549,7 @@ def classify_county_agreement(
 def fold_name(name: str) -> str:
     """A published name reduced to what two publishers can be expected to share.
 
-    Case and inner whitespace, and nothing else. Two organisations writing the same
+    Case and inner whitespace, and nothing else. Two organizations writing the same
     county or the same fire will differ on those and this project will not treat that
     as a disagreement. Anything beyond them would be this project deciding that two
     different names are one thing, which is the adjudication ADR 0013 refuses for

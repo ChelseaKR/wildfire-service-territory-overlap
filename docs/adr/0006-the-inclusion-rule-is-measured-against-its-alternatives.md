@@ -69,7 +69,7 @@ a percentage point and 1,406 records of false coverage, and can spend their atte
 the parts that move the number.
 
 What is still missing is the entity-level review. This measures what the rule costs; it
-does not establish that any particular organisation in the layer operates a distribution
+does not establish that any particular organization in the layer operates a distribution
 system, and it is not evidence that the publisher's classification of any named entity is
 right. The README continues to ask for that under "What still needs a person."
 

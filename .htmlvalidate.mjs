@@ -21,8 +21,8 @@ export default {
     // scope on every th, so strict costs nothing and pins that it keeps doing so.
     "wcag/h63": ["error", { strict: true }],
     // No inline style attribute is emitted, and none should start being. The page
-    // has one stylesheet, generated from the palette, and a colour that reached the
-    // markup directly would be a colour the contrast test cannot see.
+    // has one stylesheet, generated from the palette, and a color that reached the
+    // markup directly would be a color the contrast test cannot see.
     "no-inline-style": "error",
   },
 };

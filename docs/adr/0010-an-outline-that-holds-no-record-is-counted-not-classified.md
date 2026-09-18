@@ -9,7 +9,7 @@ Accepted. Extends ADR 0002 and ADR 0006, neither of which is superseded.
 ## Context
 
 ADR 0002 makes the inclusion rule the publisher's own `Type` field precisely so that this
-project never has to decide whether a named organisation operates a distribution system.
+project never has to decide whether a named organization operates a distribution system.
 ADR 0006 measured what that rule costs and stopped in the same place: it establishes what
 each reading of the field is worth in records, and it establishes nothing about any
 entity.

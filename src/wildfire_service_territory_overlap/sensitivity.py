@@ -214,7 +214,7 @@ def _read_overrides(file_name: str, value: Any) -> tuple[OutlineOverride, ...]:
 
 
 def _read_document(path: Path, file_name: str) -> dict[str, Any]:
-    """The file as a JSON object, with every key it carries recognised."""
+    """The file as a JSON object, with every key it carries recognized."""
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as error:
@@ -467,7 +467,7 @@ def _variant_row(
         # Keyed by the outline name rather than listed, because the name is the
         # identifier and a list would be a published collection whose order the
         # ordering ledger would have to declare against an artifact that carries
-        # it only when a reviewer supplied one. `serialise` sorts keys, and
+        # it only when a reviewer supplied one. `serialize` sorts keys, and
         # `_read_overrides` builds them in name order, so both readings agree.
         row["outline_overrides"] = {o.outline: o.as_dict() for o in supplied.overrides}
     return row
@@ -726,7 +726,7 @@ def untouched_outlines(
 
     A reader can reasonably doubt whether a particular outline in this layer belongs in
     a retail service territory set at all. This project does not answer that, because
-    answering it means classifying a named organisation from outside the publisher's own
+    answering it means classifying a named organization from outside the publisher's own
     field, which ADR 0002 refuses. It can answer the narrower question the doubt is
     usually a proxy for: could that outline be moving a published figure?
 

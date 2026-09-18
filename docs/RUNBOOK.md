@@ -169,7 +169,7 @@ on 2026-09-05. Read that decision before repeating any of it: it enumerates what
 queried, records that no California county publishes on `data.ca.gov` at all, and says
 which of Santa Cruz, Sonoma, Los Angeles, Butte and Napa fails which criterion. One set
 meets all four, Napa County's own ATC damage assessments for 2020, and it is still not
-pinned because the two organisations name the same fires differently. A candidate is
+pinned because the two organizations name the same fires differently. A candidate is
 worth the afternoon only if it carries CAL FIRE's incident name or number, or if a
 county has answered an ask with counts by fire.
 
@@ -281,7 +281,7 @@ summed:
 - `absent_from_this_record_set` and `not_named_by_the_county_record_set` are inspection
   scope. A fire the county inspected outside the state responsibility area was never
   going to be in CAL FIRE's file.
-- An agreement of zero across fires both organisations plainly worked is a defect in the
+- An agreement of zero across fires both organizations plainly worked is a defect in the
   comparison, most likely a name that does not match for a mechanical reason. You will
   not see one in a printed block: since 2026-09-05 the command refuses that case outright
   rather than leaving the reading to whoever meets it.

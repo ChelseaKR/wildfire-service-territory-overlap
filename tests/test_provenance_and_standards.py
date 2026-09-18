@@ -1271,13 +1271,13 @@ def test_the_accessibility_review_still_says_the_assistive_technology_pass_is_op
     says so. A future edit that softens this into a claim of general accessibility
     conformance fails here.
     """
-    normalised = " ".join(ACR.split())
-    assert "No assistive-technology pass" in normalised
+    normalized = " ".join(ACR.split())
+    assert "No assistive-technology pass" in normalized
     assert (
-        "Nobody has navigated the generated tables with a screen reader" in normalised
+        "Nobody has navigated the generated tables with a screen reader" in normalized
     )
-    assert "that pass remains open" in normalised
-    assert "this review does not claim it" in normalised
+    assert "that pass remains open" in normalized
+    assert "this review does not claim it" in normalized
     for overstatement in (
         "fully accessible",
         "accessibility conformant",

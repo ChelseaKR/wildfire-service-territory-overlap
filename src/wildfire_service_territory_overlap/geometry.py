@@ -10,8 +10,8 @@ is a reproducibility hole in a project whose output is supposed to be byte-ident
 between runs. :data:`ALBERS_PIPELINE` is a bare projection with no datum step, so it
 computes the same numbers on every machine with no grids present at all. The cost is
 that a WGS84 coordinate is treated as though it were on GRS80, which in California is a
-shift of roughly one to two metres. Every distance this project publishes is a band at
-100 metres or wider, and PROVENANCE.md records the trade.
+shift of roughly one to two meters. Every distance this project publishes is a band at
+100 meters or wider, and PROVENANCE.md records the trade.
 
 **A polygon the publisher ships invalid is repaired, and the repair is published.**
 Eight of the territory polygons fail an OGC validity check on retrieval, with ring
@@ -53,7 +53,7 @@ ALBERS_PIPELINE: Final[str] = (
     "+step +proj=aea +lat_0=0 +lon_0=-120 +lat_1=34 +lat_2=40.5 "
     "+x_0=0 +y_0=-4000000 +ellps=GRS80"
 )
-"""California Albers, as a bare projection. Metres. No datum step, so no grid files."""
+"""California Albers, as a bare projection. Meters. No datum step, so no grid files."""
 
 REPAIRED: Final[str] = "repaired"
 AS_PUBLISHED: Final[str] = "as_published"
@@ -83,7 +83,7 @@ def transformer() -> Transformer:
 
 
 def project_lonlat(lon: np.ndarray, lat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Longitude and latitude in degrees to Albers metres."""
+    """Longitude and latitude in degrees to Albers meters."""
     x, y = transformer().transform(lon, lat)
     return np.asarray(x, dtype="float64"), np.asarray(y, dtype="float64")
 
@@ -329,7 +329,7 @@ def boundary_segments(geom: BaseGeometry) -> list[LineString]:
 def distances_to_boundary(
     geom: BaseGeometry, xs: np.ndarray, ys: np.ndarray
 ) -> np.ndarray:
-    """Metres from each point to the nearest edge of ``geom``."""
+    """Meters from each point to the nearest edge of ``geom``."""
     if len(xs) == 0:
         return np.empty(0, dtype="float64")
     segments = boundary_segments(geom)

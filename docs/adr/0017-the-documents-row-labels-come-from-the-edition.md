@@ -120,8 +120,8 @@ pairing. Reversing every `rates` list and re-comparing shows what that is worth.
 | option 1, arguments baked into the key, with `label_key` in `IDENTITY_KEYS` | 0 |
 | option 2, key beside the words | 0 |
 
-Adding `label_key` to `IDENTITY_KEYS` does not repair the parameterised scheme, because
-a parameterised key repeats inside its own list: `label_key` is unique row to row in 1
+Adding `label_key` to `IDENTITY_KEYS` does not repair the parameterized scheme, because
+a parameterized key repeats inside its own list: `label_key` is unique row to row in 1
 of the 72 lists where `label` is unique in all 72. Only baking the argument into the key
 restores it, and that is the scheme whose keys cannot be enumerated ahead of the
 publisher's category values.

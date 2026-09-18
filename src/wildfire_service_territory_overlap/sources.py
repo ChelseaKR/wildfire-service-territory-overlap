@@ -60,7 +60,7 @@ _CEC_APPROXIMATE = Caveat(
     measured_as=(
         "Every record placed inside exactly one territory is also measured for its "
         "distance to that territory's published edge, and the counts are published in "
-        "bands at 100, 250, 500 and 1000 metres. A reader can then see how much of a "
+        "bands at 100, 250, 500 and 1000 meters. A reader can then see how much of a "
         "territory's total sits close enough to the edge to move if the approximation "
         "is off by that much. No boundary is corrected, smoothed, or second-guessed."
     ),
@@ -283,13 +283,13 @@ WIRES_TYPES: tuple[str, ...] = ("CO-OP", "IOU", "POU", "Tribal")
 
 The inclusion rule is the publisher's own ``Type`` field, not a judgment made here about
 any named entity. Two of the published types are deliberately outside it, for reasons
-that are about what the polygon represents rather than about the organisation:
+that are about what the polygon represents rather than about the organization:
 """
 
 EXCLUDED_TYPES: dict[str, str] = {
     "CCA": (
         "A community choice aggregator is defined at Public Utilities Code section "
-        "331.1 as a local government electricity buyers' programme, and section 366.2 "
+        "331.1 as a local government electricity buyers' program, and section 366.2 "
         "leaves metering, billing and delivery with the electrical corporation. Its "
         "polygon overlays another entity's distribution footprint rather than being "
         "one, so counting a record into both would count it twice."

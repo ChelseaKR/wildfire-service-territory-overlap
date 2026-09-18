@@ -29,7 +29,7 @@ wearing exactly the authority this project exists to withhold.
 
 Three rules hold from the moment a second territory retrieval is taken.
 
-**Comparisons are paired, never modelled.** What gets published is the artifact diff,
+**Comparisons are paired, never modeled.** What gets published is the artifact diff,
 value by leaf, produced by `python -m wildfire_service_territory_overlap.artifact_diff` against the previous
 pin's `measurements.json`, plus per-record transition counts computed by pairing each
 record's containment signature under the old boundaries against its signature under

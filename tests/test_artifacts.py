@@ -27,7 +27,7 @@ from wildfire_service_territory_overlap.artifacts import (
     check_all,
     check_document,
     generic_path,
-    serialise,
+    serialize,
     table_cells,
     write_json,
     write_report,
@@ -164,10 +164,10 @@ def test_check_all_ignores_a_territories_key_that_is_not_a_list() -> None:
     check_all({"territories": "none indexed"}, max_rows=5)
 
 
-def test_serialise_is_stable_for_the_same_tree() -> None:
+def test_serialize_is_stable_for_the_same_tree() -> None:
     tree = {"b": 1, "a": {"d": 2, "c": 3}}
-    assert serialise(tree) == serialise({"a": {"c": 3, "d": 2}, "b": 1})
-    assert serialise(tree).endswith("\n")
+    assert serialize(tree) == serialize({"a": {"c": 3, "d": 2}, "b": 1})
+    assert serialize(tree).endswith("\n")
 
 
 def test_a_refused_artifact_is_not_written_at_all(tmp_path: Path) -> None:
@@ -501,18 +501,18 @@ def test_a_heading_returning_to_a_shallower_level_is_not_a_skip() -> None:
     check_document("# T\n\n## One\n\n### Under one\n\n## Two\n\nProse.\n")
 
 
-def test_a_link_labelled_with_its_own_url_is_refused() -> None:
-    with pytest.raises(PublicationRefused, match="a link labelled"):
+def test_a_link_labeled_with_its_own_url_is_refused() -> None:
+    with pytest.raises(PublicationRefused, match="a link labeled"):
         check_document("# T\n\nSee [https://example.org/a](https://example.org/a).\n")
 
 
-def test_a_link_labelled_here_is_refused() -> None:
-    with pytest.raises(PublicationRefused, match="a link labelled 'here'"):
+def test_a_link_labeled_here_is_refused() -> None:
+    with pytest.raises(PublicationRefused, match="a link labeled 'here'"):
         check_document("# T\n\nThe method is described [here](PROVENANCE.md).\n")
 
 
 def test_a_link_with_no_text_at_all_is_refused() -> None:
-    with pytest.raises(PublicationRefused, match="a link labelled ''"):
+    with pytest.raises(PublicationRefused, match="a link labeled ''"):
         check_document("# T\n\nThe method is described [](PROVENANCE.md).\n")
 
 
@@ -521,7 +521,7 @@ def test_a_bare_url_published_as_a_link_is_refused() -> None:
         check_document("# T\n\nThe source is <https://example.org/data>.\n")
 
 
-def test_a_link_labelled_with_a_phrase_passes() -> None:
+def test_a_link_labeled_with_a_phrase_passes() -> None:
     check_document(
         "# T\n\nSee [the publisher's conditions of use](https://example.org).\n"
     )
@@ -532,7 +532,7 @@ def test_an_ansi_escape_sequence_is_refused() -> None:
         check_document("# T\n\n\x1b[31mnot measured\x1b[0m\n")
 
 
-def test_a_markup_tag_carrying_a_colour_is_refused() -> None:
+def test_a_markup_tag_carrying_a_color_is_refused() -> None:
     with pytest.raises(PublicationRefused, match="reached a published"):
         check_document('# T\n\n<span style="color: red">37.9%</span>\n')
 

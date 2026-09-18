@@ -8,7 +8,7 @@ exercised against a walk that should fail it.
 Since the pin moved onto upstream's output format, every request in this module goes
 through `perimeter.acquire`, so the refusals below are upstream's rather than this
 project's. They are still checked here, and deliberately. `docs/UPSTREAM.md` states the
-posture: a consumer that stops checking a dependency's behaviour because the dependency
+posture: a consumer that stops checking a dependency's behavior because the dependency
 says it checks its own is trusting a version of the code it has not read, and the pin
 exists so an upstream change arrives deliberately. These assertions are what would notice
 if the next pin moved onto a walk that had lost one of them.
@@ -309,7 +309,7 @@ def test_a_walk_that_arrives_out_of_order_is_refused_rather_than_sorted(
     """Sorting a scrambled walk would hide the reason it was scrambled.
 
     The writer does sort before hashing, so that byte-for-byte comparison is possible.
-    That is not a licence to accept a walk that came back out of the order it asked for:
+    That is not a license to accept a walk that came back out of the order it asked for:
     a service that reorders under pagination is a service that may also be repeating or
     skipping pages, and only the order reveals it.
     """

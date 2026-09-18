@@ -61,7 +61,7 @@ tribal outline.
 
 **CCA.** Community choice aggregator, defined at
 [Public Utilities Code section 331.1](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PUC&sectionNum=331.1)
-as a local government electricity buyers' programme, with section 366.2 leaving
+as a local government electricity buyers' program, with section 366.2 leaving
 metering, billing and delivery with the electrical corporation. Excluded here because
 its polygon overlays another entity's distribution footprint rather than being one, so
 counting a record into both would count it twice; the code citation is carried in
@@ -114,7 +114,7 @@ between them is published; see
 [ADR 0011](adr/0011-a-third-repair-joins-the-comparison-and-the-default-does-not-move.md).
 
 **Boundary band.** A distance from the nearest published edge, at 100, 250, 500 and
-1000 metres, within which a record's placement would be changed by an approximation
+1000 meters, within which a record's placement would be changed by an approximation
 error of that size. A territory with no placed records has no bands rather than a row of
 zeros.
 

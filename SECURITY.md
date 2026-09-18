@@ -88,7 +88,7 @@ does not fit a level still gets answered within the acknowledgment target above.
    tidying afterwards.
 2. **If it is the release-signing key**, rotate the key, update `.github/allowed_signers`
    through review, and re-verify every existing tag before the next release dispatch.
-   The release workflow refuses a signature it cannot verify, which is the behaviour
+   The release workflow refuses a signature it cannot verify, which is the behavior
    you want during a rotation.
 3. **Then remove it from history** where the hosting allows, knowing forks and caches
    may retain it anyway. This step is why step 1 comes first.

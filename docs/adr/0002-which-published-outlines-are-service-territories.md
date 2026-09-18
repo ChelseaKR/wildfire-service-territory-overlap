@@ -31,7 +31,7 @@ rule the publisher's own `Type` field rather than a judgment about any named ent
 ## Consequences
 
 The rule is mechanical and reviewable, and it is not a claim about whether any particular
-organisation operates a distribution system. Nobody with California utility service
+organization operates a distribution system. Nobody with California utility service
 territory expertise has reviewed it; the README says so under "What still needs a person."
 
 Two included entities are why more than a third of the record set is contested: a water

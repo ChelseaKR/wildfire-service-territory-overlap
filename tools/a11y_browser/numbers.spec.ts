@@ -8,7 +8,7 @@ import { pagesUnderTest, urlFor } from "./pages";
  *
  * This is a statement about content, and no accessibility engine makes it: a number
  * split over two lines is still text, still has contrast, and still sits inside a
- * labelled region. Measured on the first version of the page, which let every cell
+ * labeled region. Measured on the first version of the page, which let every cell
  * break anywhere so that wide tables shrank instead of scrolling: at 320 by 256,
  * 396 of 711 numeric cells printed a figure split across lines (`82,3` over `53`),
  * and html-validate, axe in jsdom, axe in Chromium and the reflow check were all

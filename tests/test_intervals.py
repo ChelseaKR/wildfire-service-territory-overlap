@@ -121,8 +121,8 @@ def test_difference_interval_stays_within_minus_one_and_one() -> None:
     assert -1.0 <= diff.low <= diff.high <= 1.0
 
 
-def test_wilson_centre_is_pulled_toward_a_half_on_small_denominators() -> None:
+def test_wilson_center_is_pulled_toward_a_half_on_small_denominators() -> None:
     low, high = wilson(1, 3)
-    centre = (low + high) / 2
-    assert centre > 1 / 3, "the score interval is deliberately not symmetric about p"
-    assert not math.isnan(centre)
+    center = (low + high) / 2
+    assert center > 1 / 3, "the score interval is deliberately not symmetric about p"
+    assert not math.isnan(center)

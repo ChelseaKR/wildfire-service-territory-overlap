@@ -42,7 +42,7 @@ jobs:
       # A Docker action: the ref above pins which action definition runs, and the
       # definition itself pulls the scanner image by its own tag. Findings fail the job
       # through the action's exit status; there is no continue-on-error anywhere.
-      - uses: google/osv-scanner-action/osv-scanner-action@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
+      - uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
         with:
           scan-args: |-
             --recursive

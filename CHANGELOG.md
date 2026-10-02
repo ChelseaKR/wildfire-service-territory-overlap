@@ -162,6 +162,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **The standards pin moved from `v3.0.0` to `v3.0.1`.** Upstream's `v3.0.1`, released
+  2026-10-02, is a patch: re-verified freshness stamps, text corrections and tooling fixes,
+  with no control, threshold or gate changed. `.standards-version` and the README
+  conformance preamble that a test reads it against are the whole change.
+
 - **The standards pin moved from `v2.0.0` to `v3.0.0`.** The portfolio standards were
   re-verified upstream and released as `v3.0.0` on 2026-10-02. This repository holds only
   the pin, not a vendored copy, so `.standards-version` and the README conformance

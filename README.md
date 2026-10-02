@@ -273,7 +273,7 @@ docs/adr/        the decisions, with their reasoning
 ## Standards conformance
 
 Held to the portfolio's shared engineering standards, pinned in `.standards-version` to
-`v3.0.0`. Every row states what is true, not what is intended, as of 2026-09-04. This
+`v3.0.1`. Every row states what is true, not what is intended, as of 2026-09-04. This
 line carried 2026-08-17 while rows below it recorded 2026-08-28 and later, which is the
 same kind of stale claim the CI/CD row was itself corrected for, so it is now held by a
 test: `test_the_conformance_table_is_not_older_than_the_rows_it_carries` refuses an

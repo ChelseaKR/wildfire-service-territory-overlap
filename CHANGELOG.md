@@ -162,6 +162,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **The standards pin moved from `v2.0.0` to `v3.0.0`.** The portfolio standards were
+  re-verified upstream and released as `v3.0.0` on 2026-10-02. This repository holds only
+  the pin, not a vendored copy, so `.standards-version` and the README conformance
+  preamble that a test reads it against are the whole change. Upstream's `v3.0.0`
+  conformance check passes every scored control here, 36 of 36. The rows of the
+  conformance table were not re-scored against the new text; that is still dated
+  2026-09-04.
+
 - **The acquisition's list of layers exists once.** `acquire.main` held the four calls
   inline; `refresh --run` needs the same four, and a second copy of the list is how a
   layer gets added to one caller and not the other, after which the acquisition succeeds,

@@ -54,26 +54,34 @@ audit:  ## pip-audit over the installed set
 	uv run pip-audit
 
 # The second vulnerability feed, locally. `.github/workflows/osv.yml` is the gate of
-# record: it is a required check, it reads this same uv.lock with the same scanner
+# record: it is a required check, it reads the same lockfiles with the same scanner
 # version, and it fails the pull request. This target exists so the answer is available
 # before the push rather than after it.
 #
+# `--recursive .` because that is what osv.yml runs, and the walk finds three
+# lockfiles: uv.lock, package-lock.json and tools/a11y_browser/package-lock.json. Until
+# 2026-10-09 this target read uv.lock alone, so on 2026-10-08, when the scheduled run
+# went red on source-map-js in package-lock.json (GHSA-68fv-2mgg-jv7q), `make osv`
+# still printed "No issues found": an answer about one of the three files the check
+# reads. The scanner honors .gitignore, so node_modules/ and .venv/ are not walked;
+# measured 2026-10-09, 17 directories visited and the same three files extracted.
+#
 # It is deliberately NOT a prerequisite of `verify`. CI runs `make verify` byte for
 # byte, so adding osv here would mean installing a Go binary on the runner to re-run a
-# scan that osv.yml has already run against the same file: a second execution, not a
+# scan that osv.yml has already run against the same files: a second execution, not a
 # second feed. `verify` and CI stay identical by staying out of each other's way.
 #
 # Fails closed on a finding, and fails loudly when the scanner is absent rather than
 # passing quietly: a gate that reports success because it did not run is the defect
 # this repository is built around.
-osv:  ## osv-scanner over uv.lock, the second feed; osv.yml is the gate of record
+osv:  ## osv-scanner over every tracked lockfile, the second feed; osv.yml is the gate of record
 	@command -v osv-scanner >/dev/null 2>&1 || { \
 	  echo "osv-scanner is not installed. Install it (brew install osv-scanner, or"; \
 	  echo "see https://google.github.io/osv-scanner/installation/) or read the result"; \
 	  echo "of the required 'scan' check on the pull request instead."; \
 	  exit 1; \
 	}
-	osv-scanner scan source --lockfile uv.lock
+	osv-scanner scan source --recursive .
 
 # Reviewer-supplied inclusion rule files, space separated, passed to `report` and
 # `report-offline` as one `--inclusion-rule` each. Empty by default, and CI leaves it

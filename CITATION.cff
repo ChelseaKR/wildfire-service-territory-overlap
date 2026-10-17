@@ -13,3 +13,11 @@ abstract: >-
   can be attributed to a published electric service territory boundary, and how much
   cannot. Every published rate carries its denominator and a confidence interval, and no
   utility is ranked or compared. Unofficial and not affiliated with any agency or utility.
+keywords:
+  - wildfire
+  - California
+  - electric service territory
+  - damage inspection
+  - CAL FIRE DINS
+  - California Energy Commission
+  - point-in-polygon

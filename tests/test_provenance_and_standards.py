@@ -484,6 +484,124 @@ def test_the_package_and_citation_versions_agree() -> None:
     assert f"version: {version}" in citation
 
 
+# Zenodo's GitHub integration archives a published release and describes it from one
+# file, read at the tag: `.zenodo.json` if the tree has one, and `CITATION.cff` only if
+# it does not. Read in zenodo/zenodo-rdm at 1fab575 (`site/zenodo_rdm/github/`) on
+# 2026-10-17, its CITATION.cff reader maps exactly six keys, `title`, `authors`,
+# `abstract`, `keywords`, `license` and `message`, and takes the version from the tag
+# name. Issue #54 relies on that, so the checks below hold the file to it.
+CITATION = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
+ZENODO_DOI = re.compile(r"10\.5281/zenodo\.\d+")
+
+
+def citation_list(key: str) -> list[str]:
+    """A top-level list in CITATION.cff, one plain scalar per item.
+
+    Read by line rather than through a YAML parser, which this project does not depend
+    on. An empty answer for a key the file carries means the shape changed, and each
+    test below that reads one refuses an empty answer rather than reading nothing.
+    """
+    block = re.search(rf"^{key}:\n((?:  .*\n?)+)", CITATION, re.MULTILINE)
+    if block is None:
+        return []
+    return [
+        line.removeprefix("  - ").strip()
+        for line in block.group(1).splitlines()
+        if line.startswith("  - ")
+    ]
+
+
+def test_the_citation_carries_every_field_zenodo_reads_from_it() -> None:
+    """A field Zenodo reads and this file lacks is filled from somewhere else.
+
+    A missing title becomes the repository path and the tag, a missing author list
+    becomes whoever GitHub lists as a contributor, and a missing license becomes the one
+    GitHub detects. None of those is wrong today, and none of them is reviewed here.
+    """
+    for key in ("title", "abstract", "license"):
+        assert re.search(rf"^{key}: \S", CITATION, re.MULTILINE), key
+    assert re.search(r"^authors:\n  - family-names: \S", CITATION, re.MULTILINE)
+    assert citation_list("keywords"), "CITATION.cff carries no keywords"
+    license_id = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"][
+        "license"
+    ]
+    assert f"\nlicense: {license_id}\n" in CITATION, (
+        "the citation and the package declare different licenses"
+    )
+
+
+def test_every_citation_keyword_is_a_term_the_readme_uses() -> None:
+    """A keyword is a claim about what the work is, so it is held to the README."""
+    readme = " ".join(README.split()).lower()
+    keywords = citation_list("keywords")
+    assert keywords, "CITATION.cff carries no keywords, so this check reads nothing"
+    for keyword in keywords:
+        assert keyword.lower() in readme, f"{keyword!r} is not a term the README uses"
+
+
+def test_there_is_no_zenodo_json_to_override_the_citation() -> None:
+    """Zenodo reads `.zenodo.json` instead of `CITATION.cff`, never alongside it.
+
+    A second metadata file would silently replace this one in the archive while every
+    test here went on reading the one that no longer counts. If one is ever needed,
+    this test goes, and one holding title, version, license and creators of the two
+    files together comes in with it.
+    """
+    assert not (ROOT / ".zenodo.json").exists()
+
+
+def _refuse_a_doi_zenodo_did_not_mint(citation: str) -> None:
+    """Raise on a DOI for this work in the citation that is not a Zenodo DOI.
+
+    The DOI arrives only after a release is archived, so the one way to get it wrong
+    before then is to write a placeholder that a reader, or a citation manager, takes
+    for the real one. Read are the top-level `doi` and every `identifiers` entry typed
+    `doi`, which are the two places CFF names this work's own DOI; a `doi` indented
+    under `references` names somebody else's work and is not read.
+    """
+    values = re.findall(r"^doi:\s*(.*)$", citation, re.MULTILINE)
+    # An `identifiers` entry carries its DOI as `value`, beside `type: doi`.
+    values += re.findall(
+        r"type: doi\n\s*value:\s*(.*)$|value:\s*(.*)\n\s*type: doi$",
+        citation,
+        re.MULTILINE,
+    )
+    for found in values:
+        value = found if isinstance(found, str) else "".join(found)
+        doi = value.split("#")[0].strip().strip("\"'")
+        if not ZENODO_DOI.fullmatch(doi):
+            raise AssertionError(
+                f"CITATION.cff carries doi {value.strip()!r}, which Zenodo did not mint"
+            )
+
+
+def test_the_citation_carries_no_doi_zenodo_did_not_mint() -> None:
+    _refuse_a_doi_zenodo_did_not_mint(CITATION)
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "doi: 10.5281/zenodo.XXXXXXX",
+        'doi: "TBD"',
+        "doi: 10.5281/zenodo.",
+        "identifiers:\n  - type: doi\n    value: 10.0000/placeholder",
+        "identifiers:\n  - value: 10.5281/zenodo.NNN\n    type: doi",
+    ],
+)
+def test_the_doi_check_can_actually_fire(line: str) -> None:
+    """A gate nobody has watched refuse is not a gate."""
+    with pytest.raises(AssertionError, match="which Zenodo did not mint"):
+        _refuse_a_doi_zenodo_did_not_mint(f"title: x\n{line}\n")
+    _refuse_a_doi_zenodo_did_not_mint("title: x\ndoi: 10.5281/zenodo.1234567\n")
+    _refuse_a_doi_zenodo_did_not_mint(
+        "references:\n  - type: software\n    doi: 10.1000/somebody-else\n"
+    )
+    _refuse_a_doi_zenodo_did_not_mint(
+        "identifiers:\n  - type: doi\n    value: 10.5281/zenodo.1234568\n"
+    )
+
+
 def test_the_coverage_floor_and_complexity_cap_are_declared() -> None:
     config = tomllib.loads((ROOT / "pyproject.toml").read_text())
     assert config["tool"]["coverage"]["report"]["fail_under"] >= 90

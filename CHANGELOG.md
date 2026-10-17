@@ -7,6 +7,28 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`CITATION.cff` is ready for Zenodo to describe a release from it** (issue #54).
+  Zenodo's GitHub integration reads `.zenodo.json` when a tree has one and
+  `CITATION.cff` only when it does not. Read in `zenodo/zenodo-rdm` at `1fab575`, its
+  `CITATION.cff` reader maps `title`, `authors`, `abstract`, `keywords`, `license` and
+  `message`, and takes the version from the tag name. This file already carried five of
+  the six and gains the sixth, `keywords`, each one a term the README already uses. So
+  no `.zenodo.json` is added: it would replace this file in the archive rather than
+  supplement it, and two metadata files are two places for a title or a license to
+  drift.
+
+  Four checks hold that shape. `CITATION.cff` must carry every field Zenodo reads from
+  it, with the license `pyproject.toml` declares; every keyword must be a term the
+  README uses; a `.zenodo.json` is refused, with the reason and what replaces the test
+  if one is ever needed; and any `doi` in the file, top-level or under `identifiers`,
+  must be one Zenodo mints, so a placeholder cannot go in ahead of the real DOI. The
+  last was watched refusing five placeholders before it was trusted with the real file.
+
+  Nothing has been deposited and the file carries no DOI. Linking the repository in
+  Zenodo, cutting the next release, and placing the minted DOI in `CITATION.cff` and the
+  README are the maintainer's, and `docs/RUNBOOK.md` now carries them in order. Roadmap
+  4.1 moves from open to partly shipped and says what is still open.
+
 - **`make refresh`, so the deliberate refresh is one command that cannot be run out of
   order.** `docs/RUNBOOK.md` described it as eight numbered steps, and a sequence can be
   run out of order: the step that matters most, comparing the new artifact against the

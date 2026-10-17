@@ -59,13 +59,13 @@ documents to all thirty-three, which immediately refused a fourth nobody had rea
 
 Still open: 3.1 and 3.2 wait for a human to send the letter drafts under
 `docs/outreach/` (issues #50 and #51); 3.3 waits for a reviewer (issue #52); 4.1 waits
-for an archive deposit (issue #54); 4.3 is corrected below rather than waiting; and 4.4
-was audited on 2026-09-05 rather than left waiting for a gap to announce itself. The
-audit found four, wrote them down in `docs/UPSTREAM.md` with the code here that
-compensates for each, and sent none of them upstream (issue #58). One of the four had
-already reached a document: this repository claimed every request carried a User-Agent
-naming it, and the DINS walk, the largest of the four layers, names the pinned dependency
-instead.
+for the maintainer to link Zenodo and cut a release (issue #54); 4.3 is corrected below
+rather than waiting; and 4.4 was audited on 2026-09-05 rather than left waiting for a
+gap to announce itself. The audit found four, wrote them down in `docs/UPSTREAM.md`
+with the code here that compensates for each, and sent none of them upstream
+(issue #58). One of the four had already reached a document: this repository claimed
+every request carried a User-Agent naming it, and the DINS walk, the largest of the
+four layers, names the pinned dependency instead.
 
 **How to read the tables below.** Every phase row carries a status cell, added on
 2026-09-05. Until then the tables carried no status at all, so sixteen items that were
@@ -155,7 +155,7 @@ The findings are locatable in the publisher's data; the publishers have not hear
 
 | # | Status | Item | Notes |
 |---|---|---|---|
-| 4.1 | **Open.** `CITATION.cff` carries no DOI and no release has been deposited. Still open: issue #54 | **Archive and DOI** (e.g. Zenodo) for tagged releases; `CITATION.cff` already exists and should gain the DOI | Makes the negative result citable |
+| 4.1 | **Partly shipped.** `CITATION.cff` carries every field Zenodo's GitHub integration reads from it, held there by `tests/test_provenance_and_standards.py`, and `docs/RUNBOOK.md` carries the steps from linking the repository to placing the DOI. Still open: the maintainer links the repository in Zenodo, cuts the next release, and puts the minted DOI into `CITATION.cff` and the README, issue #54 | **Archive and DOI** (e.g. Zenodo) for tagged releases; `CITATION.cff` already exists and should gain the DOI | Makes the negative result citable |
 | 4.2 | **Partly shipped.** `docs/adr/0016` is accepted and every string the report prints on its own account lives in `src/wildfire_service_territory_overlap/catalog.py`. Still open: a Spanish catalog reviewed by somebody who reads Spanish, issue #55, and the row labels inside the measurements, issue #56, analyzed in `docs/adr/0017` and not accepted | **Spanish edition of `REPORT.md`**, generated from `measurements.json` with a reviewed string catalog; figures render identically in both languages | California's other language; requires an ADR amending the English-only declaration in `docs/I18N.md`. Numbers are never re-formatted per locale inside one artifact, and the determinism gate must hold across both editions |
 | 4.3 | **Open.** Still open, and two of its three steps belong to the other repository: `perimeter` picks a free distribution name and publishes under it before the pin in `pyproject.toml` can change | **PyPI distribution**: this project's own name is clear after the rename to `wildfire-service-territory-overlap`. The dependency's is not. **Corrected 2026-09-04**: the sequence this row used to state, publish `perimeter` first and then drop the URL, cannot be executed. The name `perimeter` on PyPI is held by an unrelated Django package from YunoJuno, checked against the PyPI API on 2026-09-04, so `perimeter` cannot publish under the name this project pins. This is `docs/adr/0014` one level down | The real sequence: `perimeter` picks a distribution name that is free, publishes under it, and then the pin here changes to that name. Two of those three steps are the other repository's call. Until then the direct reference stays, and the `allow-direct-references` comment in `pyproject.toml` keeps its reasoning. Issue #57 |
 | 4.4 | **Partly shipped.** The audit ran on 2026-09-05 and its four findings are in `docs/UPSTREAM.md` with the code here that compensates for each. Still open: nothing has been sent upstream, issue #58 | **Upstream contributions to `perimeter`** where acquisition gaps surface here. **Audited 2026-09-05** at the pinned commit rather than waiting for a gap to surface on its own: four found, all in the acquisition, recorded in `docs/UPSTREAM.md` with the compensating code here and the upstream change for each | The relationship is already "consume, don't re-implement"; contributing fixes keeps it that way. Nothing has been sent upstream, so the item stays open. The audit is dated and names the commit it read, and a test refuses a `docs/UPSTREAM.md` that outlives the pin it was taken against. Issue #58 |

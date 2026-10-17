@@ -360,6 +360,91 @@ only shows up if somebody reads the setting back.
 
 Re-read it on every refresh of the pin, and whenever the conformance table is touched.
 
+## Archiving a release on Zenodo, and where its DOI goes
+
+Issue #54. None of this has happened yet: the repository is not linked to Zenodo, no
+release has been deposited, and `CITATION.cff` carries no DOI, deliberately, until
+Zenodo mints one. Every step below is the maintainer's, and the first is a settings
+change outside this repository.
+
+Zenodo's GitHub integration archives a release when GitHub reports it published, and
+describes it from one file read at the tag: `.zenodo.json` if the tree has one,
+otherwise `CITATION.cff`. This repository has no `.zenodo.json`, on purpose. Read in
+`zenodo/zenodo-rdm` at commit `1fab575` on 2026-10-17, the `CITATION.cff` reader takes
+six keys. The table says where each one lands, and where the fields it does not read
+come from instead.
+
+| Zenodo field | Comes from |
+|---|---|
+| Title | `title` |
+| Creators | `authors`, written as family name, given name |
+| Description | `abstract`, which carries the unofficial framing |
+| Keywords | `keywords`, each a term the README uses, which a test holds |
+| License | `license`, an SPDX id Zenodo resolves to its own `apache-2.0` |
+| Additional notes | `message`, so the request to be cited shows there as well |
+| Version | The tag name, for example `v0.2.0`, and not `version` |
+| Resource type | Software, Zenodo's default for a GitHub release |
+| Related identifier | The tree at the tag, recorded as "is supplement to" |
+
+Zenodo reads nothing else in `CITATION.cff`: not `version`, `date-released`,
+`repository-code`, or a `doi`. A `.zenodo.json` added later would replace
+`CITATION.cff` in the archive entirely rather than add to it, while every check here
+went on reading the file that no longer counts. `tests/test_provenance_and_standards.py`
+refuses one for that reason; whoever needs one replaces that test with one holding the
+title, version, license and creators of the two files together.
+
+### Once: link the repository
+
+1. Sign in to Zenodo, either with "Log in with GitHub" or by connecting GitHub from
+   the account settings, using the GitHub account that owns this repository, and
+   authorize the Zenodo application on GitHub when asked.
+2. Open [Zenodo's GitHub settings page](https://zenodo.org/account/settings/github/),
+   press "Sync now" if the repository is not listed, and switch
+   `ChelseaKR/wildfire-service-territory-overlap` on. Zenodo installs a webhook on the
+   repository, and that webhook is the whole link.
+3. Zenodo archives releases published after the switch, not earlier ones, so `v0.1.0`
+   is not archived by linking. The first deposit is the next release.
+
+### Each release: cut it the way every release is cut
+
+1. On `main`, before tagging, move the version in `pyproject.toml` and `CITATION.cff`
+   together (a test holds them equal), set `date-released`, and give `CHANGELOG.md` its
+   version section. Zenodo reads `CITATION.cff` at the tag, so what the tagged commit
+   says is what the archive says.
+2. Push the signed annotated tag and dispatch `.github/workflows/release.yml` with it,
+   exactly as for `v0.1.0`. Its `publish` job creates a published release rather than a
+   draft, which is the event Zenodo archives.
+3. On the first release after linking, confirm the deposit arrived: the release is
+   listed against the repository on Zenodo's GitHub settings page, and the record's
+   title, creator, license, keywords and description match the table above. The release
+   is created by the workflow's own token rather than by a person. GitHub delivers
+   repository webhooks for that, but it has not been watched happening here, so check
+   rather than assume.
+
+### After Zenodo mints: where the DOI goes
+
+Zenodo mints two DOIs per deposit: one for that version, and a concept DOI that stands
+for every version and resolves to the latest.
+
+1. Put the concept DOI in `CITATION.cff` as a top-level `doi: 10.5281/zenodo.N`. The
+   concept DOI rather than the version DOI, because a file at a tag cannot know the DOI
+   its own release is about to receive, so a version DOI written there would always
+   name the release before. A version DOI can be listed under `identifiers`, as
+   `type: doi` and `value`, with a `description` naming the version it belongs to. The
+   test suite refuses any DOI in that file that is not one Zenodo mints, so a
+   placeholder cannot go in ahead of the real one.
+2. Add a badge under the README title. Give it alt text carrying the DOI rather than the
+   word DOI alone, because the badge is an image of text:
+
+   ```markdown
+   [![DOI 10.5281/zenodo.N](https://zenodo.org/badge/DOI/10.5281/zenodo.N.svg)](https://doi.org/10.5281/zenodo.N)
+   ```
+
+3. Mark roadmap 4.1 shipped, citing `CITATION.cff`; add a `CHANGELOG.md` entry; update
+   the README's Release & Versioning row; and close issue #54. That is an ordinary pull
+   request. The DOI needs no release of its own, and the next release carries it into
+   the archive.
+
 ## What must never happen
 
 - `data/raw/` is never committed, at any granularity, ever.
